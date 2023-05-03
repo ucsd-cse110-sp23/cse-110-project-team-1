@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "SayItAssistant/lib/json-20230227.jar"
+    ]
+}
