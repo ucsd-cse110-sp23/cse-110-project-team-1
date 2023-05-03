@@ -17,9 +17,12 @@ class QAPanel extends JPanel{
         setBackground(green);
 
         question = new JTextArea(defaultQ);
+        question.setLineWrap(true);
         this.add(question);
         question.setEditable(false);
+        
         answer = new JTextArea(defaultA);
+        answer.setLineWrap(true);
         this.add(answer);
         answer.setEditable(false);
     }
@@ -69,6 +72,10 @@ class MainPanel extends JPanel{
 
         recButton = new JButton(startBlurb);
         this.add(recButton, BorderLayout.SOUTH);
+    }
+
+    public QAPanel getQaPanel(){
+        return qaPanel;
     }
 
     public JButton getRecButton() {
@@ -127,6 +134,14 @@ public class SayIt extends JFrame{
     private JButton clearButton;
 
     boolean shouldFill = true;
+
+    public MainPanel getMainPanel(){
+        return mainPanel;
+    }
+
+    public SideBar getSideBar(){
+        return sideBar;
+    }
 
     public static void main(String[] args){
         new SayIt();
