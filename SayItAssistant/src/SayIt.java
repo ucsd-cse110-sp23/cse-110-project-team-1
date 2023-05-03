@@ -181,7 +181,7 @@ public class SayIt extends JFrame{
     public SayIt() {
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setVisible(true);
+        // setVisible(true);
         setSize(400, 600);
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -205,6 +205,8 @@ public class SayIt extends JFrame{
         c.weighty = 1.0;
         c.weightx = 1.0;
         this.add(mainPanel, c);
+
+        setVisible(true);
 
         recButton = mainPanel.getRecButton();
         clearButton = sideBar.getClearButton();
