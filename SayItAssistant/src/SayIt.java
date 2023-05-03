@@ -9,6 +9,7 @@ class QAPanel extends JPanel{
     Color green = new Color(188, 226, 158);
     JTextArea question;
     JTextArea answer;
+    String qID;
     String defaultQ = "Q: ";
     String defaultA = "A: ";
 
@@ -27,6 +28,10 @@ class QAPanel extends JPanel{
         answer.setEditable(false);
     }
 
+    public String getQuestionID(){
+        return qID;
+    }
+
     public String getAnswer(){
         return answer.getText();
     }
@@ -40,12 +45,16 @@ class QAPanel extends JPanel{
     public String getQuestion(){
         return question.getText();
     }
-    public void changeQuestion(String newQuestion){
+
+    /** use to change the displayed question, must input a questionID.
+     * if there is no ID associated with it (example: displaying no question "Q:") use question ID = null**/
+    public void changeQuestion(String newQuestion, String questionID){
         question.setText(defaultQ + newQuestion);
+        qID = questionID;
         clearAnswer();
     }
     public void clearQuestion(){
-        changeQuestion(defaultQ);
+        changeQuestion(defaultQ, null);
     }
 
 }
@@ -53,7 +62,7 @@ class QAPanel extends JPanel{
 class MainPanel extends JPanel{
     JButton recButton;
     boolean isRec = false;
-    String startBlurb = "Start Recording";
+    String startBlurb = "New Question";
     String stopBlurb = "Stop Recording";
 
     QAPanel qaPanel;
@@ -99,9 +108,25 @@ class PromptHistory extends JPanel{
     JLabel title;
     JList<String> history;
     JScrollPane histPane;
-
+    //TODO: switch out list for actual button with Question ID'S
     PromptHistory(){
         // history = new JList<String>(getHistory());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        title = new JLabel("Prompt History");
+        this.add(title, BorderLayout.NORTH);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        loadHist(); //update list
+        histPane = new JScrollPane(history);
+        this.add(histPane, BorderLayout.CENTER);
+        histPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // this.add(history, BorderLayout.CENTER);
+    }
+
+    public void loadHist(){
+        //TODO: implement loading history into list
+        String[] example = {"apple", "banana", "truffle", "death", "lasdjf askdjfasdjfagh woeg hiseroignsofjasdkjf kasda"};
+        history = new JList<String>(example);
     }
 }
 
@@ -111,8 +136,14 @@ class SideBar extends JPanel{
     JButton clearButton;
 
     SideBar(){
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        promptHistory = new PromptHistory();
+        this.add(promptHistory, BorderLayout.CENTER);
+        promptHistory.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         clearButton = new JButton("Clear All");
         this.add(clearButton, BorderLayout.SOUTH);
+        clearButton.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
     public JButton getClearButton(){
