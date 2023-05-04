@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 public class JChatGPT {
     private static final String API_ENDPOINT = "https://api.openai.com/v1/completions";
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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";
     private static final String MODEL = "text-davinci-003";
     static int maxTokens = 100;
     static float temperature = 1.0f;
