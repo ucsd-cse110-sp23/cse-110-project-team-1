@@ -95,7 +95,7 @@ public class JWhisper {
      */
     public static String transcription(String filepath) throws IOException {
         if (filepath == null) {
-            filepath = "audioFile/record.wav";
+            filepath = "audioFiles/record.wav";
         } 
         //create file object from file path
         File file = new File(filepath);

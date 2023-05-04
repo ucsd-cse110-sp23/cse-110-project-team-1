@@ -43,7 +43,7 @@ public class JRecorder {
      */
     public JRecorder() {
         fileType = AudioFileFormat.Type.WAVE;
-        audioFile = new File("audioFIles/record.wav");
+        audioFile = new File("audioFiles/record.wav");
     }
 
     /*

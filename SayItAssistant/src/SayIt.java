@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+
+import javax.management.Query;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -45,7 +47,6 @@ class QAPanel extends JPanel{
     public String getQuestion(){
         return question.getText();
     }
-
     /** use to change the displayed question, must input a questionID.
      * if there is no ID associated with it (example: displaying no question "Q:") use question ID = null**/
     public void changeQuestion(String newQuestion, String questionID){
@@ -67,6 +68,8 @@ class MainPanel extends JPanel{
 
     QAPanel qaPanel;
 
+    JRecorder recorder;
+
     Color gray = new Color(218, 229, 234);
     Color green = new Color(188, 226, 158);
     
@@ -81,6 +84,8 @@ class MainPanel extends JPanel{
 
         recButton = new JButton(startBlurb);
         this.add(recButton, BorderLayout.SOUTH);
+
+        recorder = new JRecorder();
     }
 
     public QAPanel getQaPanel(){
@@ -91,13 +96,32 @@ class MainPanel extends JPanel{
         return recButton;
     }
 
+    /*
+     * Handles finishing recording and displayng to qaPanel 
+     */
+    private void finishRecording() {
+        recorder.finish();
+        String question;
+        try {
+            question = JWhisper.transcription(null);
+            qaPanel.changeQuestion(question, null);
+            qaPanel.changeAnswer(JChatGPT.run(question));
+        } catch( IOException io) {
+            io.printStackTrace();
+            System.out.println("IO exception at Whisper transcription");
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            System.out.println("Interupt exception chatGPT");
+        }
+    }
+
     public void changeRecording(){
         if (isRec){
             recButton.setText(startBlurb);
-            //stop recording
+            finishRecording();
         } else {
             recButton.setText(stopBlurb);
-            //start recording
+            recorder.start();
         }
         isRec = !isRec;
         //TODO: implement stop and start recording
@@ -182,7 +206,9 @@ public class SayIt extends JFrame{
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
-        setSize(400, 600);
+        //setSize(400, 600); //400, 600
+        setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        setUndecorated(false);
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         if (shouldFill) {
