@@ -102,10 +102,13 @@ class MainPanel extends JPanel{
     private void finishRecording() {
         recorder.finish();
         String question;
+        String answer;
         try {
             question = JWhisper.transcription(null);
             qaPanel.changeQuestion(question, null);
-            qaPanel.changeAnswer(JChatGPT.run(question));
+            answer = JChatGPT.run(question);
+            qaPanel.changeAnswer(answer);
+            History.addEntry(question, answer);
         } catch( IOException io) {
             io.printStackTrace();
             System.out.println("IO exception at Whisper transcription");
@@ -174,6 +177,7 @@ class SideBar extends JPanel{
     }
 
     public void clearHistory(){
+        History.clear();
         //TODO: implement clearing history
     }
 }
@@ -205,7 +209,7 @@ public class SayIt extends JFrame{
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
-        //setSize(400, 600); //400, 600
+        setSize(600, 600); //400, 600
         setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setUndecorated(false);
         setLayout(new GridBagLayout());
@@ -237,6 +241,8 @@ public class SayIt extends JFrame{
         clearButton = sideBar.getClearButton();
 
         addListeners();
+
+        History.initial();
     }
 
     public void addListeners() {
