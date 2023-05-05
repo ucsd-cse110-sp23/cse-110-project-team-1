@@ -72,7 +72,30 @@ public class Tests {
     }
 
     //unit tests
-    //testing QuestionAnswer 
+    //Do I test QuestionAnswer?
+    @Test
+    public void testQuestionAnswersetqID(){
+        QuestionAnswer qa = new QuestionAnswer();
+        int newqID = 12;
+        qa.setqID(newqID);
+        assertEquals(newqID, qa.getqID());
+    }    
 
-    //testing displays q
+    @Test
+    public void testQuestionAnswersetQuestion(){
+        QuestionAnswer qa = new QuestionAnswer();
+        String newQuestion = "What is my new question?";
+        qa.setQuestion(newQuestion);
+        assertEquals(newQuestion, qa.getQuestion());
+    }
+    //testing QAPanel
+
+    //testing MainPanel
+
+    //testing promptHistory
+
+    //testing SideBar
+
+    //testing SayIt
+
 }

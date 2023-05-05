@@ -8,15 +8,15 @@ import javax.swing.*;
 // import javax.swing.event.ChangeEvent;
 
 class QuestionAnswer{
-    int qID;
+    private int qID;
 
-    String question;
-    String answer;
+    private String question;
+    private String answer;
 
     QuestionAnswer(){
         qID = -1;
-        question = "";
-        answer = "";
+        question = null;
+        answer = null;
     }
 
     QuestionAnswer(int qID, String question, String answer){
@@ -47,8 +47,7 @@ class QuestionAnswer{
 
     public String getAnswer() {
         return answer;
-    }
-    
+    }    
 }
 
 class QAPanel extends JPanel{
@@ -62,24 +61,30 @@ class QAPanel extends JPanel{
     String prefixQ = "Q: ";
     String prefixA = "A: ";
 
-    QAPanel(){
+    QAPanel(QuestionAnswer questionAnswer){
         setLayout(new GridLayout(2, 1));
         setBackground(green);
 
-        qaPrompt = new QuestionAnswer();
+        qaPrompt = questionAnswer;
 
-        question = new JTextArea(prefixQ);
+        question = new JTextArea();
         question.setLineWrap(true);
         this.add(question);
         question.setEditable(false);
         
-        answer = new JTextArea(prefixA);
+        answer = new JTextArea();
         answer.setLineWrap(true);
         this.add(answer);
         answer.setEditable(false);
+
+        updateDisplay();
     }
 
     //gets the information directly from qaPrompt, has the actual question, answer, and id.
+    public QuestionAnswer getQuestionAnswer(){
+        return qaPrompt;
+    }
+    
     public int getQuestionID(){
         return qaPrompt.getqID();
     }
@@ -127,16 +132,26 @@ class QAPanel extends JPanel{
 
 
     public void clearAnswer(){
-        changeAnswer(prefixA);
+        changeAnswer("");
     }
 
-    public void clearQuestion(){
+    //clears display
+    public void clearDisplay(){
         changeQuestion(prefixA, -1);
     }
 
     public void updateDisplay(){
-        question.setText(prefixQ + getQuestion());
-        answer.setText(prefixA + getAnswer());
+        if (getQuestion() != null){
+            question.setText(prefixQ + getQuestion());
+        } else {
+            question.setText(prefixQ);
+        }
+
+        if (getAnswer() != null){
+            answer.setText(prefixA + getAnswer());
+        } else {
+            answer.setText(prefixA);
+        }
     }
 }
 
@@ -159,7 +174,7 @@ class MainPanel extends JPanel{
     
         this.setLayout(new BorderLayout()); // set layout of task
 
-        qaPanel = new QAPanel();
+        qaPanel = new QAPanel(new QuestionAnswer());
         this.add(qaPanel, BorderLayout.CENTER);
 
         recButton = new JButton(startBlurb);
