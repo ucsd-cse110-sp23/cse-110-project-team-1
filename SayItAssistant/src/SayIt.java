@@ -84,7 +84,7 @@ class QAPanel extends JPanel{
     public QuestionAnswer getQuestionAnswer(){
         return qaPrompt;
     }
-    
+
     public int getQuestionID(){
         return qaPrompt.getqID();
     }
@@ -103,10 +103,20 @@ class QAPanel extends JPanel{
         qaPrompt.setqID(id);
     }
 
-    /** use to change the displayed question, must input a questionID.
+    /** use to CREATE a new question and to display a question, must input a questionID.
      * if there is no ID associated with it (example: displaying no question "Q:") use question ID = -1**/
-    public void changeQuestion(String newQuestion, int questionID){
+    public void createQuestion(String newQuestion, int questionID){
         qaPrompt = new QuestionAnswer(questionID, newQuestion, "");
+        //qID = questionID;
+        clearAnswer();
+
+        updateDisplay();
+    }
+
+    /** use to CHANGE the displayed question, must input a questionID.
+     * if there is no ID associated with it (example: displaying no question "Q:") use question ID = -1**/
+    public void changeQuestion(QuestionAnswer newQaPrompt){
+        qaPrompt = newQaPrompt;
         //qID = questionID;
         clearAnswer();
 
@@ -137,7 +147,7 @@ class QAPanel extends JPanel{
 
     //clears display
     public void clearDisplay(){
-        changeQuestion(prefixA, -1);
+        createQuestion(prefixA, -1);
     }
 
     public void updateDisplay(){
@@ -200,7 +210,7 @@ class MainPanel extends JPanel{
         String answer;
         try {
             question = JWhisper.transcription(null);
-            qaPanel.changeQuestion(question,0);
+            qaPanel.createQuestion(question,0);
             answer = JChatGPT.run(question);
             qaPanel.changeAnswer(answer);
             History.addEntry(question, answer);
@@ -241,7 +251,6 @@ class PromptHistory extends JPanel{
         histPane = new JScrollPane(history);
         this.add(histPane, BorderLayout.CENTER);
         histPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // this.add(history, BorderLayout.CENTER);
     }
 
     public void loadHist(){
