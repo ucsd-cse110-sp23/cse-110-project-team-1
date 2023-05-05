@@ -7,11 +7,12 @@ import java.io.*;
 import javax.swing.*;
 // import javax.swing.event.ChangeEvent;
 
+//answer and question cannot be null, use empty string if you don't have an answer or question yet.
 class QuestionAnswer{
-    int qID;
+    private int qID;
 
-    String question;
-    String answer;
+    private String question;
+    private String answer;
 
     QuestionAnswer(){
         qID = -1;
@@ -62,11 +63,11 @@ class QAPanel extends JPanel{
     String prefixQ = "Q: ";
     String prefixA = "A: ";
 
-    QAPanel(){
+    QAPanel(QuestionAnswer questionAnswer){
         setLayout(new GridLayout(2, 1));
         setBackground(green);
 
-        qaPrompt = new QuestionAnswer();
+        qaPrompt = questionAnswer;
 
         question = new JTextArea(prefixQ);
         question.setLineWrap(true);
@@ -127,10 +128,11 @@ class QAPanel extends JPanel{
 
 
     public void clearAnswer(){
-        changeAnswer(prefixA);
+        changeAnswer("");
     }
 
-    public void clearQuestion(){
+    //clears display
+    public void clearDisplay(){
         changeQuestion(prefixA, -1);
     }
 
@@ -159,7 +161,7 @@ class MainPanel extends JPanel{
     
         this.setLayout(new BorderLayout()); // set layout of task
 
-        qaPanel = new QAPanel();
+        qaPanel = new QAPanel(new QuestionAnswer());
         this.add(qaPanel, BorderLayout.CENTER);
 
         recButton = new JButton(startBlurb);

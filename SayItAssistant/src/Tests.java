@@ -73,6 +73,29 @@ public class Tests {
 
     //unit tests
     //testing QuestionAnswer 
+    @Test
+    public void QuestionAnswertestsetqID(){
+        QuestionAnswer qa = new QuestionAnswer();
+        int newID = 12;
+        qa.setqID(newID);
+        assertEquals(newID, qa.getqID());
+    }
 
-    //testing displays q
+    @Test
+    public void QuestionAnswertestsetQuestion(){
+        QuestionAnswer qa = new QuestionAnswer(1, "hi", "good morning");
+        String newQuestion = "what is the highest mountain in the world?"
+        qa.setQuestion(newQuestion);
+        assertEquals(newQuestion, qa.getQuestion());
+    }
+    //testing QAPanel
+
+    //testing MainPanel
+
+    //testing promptHistory
+
+    //testing SideBar
+
+    //testing SayIt
+
 }
