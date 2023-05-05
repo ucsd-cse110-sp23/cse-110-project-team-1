@@ -23,6 +23,7 @@ public class History {
      * Call this method before any other method in the class
      * Set the saveBody and entries field of this class from the file indicated by savePath
      * if the file is empty, saveBody and entries are defaulted to new 
+     * @return pre-existing prompts in triplet form
      */
     @SuppressWarnings("unchecked")
     public static ArrayList<Triplet<Integer,String,String>> initial() {
