@@ -124,7 +124,6 @@ class MainPanel extends JPanel{
             recorder.start();
         }
         isRec = !isRec;
-        //TODO: implement stop and start recording
     }
 }
 
