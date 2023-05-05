@@ -25,6 +25,7 @@ public class History {
      * if the file is empty, saveBody and entries are defaulted to new 
      */
     public static void initial() {
+        //Tries to create new save File if one is not present 
         File save = new File(savePath);
         try {
             save.getParentFile().mkdirs(); 
@@ -33,6 +34,7 @@ public class History {
             io.printStackTrace();
         }
 
+        //Parse saveFile and load in previous questions and prompts
         try {
             Object obj = new JSONParser().parse(new FileReader(savePath));
             
@@ -41,103 +43,102 @@ public class History {
             entries = (JSONArray) saveBody.get(ENTRY_NAME);
         } catch (IOException io) {
             io.printStackTrace();
-        } catch (ParseException p) {
+        } catch (ParseException p) { //If file is empty, default initialize them
             saveBody = new JSONObject();
             entries = new JSONArray();
-            addNewPrompt();
         }
     }
-    @SuppressWarnings("unchecked")
-    private static void formatJSONEntry(int id) {
-        JSONObject newEntry = new JSONObject();
-        newEntry.put(ID_FIELD, id);
-        JSONArray questionArr = new JSONArray();
-        newEntry.put(QUESTION_FIELD, questionArr);
-        JSONArray answerArr = new JSONArray();
-        newEntry.put(ANSWER_FIELD, answerArr);
-        entries.add(newEntry);
-        saveBody.put(ENTRY_NAME,entries);
-        writeToFile();
-    }
+
+    /* Helper method to get an Entry by ID 
+     * Uses binary search to quickly get entry by ID
+     * @param id of entry to be searched
+    */
     private static JSONObject getEntryObject(int id) {
-        int l = 0, r = entries.size() - 1;
-        while (l <= r) {
-            int m = l + (r - l) / 2;
+        int left = 0, right = entries.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
             
-            JSONObject entry = (JSONObject)entries.get(m);
+            JSONObject entry = (JSONObject)entries.get(mid);
             int entryId = (int)entry.get(ID_FIELD);
-            // Check if x is present at mid
-            if (entryId == id)
+            if (entryId == id) {
                 return entry;
+            }
  
-            // If x greater, ignore left half
-            if (entryId < id)
-                l = m + 1;
- 
-            // If x is smaller, ignore right half
-            else
-                r = m - 1;
+            if (entryId < id) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
         }
         return null;
     }
+    /* Helper method to get an Entry's index in entries array by ID 
+     * Uses binary search to quickly get entry by ID
+     * @param id of entry to be searched
+    */
     private static int getEntryIndex(int id) {
-        int l = 0, r = entries.size() - 1;
-        while (l <= r) {
-            int m = l + (r - l) / 2;
+        int left = 0, right = entries.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
             
-            JSONObject entry = (JSONObject)entries.get(m);
+            JSONObject entry = (JSONObject)entries.get(mid);
             int entryId = (int)entry.get(ID_FIELD);
-            // Check if x is present at mid
-            if (entryId == id)
-                return m;
+            if (entryId == id) {
+                return mid;
+            }
  
-            // If x greater, ignore left half
-            if (entryId < id)
-                l = m + 1;
- 
-            // If x is smaller, ignore right half
-            else
-                r = m - 1;
+            if (entryId < id) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
         }
         return -1;
     }
-
-    public static int addNewPrompt() {
-        if (entries.size() == 0) {
-            formatJSONEntry(1);
-            return 1;
-        }
-        JSONObject lastObject = (JSONObject)entries.get(entries.size()-1);
-        int newID = (int)lastObject.get(ID_FIELD) + 1;
-        formatJSONEntry(newID);
-        return newID;
+    /* Helper method to format JSON entry into entries array */ 
+    @SuppressWarnings("unchecked")
+    private static JSONObject formatJSONEntry(int id, String prompt, String answer) {
+        JSONObject newEntry = new JSONObject();
+        newEntry.put(ID_FIELD, id);
+        newEntry.put(QUESTION_FIELD, prompt);
+        newEntry.put(ANSWER_FIELD, answer);
+        return newEntry;
     }
+
     /*
      * Need to call initial first before running this
      * @param prompt: the question to be saved
      * @param answer: answer to be saved
      * Saves entry into a Json file with the id of array
-     * @returns -1 if initial is not called or the id of the entry
+     * @returns -1 if initial is not called else id of prompt
      */
     @SuppressWarnings("unchecked")
-    public static void addEntry(String prompt, String answer, int id) {
-        if (entries == null) {
-            return;
-        }
-        JSONObject entry = getEntryObject(id);
-        if (entry == null) {
-            throw new NullPointerException();
-        }
-        JSONArray questionArr = (JSONArray)entry.get(QUESTION_FIELD);
-        JSONArray answerArr = (JSONArray)entry.get(ANSWER_FIELD);
-        questionArr.add(prompt);
-        answerArr.add(answer);
-        entry.put(QUESTION_FIELD,questionArr);
-        entry.put(ANSWER_FIELD, answerArr);
+    public static int addEntry(String prompt, String answer) {
 
-        entries.set(getEntryIndex(id), entry);
+        //Check if initial hasn't been called
+        if (entries == null) {
+            return -1;
+        } 
+
+        JSONObject lastObject;
+        int newId;
+
+        //If entry is empty default id to 1
+        if (entries.size() == 0) {
+            newId = 1;
+        } else {     
+
+        //If entry is not empty, get id from last object + 1                                        
+            lastObject = (JSONObject)entries.get(entries.size()-1);
+            newId = (int)lastObject.get(ID_FIELD) + 1;
+
+        }
+
+        //Save to file
+        entries.add(formatJSONEntry(newId, prompt, answer));
         saveBody.put(ENTRY_NAME, entries);
         writeToFile();
+        return newId;
     }
 
     /*
@@ -147,14 +148,17 @@ public class History {
      */
     @SuppressWarnings("unchecked")
     public static void removeEntry(int id) {
-        int index = getEntryIndex(id);
-        if (index == -1) {
+        int index = getEntryIndex(id);  //tries to find entry in array
+        if (index == -1) {  //if not present do nothing and return 
             return;
         }
+
+        //remove entry and save to file
         entries.remove(index);
         saveBody.put(ENTRY_NAME, entries);
         writeToFile();
     }
+    
     /*
      * Helper method to write to saveFile
      */
@@ -186,6 +190,22 @@ public class History {
             ex.printStackTrace();
             System.out.println("Wrong file path");
         } 
-        addNewPrompt();
+    }
+
+    /*Testing purposes*/
+    public static void main(String[] args) {
+        History.initial();
+        History.clear();
+        History.addEntry("What is java UI?", "Idk figure it out bro.");
+        History.addEntry("Hi", "bye");
+        History.addEntry("this should be prompt 3", "Okay prompt 3");
+        History.removeEntry(0);
+        History.removeEntry(0);
+        History.removeEntry(0);
+        History.addEntry("What is java UI?", "Idk figure it out bro.");
+        History.addEntry("Hi", "bye");
+        History.removeEntry(1);
+        History.removeEntry(1);
+        History.clear();
     }
 }

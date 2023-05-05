@@ -188,7 +188,7 @@ class MainPanel extends JPanel{
             qaPanel.changeQuestion(question,0);
             answer = JChatGPT.run(question);
             qaPanel.changeAnswer(answer);
-            History.addEntry(question, answer, qaPanel.getQuestionID());
+            History.addEntry(question, answer);
         } catch( IOException io) {
             io.printStackTrace();
             System.out.println("IO exception at Whisper transcription");
@@ -323,9 +323,6 @@ public class SayIt extends JFrame{
         addListeners();
 
         History.initial();
-        /*testing purposes */
-        mainPanel.getQaPanel().setQuestionID(History.addNewPrompt());
-
     }
 
     public void addListeners() {
