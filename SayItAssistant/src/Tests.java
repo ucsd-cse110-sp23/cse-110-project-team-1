@@ -75,9 +75,19 @@ public class Tests {
     //Do I test QuestionAnswer?
     @Test
     public void testQuestionAnswersetqID(){
-        QuestionAnswer qa = new QuestionAnswer()
+        QuestionAnswer qa = new QuestionAnswer();
+        int newqID = 12;
+        qa.setqID(newqID);
+        assertEquals(newqID, qa.getqID());
     }    
 
+    @Test
+    public void testQuestionAnswersetQuestion(){
+        QuestionAnswer qa = new QuestionAnswer();
+        String newQuestion = "What is my new question?";
+        qa.setQuestion(newQuestion);
+        assertEquals(newQuestion, qa.getQuestion());
+    }
     //testing QAPanel
 
     //testing MainPanel

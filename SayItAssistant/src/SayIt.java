@@ -47,8 +47,7 @@ class QuestionAnswer{
 
     public String getAnswer() {
         return answer;
-    }
-    
+    }    
 }
 
 class QAPanel extends JPanel{
@@ -82,6 +81,10 @@ class QAPanel extends JPanel{
     }
 
     //gets the information directly from qaPrompt, has the actual question, answer, and id.
+    public QuestionAnswer getQuestionAnswer(){
+        return qaPrompt;
+    }
+    
     public int getQuestionID(){
         return qaPrompt.getqID();
     }
