@@ -11,7 +11,7 @@ class QAPanel extends JPanel{
     Color green = new Color(188, 226, 158);
     JTextArea question;
     JTextArea answer;
-    String qID;
+    int qID;
     String defaultQ = "Q: ";
     String defaultA = "A: ";
 
@@ -30,8 +30,11 @@ class QAPanel extends JPanel{
         answer.setEditable(false);
     }
 
-    public String getQuestionID(){
+    public int getQuestionID(){
         return qID;
+    }
+    public void setQuestionID(int id) {
+        qID = id;
     }
 
     public String getAnswer(){
@@ -48,14 +51,14 @@ class QAPanel extends JPanel{
         return question.getText();
     }
     /** use to change the displayed question, must input a questionID.
-     * if there is no ID associated with it (example: displaying no question "Q:") use question ID = null**/
-    public void changeQuestion(String newQuestion, String questionID){
+     * if there is no ID associated with it (example: displaying no question "Q:") use question ID = -1**/
+    public void changeQuestion(String newQuestion, int questionID){
         question.setText(defaultQ + newQuestion);
-        qID = questionID;
+        //qID = questionID;
         clearAnswer();
     }
     public void clearQuestion(){
-        changeQuestion(defaultQ, null);
+        changeQuestion(defaultQ, -1);
     }
 
 }
@@ -105,10 +108,10 @@ class MainPanel extends JPanel{
         String answer;
         try {
             question = JWhisper.transcription(null);
-            qaPanel.changeQuestion(question, null);
+            qaPanel.changeQuestion(question,0);
             answer = JChatGPT.run(question);
             qaPanel.changeAnswer(answer);
-            History.addEntry(question, answer);
+            History.addEntry(question, answer, qaPanel.getQuestionID());
         } catch( IOException io) {
             io.printStackTrace();
             System.out.println("IO exception at Whisper transcription");
@@ -243,6 +246,9 @@ public class SayIt extends JFrame{
         addListeners();
 
         History.initial();
+        /*testing purposes */
+        mainPanel.getQaPanel().setQuestionID(History.addNewPrompt());
+
     }
 
     public void addListeners() {

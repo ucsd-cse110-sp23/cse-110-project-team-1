@@ -12,9 +12,9 @@ import org.json.simple.parser.*;
 public class History {
     private static final String ENTRY_NAME = "Entries";
     private static final String ID_FIELD = "ID";
-    private static final String QUESTION_FIELD = "Question";
+    private static final String QUESTION_FIELD = "Questions";
     private static final String savePath = "saveFiles/history.json";
-    static final String ANSWER_FIELD = "Answer";
+    static final String ANSWER_FIELD = "Answers";
     static JSONObject saveBody;
     static JSONArray entries;
 
@@ -44,9 +44,74 @@ public class History {
         } catch (ParseException p) {
             saveBody = new JSONObject();
             entries = new JSONArray();
+            addNewPrompt();
         }
     }
+    @SuppressWarnings("unchecked")
+    private static void formatJSONEntry(int id) {
+        JSONObject newEntry = new JSONObject();
+        newEntry.put(ID_FIELD, id);
+        JSONArray questionArr = new JSONArray();
+        newEntry.put(QUESTION_FIELD, questionArr);
+        JSONArray answerArr = new JSONArray();
+        newEntry.put(ANSWER_FIELD, answerArr);
+        entries.add(newEntry);
+        saveBody.put(ENTRY_NAME,entries);
+        writeToFile();
+    }
+    private static JSONObject getEntryObject(int id) {
+        int l = 0, r = entries.size() - 1;
+        while (l <= r) {
+            int m = l + (r - l) / 2;
+            
+            JSONObject entry = (JSONObject)entries.get(m);
+            int entryId = (int)entry.get(ID_FIELD);
+            // Check if x is present at mid
+            if (entryId == id)
+                return entry;
+ 
+            // If x greater, ignore left half
+            if (entryId < id)
+                l = m + 1;
+ 
+            // If x is smaller, ignore right half
+            else
+                r = m - 1;
+        }
+        return null;
+    }
+    private static int getEntryIndex(int id) {
+        int l = 0, r = entries.size() - 1;
+        while (l <= r) {
+            int m = l + (r - l) / 2;
+            
+            JSONObject entry = (JSONObject)entries.get(m);
+            int entryId = (int)entry.get(ID_FIELD);
+            // Check if x is present at mid
+            if (entryId == id)
+                return m;
+ 
+            // If x greater, ignore left half
+            if (entryId < id)
+                l = m + 1;
+ 
+            // If x is smaller, ignore right half
+            else
+                r = m - 1;
+        }
+        return -1;
+    }
 
+    public static int addNewPrompt() {
+        if (entries.size() == 0) {
+            formatJSONEntry(1);
+            return 1;
+        }
+        JSONObject lastObject = (JSONObject)entries.get(entries.size()-1);
+        int newID = (int)lastObject.get(ID_FIELD) + 1;
+        formatJSONEntry(newID);
+        return newID;
+    }
     /*
      * Need to call initial first before running this
      * @param prompt: the question to be saved
@@ -55,19 +120,24 @@ public class History {
      * @returns -1 if initial is not called or the id of the entry
      */
     @SuppressWarnings("unchecked")
-    public static int addEntry(String prompt, String answer) {
+    public static void addEntry(String prompt, String answer, int id) {
         if (entries == null) {
-            return -1;
+            return;
         }
-        int newId = entries.size() +1;
-        JSONObject newEntry = new JSONObject();
-        newEntry.put(ID_FIELD, newId);
-        newEntry.put(QUESTION_FIELD, prompt);
-        newEntry.put(ANSWER_FIELD, answer);
-        entries.add(newEntry);
+        JSONObject entry = getEntryObject(id);
+        if (entry == null) {
+            throw new NullPointerException();
+        }
+        JSONArray questionArr = (JSONArray)entry.get(QUESTION_FIELD);
+        JSONArray answerArr = (JSONArray)entry.get(ANSWER_FIELD);
+        questionArr.add(prompt);
+        answerArr.add(answer);
+        entry.put(QUESTION_FIELD,questionArr);
+        entry.put(ANSWER_FIELD, answerArr);
+
+        entries.set(getEntryIndex(id), entry);
         saveBody.put(ENTRY_NAME, entries);
         writeToFile();
-        return newId;
     }
 
     /*
@@ -77,7 +147,11 @@ public class History {
      */
     @SuppressWarnings("unchecked")
     public static void removeEntry(int id) {
-        entries.remove(id-1);
+        int index = getEntryIndex(id);
+        if (index == -1) {
+            return;
+        }
+        entries.remove(index);
         saveBody.put(ENTRY_NAME, entries);
         writeToFile();
     }
@@ -112,5 +186,6 @@ public class History {
             ex.printStackTrace();
             System.out.println("Wrong file path");
         } 
+        addNewPrompt();
     }
 }
