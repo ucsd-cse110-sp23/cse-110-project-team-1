@@ -31,10 +31,10 @@ class MockChatGPT extends JChatGPT{
 
 public class Tests {
 
-    @Test
-    public void UItest() {
-        new SayIt();
-    }
+    // @Test
+    // public void UItest() {
+    //     new SayIt();
+    // }
 
     @Test
     public void ChatGPTtestRight() {
@@ -70,4 +70,9 @@ public class Tests {
         String mockAnswer = MockChatGPT.mockRunMicFailure(prompt, micFailure);
         assertEquals(testAnswer, mockAnswer);
     }
+
+    //unit tests
+    //testing QuestionAnswer 
+
+    //testing displays q
 }

@@ -2,65 +2,142 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 
-import javax.management.Query;
-import javax.sound.sampled.*;
+// import javax.management.Query;
+// import javax.sound.sampled.*;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
+// import javax.swing.event.ChangeEvent;
+
+class QuestionAnswer{
+    int qID;
+
+    String question;
+    String answer;
+
+    QuestionAnswer(){
+        qID = -1;
+        question = "";
+        answer = "";
+    }
+
+    QuestionAnswer(int qID, String question, String answer){
+        this.qID = qID;
+        this.question = question;
+        this.answer = answer;
+    }
+
+    public void setqID(int qID) {
+        this.qID = qID;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public int getqID() {
+        return qID;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+    
+}
 
 class QAPanel extends JPanel{
     Color green = new Color(188, 226, 158);
+    
+    QuestionAnswer qaPrompt;//TODO: refactor to use QuestionAnswer
+    
     JTextArea question;
     JTextArea answer;
-    int qID;
-    String defaultQ = "Q: ";
-    String defaultA = "A: ";
+    //int qID;
+    String prefixQ = "Q: ";
+    String prefixA = "A: ";
 
     QAPanel(){
         setLayout(new GridLayout(2, 1));
         setBackground(green);
 
-        question = new JTextArea(defaultQ);
+        qaPrompt = new QuestionAnswer();
+
+        question = new JTextArea(prefixQ);
         question.setLineWrap(true);
         this.add(question);
         question.setEditable(false);
         
-        answer = new JTextArea(defaultA);
+        answer = new JTextArea(prefixA);
         answer.setLineWrap(true);
         this.add(answer);
         answer.setEditable(false);
     }
 
+    //gets the information directly from qaPrompt, has the actual question, answer, and id.
     public int getQuestionID(){
-        return qID;
-    }
-    public void setQuestionID(int id) {
-        qID = id;
-    }
-
-    public String getAnswer(){
-        return answer.getText();
-    }
-    public void changeAnswer(String newAnswer){
-        answer.setText(defaultA + newAnswer);        
-    }
-    public void clearAnswer(){
-        changeAnswer(defaultA);
+        return qaPrompt.getqID();
     }
 
     public String getQuestion(){
-        return question.getText();
+        return qaPrompt.getQuestion();
     }
+
+    public String getAnswer(){
+        return qaPrompt.getAnswer();
+    }
+
+
+    public void setQuestionID(int id) {
+        //qID = id;
+        qaPrompt.setqID(id);
+    }
+
     /** use to change the displayed question, must input a questionID.
      * if there is no ID associated with it (example: displaying no question "Q:") use question ID = -1**/
     public void changeQuestion(String newQuestion, int questionID){
-        question.setText(defaultQ + newQuestion);
+        qaPrompt = new QuestionAnswer(questionID, newQuestion, "");
         //qID = questionID;
         clearAnswer();
-    }
-    public void clearQuestion(){
-        changeQuestion(defaultQ, -1);
+
+        updateDisplay();
     }
 
+    public void changeAnswer(String newAnswer){
+        qaPrompt.setAnswer(newAnswer);
+        // answer.setText(prefixA + newAnswer);
+        
+        updateDisplay();
+    }
+
+
+
+    public String getQuestionText(){
+        return question.getText();
+    }
+
+    public String getAnswerText(){
+        return answer.getText();
+    }
+
+
+    public void clearAnswer(){
+        changeAnswer(prefixA);
+    }
+
+    public void clearQuestion(){
+        changeQuestion(prefixA, -1);
+    }
+
+    public void updateDisplay(){
+        question.setText(prefixQ + getQuestion());
+        answer.setText(prefixA + getAnswer());
+    }
 }
 
 class MainPanel extends JPanel{
