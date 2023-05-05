@@ -117,6 +117,7 @@ class QAPanel extends JPanel{
      * if there is no ID associated with it (example: displaying no question "Q:") use question ID = -1**/
     public void changeQuestion(QuestionAnswer newQaPrompt){
         qaPrompt = newQaPrompt;
+        qaPrompt.setQuestion(qaPrompt.getQuestion());
         //qID = questionID;
         clearAnswer();
 

@@ -11,7 +11,8 @@ import org.json.JSONException;
 
 public class JWhisper {
     private static final String API_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
-    private static final String TOKEN = "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";
+    private static final String TOKEN = "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";
+    // private static final String TOKEN = "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";
     private static final String MODEL = "whisper-1";
 
      //Helper method to write a parameter to the output stream in multipart form data format

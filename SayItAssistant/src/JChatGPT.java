@@ -10,7 +10,8 @@ import org.json.JSONObject;
 
 public class JChatGPT {
     private static final String API_ENDPOINT = "https://api.openai.com/v1/completions";
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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";
+    // private static final String API_KEY = "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";
     private static final String MODEL = "text-davinci-003";
     static int maxTokens = 100;
     static float temperature = 1.0f;
@@ -68,6 +69,7 @@ public class JChatGPT {
         JSONObject responseJson = new JSONObject(responseBody);
         JSONArray choices = responseJson.getJSONArray("choices");
         String generatedText = choices.getJSONObject(0).getString("text");
+        System.out.print(generatedText);
 
         return generatedText;
     }
