@@ -7,7 +7,6 @@ import java.io.*;
 import javax.swing.*;
 // import javax.swing.event.ChangeEvent;
 
-//answer and question cannot be null, use empty string if you don't have an answer or question yet.
 class QuestionAnswer{
     private int qID;
 
@@ -16,8 +15,8 @@ class QuestionAnswer{
 
     QuestionAnswer(){
         qID = -1;
-        question = "";
-        answer = "";
+        question = null;
+        answer = null;
     }
 
     QuestionAnswer(int qID, String question, String answer){
@@ -69,15 +68,17 @@ class QAPanel extends JPanel{
 
         qaPrompt = questionAnswer;
 
-        question = new JTextArea(prefixQ);
+        question = new JTextArea();
         question.setLineWrap(true);
         this.add(question);
         question.setEditable(false);
         
-        answer = new JTextArea(prefixA);
+        answer = new JTextArea();
         answer.setLineWrap(true);
         this.add(answer);
         answer.setEditable(false);
+
+        updateDisplay();
     }
 
     //gets the information directly from qaPrompt, has the actual question, answer, and id.
@@ -137,8 +138,17 @@ class QAPanel extends JPanel{
     }
 
     public void updateDisplay(){
-        question.setText(prefixQ + getQuestion());
-        answer.setText(prefixA + getAnswer());
+        if (getQuestion() != null){
+            question.setText(prefixQ + getQuestion());
+        } else {
+            question.setText(prefixQ);
+        }
+
+        if (getAnswer() != null){
+            answer.setText(prefixA + getAnswer());
+        } else {
+            answer.setText(prefixA);
+        }
     }
 }
 
