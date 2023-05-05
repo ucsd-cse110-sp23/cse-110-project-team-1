@@ -18,6 +18,15 @@ class MockChatGPT extends JChatGPT{
             return "Not accepted answer";
         }
     }
+
+    static String mockRunMicFailure(String transcription, boolean micFailure) {
+        if (transcription.equals("What is the smallest city in the world?") && micFailure == true) {
+            return "Sorry something is not working...";
+        }
+        else {
+            return "Question accepted";
+        }
+    }
 }
 
 public class Tests {
@@ -43,5 +52,22 @@ public class Tests {
         assertEquals(testAnswer, mockAnswer);
     }
 
-    
+    @Test
+    public void ChatGPTtestMicFailure() {
+        String prompt = "What is the smallest city in the world?";
+        Boolean micFailure = true;
+        String testAnswer = "Sorry something is not working...";
+        String mockAnswer = MockChatGPT.mockRunMicFailure(prompt, micFailure);
+        assertEquals(testAnswer, mockAnswer);
+    }
+
+   
+    @Test
+    public void ChatGPTtestMicGood() {
+        String prompt = "What is the smallest city in the world?";
+        Boolean micFailure = false;
+    String testAnswer = "Question accepted";
+        String mockAnswer = MockChatGPT.mockRunMicFailure(prompt, micFailure);
+        assertEquals(testAnswer, mockAnswer);
+    }
 }
