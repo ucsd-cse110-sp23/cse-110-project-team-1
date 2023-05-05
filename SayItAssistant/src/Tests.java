@@ -195,7 +195,8 @@ public class Tests {
         assertEquals(newQa, tQAPanel.getQuestionAnswer());
     }
 
-
+    @Test
+    public void testQAPanel
 
     //testing MainPanel
 

@@ -53,7 +53,7 @@ class QuestionAnswer{
 class QAPanel extends JPanel{
     Color green = new Color(188, 226, 158);
     
-    QuestionAnswer qaPrompt;//TODO: refactor to use QuestionAnswer
+    QuestionAnswer qaPrompt;
     
     JTextArea question;
     JTextArea answer;
@@ -61,6 +61,7 @@ class QAPanel extends JPanel{
     String prefixQ = "Q: ";
     String prefixA = "A: ";
 
+    //DO NOT pass in a null QuestionAnswer
     QAPanel(QuestionAnswer questionAnswer){
         setLayout(new GridLayout(2, 1));
         setBackground(green);
@@ -140,12 +141,12 @@ class QAPanel extends JPanel{
 
 
     public void clearAnswer(){
-        changeAnswer("");
+        changeAnswer(null);
     }
 
     //clears display
     public void clearDisplay(){
-        createQuestion(prefixA, -1);
+        createQuestion(null, -1);
     }
 
     public void updateDisplay(){
