@@ -3,6 +3,7 @@
         "lib/**/*.jar",
         "SayItAssistant/lib/json-20230227.jar",
         "SayItAssistant/lib/json-simple-1.1.1.jar",
-        "SayItAssistant/lib/junit-platform-console-standalone-1.9.3.jar"
+        "SayItAssistant/lib/junit-platform-console-standalone-1.9.3.jar",
+        "SayItAssistant/lib/javatuples-1.2.jar"
     ]
 }

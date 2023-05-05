@@ -118,8 +118,6 @@ class QAPanel extends JPanel{
     public void changeQuestion(QuestionAnswer newQaPrompt){
         qaPrompt = newQaPrompt;
         //qID = questionID;
-        clearAnswer();
-
         updateDisplay();
     }
 
