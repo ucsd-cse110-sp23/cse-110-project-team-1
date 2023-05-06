@@ -274,6 +274,11 @@ class PromptHistory extends JPanel{
         System.out.println("----------------");
         JButton button2 = new JButton("button2");
         history.add(button2);
+        System.out.println(history.getComponentCount());
+        history.revalidate();
+        history.repaint();
+        histPane.revalidate();
+        histPane.repaint();
         // histPane = new JScrollPane(history);
     }
 
@@ -360,6 +365,8 @@ public class SayIt extends JFrame{
     private SideBar sideBar;
     private JButton clearButton;
 
+    private PromptHistory hist;
+
     boolean shouldFill = true;
 
     public MainPanel getMainPanel(){
@@ -375,6 +382,7 @@ public class SayIt extends JFrame{
     }
 
     public SayIt() {
+        hist = new PromptHistory();
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
@@ -420,6 +428,12 @@ public class SayIt extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 mainPanel.changeRecording();
+                for(int i=0; i<=1; i++){
+                    JButton bttn2 = new JButton("test 2");
+                    hist.history.add(bttn2);
+                    hist.history.revalidate();
+                }
+                // System.out.println(hist.history.getComponentCount());
             }
         }
         );
