@@ -129,7 +129,13 @@ class QAPanel extends JPanel{
         updateDisplay();
     }
 
+    public String getPrefixQ(){
+        return prefixQ;
+    }
 
+    public String getPrefixA(){
+        return prefixA;
+    }
 
     public String getQuestionText(){
         return question.getText();
@@ -203,7 +209,7 @@ class MainPanel extends JPanel{
     /*
      * Handles finishing recording and displayng to qaPanel 
      */
-    private void finishRecording() {
+    protected void finishRecording() {
         recorder.finish();
         String question;
         String answer;
@@ -216,6 +222,7 @@ class MainPanel extends JPanel{
         } catch( IOException io) {
             io.printStackTrace();
             System.out.println("IO exception at Whisper transcription");
+            qaPanel.changeAnswer("Sorry, we didn't quite catch that");
         } catch (InterruptedException ex) {
             ex.printStackTrace();
             System.out.println("Interupt exception chatGPT");
