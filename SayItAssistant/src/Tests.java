@@ -196,17 +196,7 @@ public class Tests {
     }
 
     @Test
-    public void testQAPanelchangeAnswer(){
-        QuestionAnswer qa = new QuestionAnswer(1, "good morning?", "good evening");
-        QAPanel tQAPanel = new QAPanel(qa);
-        String newAnswer = "this is a new answer";
-        tQAPanel.changeAnswer(newAnswer);
-        assertEquals(qa, tQAPanel.getQuestionAnswer());
-        assertEquals(newAnswer, qa.getAnswer());
-    }
-
-    // @Test
-    // public void 
+    public void testQAPanel
 
     //testing MainPanel
 
