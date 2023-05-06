@@ -26,6 +26,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
+      # best if get permissions to run gradlew executable instead of this
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       # build everything (includes running unit tests)
       - name: Execute Gradle build
         run: ./gradlew build
