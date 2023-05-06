@@ -19,6 +19,28 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     // This provides the TestEngine to actually run the tests.
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+    // https://central.sonatype.com/artifact/org.javatuples/javatuples/1.2
+    implementation 'org.javatuples:javatuples:1.2'
+    
+    // https://central.sonatype.com/artifact/org.json/json/20230227
+    implementation 'org.json:json:20230227'
+
+    // https://central.sonatype.com/artifact/com.googlecode.json-simple/json-simple/1.1.1
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+}
+
+sourceSets {
+    main{
+        java {
+            srcDirs = ["SayItAssistant/src"]
+        }
+    }
+    test{
+        java {
+            srcDirs = ["SayItAssistant/test"]
+        }
+    }
 }
 
 test {
