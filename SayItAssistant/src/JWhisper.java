@@ -31,7 +31,7 @@ public class JWhisper {
     }
 
     //Helper method to write a file to the output stream in multipart form data format
-    private static void writeFileToOutputStream(
+    private void writeFileToOutputStream(
         OutputStream outputStream,
         File file,
         String boundary
@@ -93,7 +93,7 @@ public class JWhisper {
      * @param String filepath; path to audio file
      * @param null for default audioFiles/record.wav
      */
-    public static String transcription(String filepath) throws IOException {
+    public String transcription(String filepath) throws IOException {
         if (filepath == null) {
             filepath = "audioFiles/record.wav";
         } 

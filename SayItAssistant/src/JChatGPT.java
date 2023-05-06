@@ -21,7 +21,7 @@ public class JChatGPT{
      * @param tokens for maxTokens
      * @param temp for temperature
      */
-    public static void setParams(int tokens, float temp) {
+    public void setParams(int tokens, float temp) {
         maxTokens = tokens;
         temperature = temp;
     }
@@ -31,7 +31,7 @@ public class JChatGPT{
      * @param String transciption is the prompt to be asked
      * @return Chat-GPT output to the prompt
      */
-    public static String run(String transcription) throws IOException, InterruptedException {
+    public String run(String transcription) throws IOException, InterruptedException {
         //Set request parameters
         String prompt = transcription;
         //int maxTokens = 100;
