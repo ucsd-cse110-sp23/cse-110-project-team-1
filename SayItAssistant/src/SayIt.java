@@ -216,7 +216,9 @@ class MainPanel extends JPanel{
         // try {
             // question = JWhisper.transcription(null);
             question = "this is the test";
+            System.out.println("before saveQuestion");
             history.saveQuestion(question);
+            System.out.println("after saveQuestion");
             qaPanel.createQuestion(question,0);
             // answer = JChatGPT.run(question);
             answer = "test answer";
@@ -260,8 +262,19 @@ class PromptHistory extends JPanel{
 
         loadHist(); //update list
         histPane = new JScrollPane(history);
+        // histPane.revalidate();
+        // histPane.repaint();
+        // addBttn();
         this.add(histPane, BorderLayout.CENTER);
         histPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
+
+    public void addBttn(){
+        System.out.println("AddBttn function");
+        System.out.println("----------------");
+        JButton button2 = new JButton("button2");
+        history.add(button2);
+        // histPane = new JScrollPane(history);
     }
 
     // PromptHistory(){
@@ -289,17 +302,19 @@ class PromptHistory extends JPanel{
     }
 
     public void saveQuestion(String questionName){
-        JButton button1 = new JButton(questionName);
-        history.add(button1);
-        history.revalidate();
-        history.repaint();
-        // histPane.add(history);
-        histPane.setViewportView(history);
-        histPane.revalidate();
-        histPane.repaint();
+        addBttn();
+        histPane.add(new JButton("test 1"));
+        // System.out.print("question button");
+        // JButton button1 = new JButton("test 1");
+        // history.add(button1);
+        // // history.revalidate();
+        // // history.repaint();
+        // // histPane.add(history);
+        // histPane.setViewportView(history);
+        // histPane.revalidate();
+        // histPane.repaint();
     }
     // public void saveQuestion(String questionName){
-
     //     JButton button1 = new JButton(questionName);
     //     history.add(button1);
     //     history.revalidate();
