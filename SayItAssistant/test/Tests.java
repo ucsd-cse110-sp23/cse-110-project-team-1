@@ -1,10 +1,19 @@
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
-import java.io.IOException;
-import java.util.logging.Logger;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+// import static org.junit.Assert.assertEquals;
+// import static org.junit.Assert.assertNotEquals;
+
+// import java.io.IOException;
+// import java.util.logging.Logger;
+
+// import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 
 
@@ -115,7 +124,7 @@ public class Tests {
     public void testQuestionAnswersetAnswer(){
         QuestionAnswer qa = new QuestionAnswer();
         String newAnswer = "My answer is you";
-        qa.setQuestion(newAnswer);
+        qa.setAnswer(newAnswer);
         assertEquals(newAnswer, qa.getAnswer());
     }
 
@@ -123,7 +132,7 @@ public class Tests {
     public void testQuestionAnswersetAnswerChange(){
         QuestionAnswer qa = new QuestionAnswer(1, "Whoa dude what's that?", "I know bro");
         String newAnswer = "My answer is you";
-        qa.setQuestion(newAnswer);
+        qa.setAnswer(newAnswer);
         assertEquals(newAnswer, qa.getAnswer());
     }
 
@@ -132,7 +141,7 @@ public class Tests {
     public void testQuestionAnswergetID(){
         int id = 12;
         QuestionAnswer qa = new QuestionAnswer(id, "Whoa dude what's that?", "I know bro");
-        assertEquals(1, qa.getqID());
+        assertEquals(id, qa.getqID());
     }
 
     @Test
@@ -194,9 +203,6 @@ public class Tests {
         tQAPanel.changeQuestion(newQa);
         assertEquals(newQa, tQAPanel.getQuestionAnswer());
     }
-
-    @Test
-    public void testQAPanel
 
     //testing MainPanel
 
