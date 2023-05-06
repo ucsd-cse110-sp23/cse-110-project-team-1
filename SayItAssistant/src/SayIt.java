@@ -176,10 +176,13 @@ class MainPanel extends JPanel{
 
     JRecorder recorder;
 
+    PromptHistory history;
+
     Color gray = new Color(218, 229, 234);
     Color green = new Color(188, 226, 158);
     
     MainPanel(){
+        history = new PromptHistory();
         this.setPreferredSize(new Dimension(400, 20)); // set size of task
         this.setBackground(gray); // set background color of task
     
@@ -209,19 +212,23 @@ class MainPanel extends JPanel{
         recorder.finish();
         String question;
         String answer;
-        try {
-            question = JWhisper.transcription(null);
+        // PromptHistory history = new PromptHistory();
+        // try {
+            // question = JWhisper.transcription(null);
+            question = "this is the test";
+            history.saveQuestion(question);
             qaPanel.createQuestion(question,0);
-            answer = JChatGPT.run(question);
+            // answer = JChatGPT.run(question);
+            answer = "test answer";
             qaPanel.changeAnswer(answer);
             History.addEntry(question, answer);
-        } catch( IOException io) {
-            io.printStackTrace();
-            System.out.println("IO exception at Whisper transcription");
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-            System.out.println("Interupt exception chatGPT");
-        }
+        // } catch( IOException io) {
+        //     io.printStackTrace();
+        //     System.out.println("IO exception at Whisper transcription");
+        // } catch (InterruptedException ex) {
+        //     ex.printStackTrace();
+        //     System.out.println("Interupt exception chatGPT");
+        // }
     }
 
     public void changeRecording(){
@@ -238,15 +245,18 @@ class MainPanel extends JPanel{
 
 class PromptHistory extends JPanel{
     JLabel title;
-    JList<String> history;
+    JPanel history;
     JScrollPane histPane;
     //TODO: switch out list for actual button with Question ID'S
     PromptHistory(){
-        // history = new JList<String>(getHistory());
+        history = new JPanel(new GridLayout(10,1,10,5));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         title = new JLabel("Prompt History");
         this.add(title, BorderLayout.NORTH);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JButton button1 = new JButton("button1");
+        history.add(button1);
 
         loadHist(); //update list
         histPane = new JScrollPane(history);
@@ -254,11 +264,50 @@ class PromptHistory extends JPanel{
         histPane.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
+    // PromptHistory(){
+    //     history = new JPanel();
+    //     history.setLayout(new BoxLayout(history, BoxLayout.Y_AXIS)); // add this line
+    //     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    //     title = new JLabel("Prompt History");
+    //     this.add(title, BorderLayout.NORTH);
+    //     title.setAlignmentX(Component.CENTER_ALIGNMENT);
+    
+    //     JButton button1 = new JButton("button1");
+    //     history.add(button1);
+    
+    //     loadHist(); //update list
+    //     histPane = new JScrollPane(history);
+    //     this.add(histPane, BorderLayout.CENTER);
+    //     histPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+    //     history.setPreferredSize(new Dimension(200, 400)); // for example
+    // }
+
     public void loadHist(){
         //TODO: implement loading history into list
-        String[] example = {"apple", "banana", "truffle", "death", "lasdjf askdjfasdjfagh woeg hiseroignsofjasdkjf kasda"};
-        history = new JList<String>(example);
+        // String[] example = {"apple", "banana", "truffle", "death", "lasdjf askdjfasdjfagh woeg hiseroignsofjasdkjf kasda"};
+        // history = new JList<String>(example);
     }
+
+    public void saveQuestion(String questionName){
+        JButton button1 = new JButton(questionName);
+        history.add(button1);
+        history.revalidate();
+        history.repaint();
+        // histPane.add(history);
+        histPane.setViewportView(history);
+        histPane.revalidate();
+        histPane.repaint();
+    }
+    // public void saveQuestion(String questionName){
+
+    //     JButton button1 = new JButton(questionName);
+    //     history.add(button1);
+    //     history.revalidate();
+    //     history.repaint();
+    //     histPane.setViewportView(history);
+    //     histPane.revalidate();
+    //     histPane.repaint();
+    // }
 }
 
 // the side panel
