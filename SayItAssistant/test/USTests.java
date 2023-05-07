@@ -129,6 +129,7 @@ public class USTests {
     //     String answer = "The smallest city is the Vatican";
     //     MockRecorder mockRec = new MockRecorder(true);
     //     MockWhisper mockWhisper = new MockWhisper(false, question);
+        
     //     MockGPT mockGPT = new MockGPT(true, answer);
     //     SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
     //     // and the user has recorded their prompt
@@ -140,8 +141,7 @@ public class USTests {
     //     // assertNotEquals(app.getMainPanel().getQaPanel().getAnswerText(),
     //     // app.getMainPanel().getQaPanel().getPrefixA() + answer);
     //     // and display "Sorry. we didn't quite catch that" as our answer
-    //     assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
-    //     app.getMainPanel().getQaPanel().getPrefixA() + "Sorry, we didn't quite catch that");
+    //     assertEquals(app.getMainPanel().getQaPanel().getPrefixA() + "Sorry, we didn't quite catch that", app.getMainPanel().getQaPanel().getAnswerText());
     // }
 
     //@Test
