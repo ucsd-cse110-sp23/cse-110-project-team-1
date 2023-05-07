@@ -119,10 +119,9 @@ public class USTests {
      * User Story 1 Scenario 1: Voice to text is working
      * Given the application is open
      * And the user has clicked new question
-     * When the user says “What is the smallest city?”
-     * Then display “What is the smallest city?” as the question
-     * And display nothing while generating the answer to the user’s prompt
-     * And display the answer to “What is the smallest city?” when generated
+     * When the user says "What is the smallest city?" as the question
+     * And displays nothing while generating the answer to the user's prompt
+     * And displays the answer to "What is the samllest city?" when generated
      */
     @Test
     public void US1S1Test(){
@@ -157,7 +156,7 @@ public class USTests {
      * And the user has recorded their prompt
      * When the user’s recording cannot be converted to text
      * Then do not answer the prompt
-     * And display “Sorry we didn’t quite catch that” as our answer
+     * And display "Sorry we didn’t quite catch that" as our answer
      */
     @Test
     public void US1S2Test(){
@@ -187,7 +186,7 @@ public class USTests {
      * Given the application is open
      * And the user has clicked new question
      * When the user’s mic is not connected
-     * Then display “please connect microphone”
+     * Then display "please connect microphone"
      * And do not record
      */
 
@@ -213,7 +212,7 @@ public class USTests {
     /**
      * User Story 2 Scenario 1: The user asks a question
      * Given that the application is open and user has recorded a question successfully
-     * When the user asks “What is Java UI?”
+     * When the user asks "What is Java UI?"
      * Then the answer appears in the area below the question
      */
     @Test
@@ -245,7 +244,7 @@ public class USTests {
 
     /*
      * User Story 3 Scenario 1:  Saving question and answer
-     * Given that the user asks “What is JAVA UI?” and clicked stop
+     * Given that the user asks "What is JAVA UI?" and clicked stop
      * When the answer of that question displays
      * Then save the question and answer
      */
@@ -290,7 +289,7 @@ public class USTests {
     /*
      * User Story 3 Scenario 2: Whisper has error
      * Given that the functionality of whisper produces an error
-     * When the user ask “What is JAVA UI?” and stops recording
+     * When the user ask "What is JAVA UI?" and stops recording
      * Then application would not save the question and the answer
      */
     @Test 
