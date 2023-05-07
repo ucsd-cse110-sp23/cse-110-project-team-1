@@ -70,7 +70,7 @@ public class JRecorder {
         return format;
     }
 
-    public void start() {
+    public void start(){
         try {
             AudioFormat format = audioFormat();                                               //Custom audio Format
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);   //DataLine is a handy class that describes lines and formats

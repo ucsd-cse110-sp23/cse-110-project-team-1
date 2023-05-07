@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import javax.sound.sampled.LineUnavailableException;
 import javax.swing.JButton;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -84,6 +85,11 @@ class MockRecorder extends JRecorder{
     @Override
     public void start(){
         if (!isSuccess){
+            try {
+                throw new LineUnavailableException("this tests LineUnavailableExeception");
+            } catch (LineUnavailableException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

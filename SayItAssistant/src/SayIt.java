@@ -306,7 +306,16 @@ class PromptHistory extends JPanel{
         // history = new JList<String>(example);
         history = new JPanel();
         history.setLayout(new GridBagLayout());
-        // history.setLayout(new BoxLayout(history, BoxLayout.Y_AXIS));
+        history.setBackground(new Color(0,0,0));
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.PAGE_END;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.gridx = 0;
+        c.gridy = GridBagConstraints.RELATIVE;
+        history.add(new JPanel(), c);
+        //  history.setLayout(new BoxLayout(history, BoxLayout.Y_AXIS));
         // for (int i = 0; i < 50; i++){
         //     addQA(new QuestionAnswer(0,"hello " + i, "great"));
         //     addQA(new QuestionAnswer(0,"hello my name is not something you know " + i, "great"));
@@ -320,11 +329,15 @@ class PromptHistory extends JPanel{
     public void addQA(QuestionAnswer qa){
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
+        // c.anchor = GridBagConstraints.NORTH;
+        c.weightx = 1;
+        // c.weighty = 0.00001;
         c.gridx = 0;
         c.gridy = GridBagConstraints.RELATIVE;
         //c.weighty = 1.0;
         RecentQuestion recentQ = new RecentQuestion(qa);
         history.add(recentQ, c, 0);
+        // history.add(recentQ, 0);
         // recentQ.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 }
@@ -457,8 +470,8 @@ public class SayIt extends JFrame{
 
     public void changeRecording(){
         if (mainPanel.getIsRec()){
-            mainPanel.stopRecording();
             finishRecording();
+            mainPanel.stopRecording();
         } else {
             recorder.start();
             mainPanel.startRecording();
