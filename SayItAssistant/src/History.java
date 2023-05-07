@@ -11,9 +11,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
 public class History {
-    private static final String QUESTION_FIELD = "Question";
-    private static final String savePath = "saveFiles/history.json";
-    static final String ANSWER_FIELD = "Answer";
+    public static final String QUESTION_FIELD = "Question";
+    public static final String savePath = "saveFiles/history.json";
+    public static final String ANSWER_FIELD = "Answer";
     static JSONObject saveBody;
     //static JSONArray entries;
     static ArrayList<Triplet<Integer,String,String>> entries;

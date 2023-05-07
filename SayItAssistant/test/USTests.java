@@ -1,4 +1,6 @@
 import org.junit.jupiter.api.Test;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,11 +13,15 @@ import javax.swing.JButton;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
 // import static org.junit.Assert.assertEquals;
 // import static org.junit.Assert.assertNotEquals;
 
 import java.io.IOException;
 import java.lang.InterruptedException;
+import java.text.ParseException;
 import java.util.logging.Logger;
 
 // import org.junit.Test;
@@ -86,15 +92,25 @@ class MockRecorder extends JRecorder{
     public void start(){
         if (!isSuccess){
             try {
-                throw new LineUnavailableException("this tests LineUnavailableExeception");
+                throw new LineUnavailableException();
             } catch (LineUnavailableException ex) {
-                ex.printStackTrace();
+                System.out.println("this tests LineUnavailableExeception");
             }
+        } else {
+            super.start();
         }
     }
 
     @Override
-    public void finish(){}
+    public void finish(){
+        if (!isSuccess) {
+            targetLine = null;
+            audioThread = null;
+            super.finish();
+        } else {
+            super.finish();
+        }
+    }
 }
 
 public class USTests {
@@ -150,12 +166,81 @@ public class USTests {
         assertEquals(app.getMainPanel().getQaPanel().getPrefixA() + "Sorry, we didn't quite catch that", app.getMainPanel().getQaPanel().getAnswerText());
     }
 
-    //@Test
-    //public void US1S3Test(){
-        //Given the application is open
-        //and the user has clicked new question
-        //when the user's mic is not connected
-        //then display "Please connect microphone"
-        //and do not record
-    //}
+    /*
+     * Scenario 1:  Saving question and answer
+        Given that the user asks “What is JAVA UI?” and clicked stop
+        When the answer of that question displays
+        Then save the question and answer
+     */
+    @Test
+    public void US3S1Test(){
+        History.initial();
+        History.clear();
+        boolean test = false; 
+        try {
+            Object obj = new JSONParser().parse(new FileReader(History.savePath));
+        } catch (org.json.simple.parser.ParseException e) {
+            test = true;
+        } catch (IOException e) {
+            test = false;
+        }
+        assertTrue(test);
+        String question = "What is Java Ui?";
+        String answer = "Java Ui is a way to display graphical information with Java.";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, question);
+        MockGPT mockGPT = new MockGPT(true, answer);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
+        app.changeRecording();
+        app.changeRecording();
+        JSONObject saveBody = null;
+        try {
+
+            Object obj = new JSONParser().parse(new FileReader(History.savePath));
+            saveBody = (JSONObject) obj;
+        } catch (IOException io) {
+            test = false;
+        } catch (org.json.simple.parser.ParseException e) {
+            test = false;
+        }
+        if (saveBody == null) {
+            test = false;
+        }
+        assertTrue(test);
+        JSONObject entry = (JSONObject)saveBody.get("1");
+        assertEquals(answer, entry.get(History.ANSWER_FIELD));
+    }
+        /*
+        * 
+        Scenario 2: Whisper has error
+        Given that the functionality of whisper produces an error
+        When the user ask “What is JAVA UI?” and stops recording
+        Then application would not save the question and the answer
+        */
+    @Test 
+    public void US3S2Test() {
+        History.initial();
+        History.clear();
+        String question = "What is Java Ui?";
+        String answer = "Java Ui is a way to display graphical information with Java.";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(false, question);
+        MockGPT mockGPT = new MockGPT(true, answer);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
+        app.changeRecording();
+        app.changeRecording();
+        JSONObject saveBody = null;
+        boolean test = false;
+        try {
+
+            Object obj = new JSONParser().parse(new FileReader(History.savePath));
+            saveBody = (JSONObject) obj;
+        } catch (IOException io) {
+            test = false;
+        } catch (org.json.simple.parser.ParseException e) {
+            test = true;
+        }
+        assertTrue(test);
+        assertEquals(null, saveBody);
+    }
 }

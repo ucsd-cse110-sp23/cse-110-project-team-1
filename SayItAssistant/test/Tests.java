@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.Test;
+import org.junit.internal.runners.statements.ExpectException;
 import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -215,7 +216,39 @@ public class Tests {
         tQAPanel.changeQuestion(newQa);
         assertEquals(newQa, tQAPanel.getQuestionAnswer());
     }
+    /**
+     * Recorder tests
+     */
+    @Test 
+    public void testRecorderStart() {
+        MockRecorder recorder = new MockRecorder(true);
+        recorder.start();
+        assertEquals(recorder.audioThread.isAlive(), true);
+    }
+    @Test 
+    public void testRecorderFinish() {
+        MockRecorder recorder = new MockRecorder(true);
+        recorder.start();
+        assertEquals(recorder.audioThread.isAlive(), true);
+        recorder.finish();
+        assertEquals(recorder.audioThread.isAlive(), false);
+    }
+    /**
+     * Whisper tests
+     */
 
+    @Test
+    public void testTranscriptNoFileFound() {
+        JWhisper whisper = new JWhisper();
+        boolean test =false;
+        String badFilePath = "IfThisIsAFilePathIWillLoseIt/record.wav";
+        try {
+            whisper.transcription(badFilePath);
+        } catch (IOException io) {
+            test = true;
+        }
+        assertTrue(test);
+    }
     //testing MainPanel
 
     //testing promptHistory
