@@ -69,10 +69,7 @@ public class JRecorder {
         );
         return format;
     }
-    /**
-     * 
-     * @return true if start successfully, false if line is not available (no microphone)
-     */
+
     public boolean start(){
         try {
             AudioFormat format = audioFormat();                                               //Custom audio Format

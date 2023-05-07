@@ -90,16 +90,17 @@ class MockRecorder extends JRecorder{
 
     @Override
     public boolean start(){
-        return isSuccess;
-        // if (!isSuccess){
-        //     try {
-        //         throw new LineUnavailableException();
-        //     } catch (LineUnavailableException ex) {
-        //         System.out.println("this tests LineUnavailableExeception");
-        //     }
-        // } else {
-        //     super.start();
-        // }
+        // return isSuccess;
+        if (!isSuccess){
+            try {
+                throw new LineUnavailableException();
+            } catch (LineUnavailableException ex) {
+                System.out.println("this tests LineUnavailableExeception");
+                return isSuccess;
+            }
+        } else {
+            return super.start();
+        }
     }
 
     @Override

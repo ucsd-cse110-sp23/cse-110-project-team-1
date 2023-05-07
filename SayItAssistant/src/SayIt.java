@@ -474,6 +474,7 @@ public class SayIt extends JFrame{
             finishRecording();
             mainPanel.stopRecording();
         } else {
+            // recorder.start();
             mainPanel.startRecording();
             if (!recorder.start()){
                 mainPanel.stopRecording();
