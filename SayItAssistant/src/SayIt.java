@@ -307,6 +307,10 @@ class PromptHistory extends JPanel{
         history = new JPanel();
         history.setLayout(new GridBagLayout());
         // history.setLayout(new BoxLayout(history, BoxLayout.Y_AXIS));
+        for (int i = 0; i < 50; i++){
+            addQA(new QuestionAnswer(0,"hello " + i, "great"));
+            addQA(new QuestionAnswer(0,"hello my name is not something you know " + i, "great"));
+        }
     }
 
     public JPanel getHistory(){
@@ -407,7 +411,7 @@ public class SayIt extends JFrame{
         c.gridwidth = 1;
         c.gridx = 0;
         c.weighty = 1.0;
-        c.weightx = 1;
+        c.weightx = 0.25;
         this.add(sideBar, c);
 
         this.mainPanel = new MainPanel();
