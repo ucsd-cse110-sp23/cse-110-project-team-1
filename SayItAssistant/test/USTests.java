@@ -136,7 +136,7 @@ public class USTests {
         app.changeRecording();
         app.changeRecording();
         // when the user's recording cannot be converted to text
-        app.getMainPanel().getQaPanel().changeAnswer(answer);
+        // app.getMainPanel().getQaPanel().changeAnswer(answer);
         // then do not answer the prompt
         // assertNotEquals(app.getMainPanel().getQaPanel().getAnswerText(),
         // app.getMainPanel().getQaPanel().getPrefixA() + answer);

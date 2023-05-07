@@ -43,6 +43,15 @@ class MockChatGPT extends JChatGPT{
 }
 
 public class Tests {
+    //US1T1: Main button for asking question 
+    //UI: CANNOT BE TESTED AUTOMATICALLY
+
+    //US1T2: Error handling for voice-to-text and microphone connection failure
+    //SKIP
+
+    //US1T3: JRecorder class
+
+    //US1T4: JWhisper
 
     // @Test
     // public void UItest() {
