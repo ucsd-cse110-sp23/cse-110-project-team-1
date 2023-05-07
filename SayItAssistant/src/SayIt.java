@@ -178,11 +178,16 @@ class MainPanel extends JPanel{
 
     QAPanel qaPanel;
 
-    JRecorder recorder;
+    // JChatGPT chatGPT;
+    // JWhisper whisper;
+    // JRecorder recorder;
 
     Color gray = new Color(218, 229, 234);
     Color green = new Color(188, 226, 158);
+
+    // JPanel history;
     
+    // JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, JPanel history
     MainPanel(){
         this.setPreferredSize(new Dimension(400, 20)); // set size of task
         this.setBackground(gray); // set background color of task
@@ -195,7 +200,11 @@ class MainPanel extends JPanel{
         recButton = new JButton(startBlurb);
         this.add(recButton, BorderLayout.SOUTH);
 
-        recorder = new JRecorder();
+        // this.chatGPT = chatGPT;
+        // this.whisper = whisper;
+        // this.recorder = recorder;
+        // // recorder = new JRecorder();
+        // this.history = history;
     }
 
     public QAPanel getQaPanel(){
@@ -206,44 +215,72 @@ class MainPanel extends JPanel{
         return recButton;
     }
 
+    public boolean getIsRec(){
+        return isRec;
+    }
     /*
      * Handles finishing recording and displayng to qaPanel 
      */
-    protected void finishRecording() {
-        recorder.finish();
-        String question;
-        String answer;
-        try {
-            question = JWhisper.transcription(null);
-            qaPanel.createQuestion(question,0);
-            answer = JChatGPT.run(question);
-            qaPanel.changeAnswer(answer);
-            History.addEntry(question, answer);
-        } catch( IOException io) {
-            io.printStackTrace();
-            System.out.println("IO exception at Whisper transcription");
-            qaPanel.changeAnswer("Sorry, we didn't quite catch that");
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-            System.out.println("Interupt exception chatGPT");
+    // protected void finishRecording() {
+    //     recorder.finish();
+    //     String question;
+    //     String answer;
+    //     try {
+    //         question = whisper.transcription(null);
+    //         qaPanel.createQuestion(question,0);
+    //         answer = chatGPT.run(question);
+    //         qaPanel.changeAnswer(answer);
+    //         History.addEntry(question, answer);
+    //     } catch( IOException io) {
+    //         io.printStackTrace();
+    //         System.out.println("IO exception at Whisper transcription");
+    //         qaPanel.changeAnswer("Sorry, we didn't quite catch that");
+    //     } catch (InterruptedException ex) {
+    //         ex.printStackTrace();
+    //         System.out.println("Interupt exception chatGPT");
+    //     }
+    // }
+
+
+    public void stopRecording(){
+        recButton.setText(startBlurb);
+        isRec = false;
+    }
+
+    public void startRecording(){
+        recButton.setText(stopBlurb);
+        isRec = true;
+    }
+    // public void changeRecording(){
+    //     if (isRec){
+    //         recButton.setText(startBlurb);
+    //     } else {
+    //         recButton.setText(stopBlurb);
+    //     }
+    //     isRec = !isRec;
+    // }
+}
+
+class RecentQuestion extends JButton{
+    QuestionAnswer questionAnswer;
+    int maxCharLimit = 20;
+    RecentQuestion(QuestionAnswer qa){
+        questionAnswer = qa;
+        if (qa.getQuestion().length() > maxCharLimit){
+            this.setText(qa.getQuestion().substring(0, maxCharLimit) + "...");
+        } else {
+            this.setText(qa.getQuestion());
         }
     }
 
-    public void changeRecording(){
-        if (isRec){
-            recButton.setText(startBlurb);
-            finishRecording();
-        } else {
-            recButton.setText(stopBlurb);
-            recorder.start();
-        }
-        isRec = !isRec;
+    QuestionAnswer getQuestionAnswer(){
+        return questionAnswer;
     }
 }
 
 class PromptHistory extends JPanel{
     JLabel title;
-    JList<String> history;
+    JPanel history;
     JScrollPane histPane;
     //TODO: switch out list for actual button with Question ID'S
     PromptHistory(){
@@ -252,17 +289,43 @@ class PromptHistory extends JPanel{
         title = new JLabel("Prompt History");
         this.add(title, BorderLayout.NORTH);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         loadHist(); //update list
         histPane = new JScrollPane(history);
+        //TODO: figure out how to get ScrollPane to not collapse when the width becomes too large
+        //right now am using 200 arbitrarily.
+        histPane.setMinimumSize(new Dimension(200, HEIGHT));
+        histPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        histPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         this.add(histPane, BorderLayout.CENTER);
         histPane.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
     public void loadHist(){
         //TODO: implement loading history into list
-        String[] example = {"apple", "banana", "truffle", "death", "lasdjf askdjfasdjfagh woeg hiseroignsofjasdkjf kasda"};
-        history = new JList<String>(example);
+        // String[] example = {"apple", "banana", "truffle", "death", "lasdjf askdjfasdjfagh woeg hiseroignsofjasdkjf kasda"};
+        // history = new JList<String>(example);
+        history = new JPanel();
+        history.setLayout(new GridBagLayout());
+        // history.setLayout(new BoxLayout(history, BoxLayout.Y_AXIS));
+        for (int i = 0; i < 50; i++){
+            addQA(new QuestionAnswer(0,"hello " + i, "great"));
+            addQA(new QuestionAnswer(0,"hello my name is not something you know " + i, "great"));
+        }
+    }
+
+    public JPanel getHistory(){
+        return history;
+    }
+
+    public void addQA(QuestionAnswer qa){
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 0;
+        c.gridy = GridBagConstraints.RELATIVE;
+        //c.weighty = 1.0;
+        RecentQuestion recentQ = new RecentQuestion(qa);
+        history.add(recentQ, c, 0);
+        // recentQ.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 }
 
@@ -290,6 +353,10 @@ class SideBar extends JPanel{
         History.clear();
         //TODO: implement clearing history
     }
+
+    public PromptHistory getPromptHistory(){
+        return promptHistory;
+    }
 }
 
 // the main app
@@ -303,6 +370,10 @@ public class SayIt extends JFrame{
 
     boolean shouldFill = true;
 
+    JChatGPT chatGPT;
+    JWhisper whisper;
+    JRecorder recorder;
+
     public MainPanel getMainPanel(){
         return mainPanel;
     }
@@ -311,11 +382,13 @@ public class SayIt extends JFrame{
         return sideBar;
     }
 
+    // new MainPanel(new JChatGPT(), new JWhisper(), new JRecorder())
     public static void main(String[] args){
-        new SayIt();
+        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder());
     }
 
-    public SayIt() {
+    // MainPanel mainPanel
+    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder) {
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
@@ -329,6 +402,10 @@ public class SayIt extends JFrame{
                         c.fill = GridBagConstraints.HORIZONTAL;
         }
 
+        this.chatGPT = chatGPT;
+        this.whisper = whisper;
+        this.recorder = recorder;
+
         sideBar = new SideBar();
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = 1;
@@ -337,7 +414,8 @@ public class SayIt extends JFrame{
         c.weightx = 0.25;
         this.add(sideBar, c);
 
-        mainPanel = new MainPanel();
+        this.mainPanel = new MainPanel();
+        //TODO: might change so that SayIt() doesn't need mainpanel passed in
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = 4;
         c.gridx = 1;
@@ -355,12 +433,44 @@ public class SayIt extends JFrame{
         History.initial();
     }
 
+    private void finishRecording() {
+        recorder.finish();
+        String question;
+        String answer;
+        QAPanel qaPanel = mainPanel.getQaPanel();
+        try {
+            question = whisper.transcription(null);
+            qaPanel.createQuestion(question,0);
+            answer = chatGPT.run(question);
+            qaPanel.changeAnswer(answer);
+            getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+            History.addEntry(question, answer);
+        } catch( IOException io) {
+            io.printStackTrace();
+            System.out.println("IO exception at Whisper transcription");
+            qaPanel.changeAnswer("Sorry, we didn't quite catch that");
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            System.out.println("Interupt exception chatGPT");
+        }
+    }
+
+    public void changeRecording(){
+        if (mainPanel.getIsRec()){
+            mainPanel.stopRecording();
+            finishRecording();
+        } else {
+            recorder.start();
+            mainPanel.startRecording();
+        }
+    }
+
     public void addListeners() {
         recButton.addActionListener(
         new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mainPanel.changeRecording();
+                changeRecording();
             }
         }
         );
