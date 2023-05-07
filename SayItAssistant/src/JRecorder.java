@@ -70,7 +70,7 @@ public class JRecorder {
         return format;
     }
 
-    public void start() {
+    public boolean start(){
         try {
             AudioFormat format = audioFormat();                                               //Custom audio Format
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);   //DataLine is a handy class that describes lines and formats
@@ -93,8 +93,10 @@ public class JRecorder {
             //audio thread since AudioSystem.write will halt all operations after it
             audioThread = new Thread(audioRunnable);
             audioThread.start();
+            return true;
         } catch (LineUnavailableException ex) {
             ex.printStackTrace();
+            return false;
         }
     }
 
