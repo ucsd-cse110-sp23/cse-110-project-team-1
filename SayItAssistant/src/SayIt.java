@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 
+import javax.sound.sampled.LineUnavailableException;
 // import javax.management.Query;
 // import javax.sound.sampled.*;
 import javax.swing.*;
@@ -473,8 +474,11 @@ public class SayIt extends JFrame{
             finishRecording();
             mainPanel.stopRecording();
         } else {
-            recorder.start();
             mainPanel.startRecording();
+            if (!recorder.start()){
+                mainPanel.stopRecording();
+                mainPanel.getQaPanel().changeAnswer("Please connect microphone");
+            }
         }
     }
 
