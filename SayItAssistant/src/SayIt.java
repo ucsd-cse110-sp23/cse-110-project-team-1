@@ -94,7 +94,7 @@ class QAPanel extends JPanel{
 
     /**
      * Creates new panel where the question and answer are displayed
-     * @param questionAnswer pass in the QuestionAnswer of the question and answer to be displayed (null if no question asked)
+     * @param questionAnswer pass in the QuestionAnswer of the question and answer to be displayed (-1 qID and null question and answer if no question asked)
      */
     QAPanel(QuestionAnswer questionAnswer){
         setLayout(new GridLayout(2, 1));
@@ -218,7 +218,7 @@ class QAPanel extends JPanel{
      * sets the displayed QuestionAnswer to null and clears the display for the question and answer
      */
     public void clearDisplay(){
-        changeQuestion(null);
+        changeQuestion(new QuestionAnswer());
     }
 
     /**
@@ -269,7 +269,7 @@ class MainPanel extends JPanel{
         this.setLayout(new BorderLayout()); // set layout of task
 
         //Currently sets the Question Answer panel to display no question or answer upon the main panel being set up
-        qaPanel = new QAPanel(null);
+        qaPanel = new QAPanel(new QuestionAnswer());
         this.add(qaPanel, BorderLayout.CENTER);
 
         recButton = new JButton(startBlurb);
@@ -522,6 +522,7 @@ public class SayIt extends JFrame{
 
         addListeners();
 
+        //TODO: save the array list of tuples and use it to load prompt history
         History.initial();
     }
 

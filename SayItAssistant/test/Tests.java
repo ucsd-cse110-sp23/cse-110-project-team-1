@@ -218,7 +218,8 @@ public class Tests {
         QuestionAnswer qa = new QuestionAnswer(1, "good morning?", "good evening");
         QAPanel tQAPanel = new QAPanel(qa);
         tQAPanel.clearDisplay();
-        assertEquals(null, tQAPanel.getQuestionAnswer());
+        assertNotEquals(qa, tQAPanel.getQuestionAnswer());
+        assertEquals(-1, tQAPanel.getQuestionID());
         assertEquals(tQAPanel.getPrefixQ(), tQAPanel.getQuestionText());
         assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
     }
@@ -289,10 +290,12 @@ public class Tests {
         assertEquals(false, mp.getIsRec());
     }
 
-    /**
-     * SayIt tests
-     */
 
+
+
+    /**
+     * SayIt tests 
+     */
 
     /**
      * Recorder tests
