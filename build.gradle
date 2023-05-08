@@ -31,20 +31,7 @@ dependencies {
 }
 
 sourceSets {
-    main{
-        java {
-            srcDirs = ["SayItAssistant/src"]
-        }
-    }
     test{
-        java {
-            srcDirs = ["SayItAssistant/test"]
-        }
-    }
-}
-
-sourceSets {
-    test {
         java {
             srcDirs = ['test']
         }
