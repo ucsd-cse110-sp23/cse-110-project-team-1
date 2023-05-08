@@ -33,6 +33,9 @@ jobs:
       # build everything (includes running unit tests)
       - name: Execute Gradle build
         run: ./gradlew build
+        
+      - name: Test with JUnit
+        run: ./gradlew test --tests SayItAssistant.test.Tests
 
       # report the results
       - name: Publish Test Report
