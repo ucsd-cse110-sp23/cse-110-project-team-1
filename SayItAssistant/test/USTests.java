@@ -95,7 +95,7 @@ class MockRecorder extends JRecorder{
             try {
                 throw new LineUnavailableException();
             } catch (LineUnavailableException ex) {
-                System.out.println("this tests LineUnavailableExeception :)");
+                System.out.println("this tests LineUnavailableExeception");
                 return isSuccess;
             }
         } else {
@@ -146,7 +146,7 @@ public class USTests {
         // assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
         // app.getMainPanel().getQaPanel().getPrefixA());
         //And displays the answer to the question when it is generated
-        app.getMainPanel().getQaPanel().changeAnswer(answer);
+        //app.getMainPanel().getQaPanel().changeAnswer(answer);
         assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
         app.getMainPanel().getQaPanel().getPrefixA() + answer);
     }
