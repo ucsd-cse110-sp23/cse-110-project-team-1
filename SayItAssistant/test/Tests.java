@@ -34,7 +34,7 @@ public class Tests {
         QuestionAnswer qa = new QuestionAnswer();
         int newqID = 12;
         qa.setqID(newqID);
-        assertEquals(newqID+1, qa.getqID());
+        assertEquals(newqID, qa.getqID());
     }    
 
     @Test
