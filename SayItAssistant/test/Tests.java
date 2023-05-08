@@ -20,6 +20,8 @@ import java.util.logging.Logger;
 // import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.awt.*;
+
 
 public class Tests {
     //UNITTESTS
@@ -290,8 +292,38 @@ public class Tests {
         assertEquals(false, mp.getIsRec());
     }
 
+    /**
+     * PromptHistory tests
+     */
+    @Test
+    public void testdisplayAskedQinBar(){
+        PromptHistory ph = new PromptHistory();
+        String question = "question?";
+        QuestionAnswer qa = new QuestionAnswer(1, question, "answer?");
+        ph.addQA(qa);
+        Component listItem = ph.getHistory().getComponent(0);
+        assertEquals(question, ((RecentQuestion) listItem).getText());
+        // for (int i = 0; i < listItems.length; i++) {
+        //   if (listItems[i] instanceof RecentQuestion) {
+        //     assertEquals(question, ((RecentQuestion) listItems[i]).getText());
+        //   }
+        // }
+    }
 
-
+    @Test
+    public void testArrangebyMostRecent(){
+        PromptHistory ph = new PromptHistory();
+        String question1 = "question1?";
+        String question2 = "question2?";
+        QuestionAnswer qa1 = new QuestionAnswer(1, question1, "answer?");
+        ph.addQA(qa1);
+        QuestionAnswer qa2 = new QuestionAnswer(2, question2, "answer?");
+        ph.addQA(qa2);
+        Component listItem2 = ph.getHistory().getComponent(0);
+        assertEquals(question2, ((RecentQuestion) listItem2).getText());
+        Component listItem1 = ph.getHistory().getComponent(1);
+        assertEquals(question1, ((RecentQuestion) listItem1).getText());
+    }
 
     /**
      * SayIt tests 
