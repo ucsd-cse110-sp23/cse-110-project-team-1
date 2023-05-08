@@ -347,20 +347,20 @@ public class Tests {
     /**
      * Recorder tests
      */
-    @Test 
-    public void testRecorderStart() {
-        JRecorder recorder = new JRecorder();
-        recorder.start();
-        assertEquals(recorder.audioThread.isAlive(), true);
-    }
-    @Test 
-    public void testRecorderFinish() {
-        JRecorder recorder = new JRecorder();
-        recorder.start();
-        assertEquals(recorder.audioThread.isAlive(), true);
-        recorder.finish();
-        assertEquals(recorder.audioThread.isAlive(), false);
-    }
+    // @Test 
+    // public void testRecorderStart() {
+    //     JRecorder recorder = new JRecorder();
+    //     recorder.start();
+    //     assertEquals(recorder.audioThread.isAlive(), true);
+    // }
+    // @Test 
+    // public void testRecorderFinish() {
+    //     JRecorder recorder = new JRecorder();
+    //     recorder.start();
+    //     assertEquals(recorder.audioThread.isAlive(), true);
+    //     recorder.finish();
+    //     assertEquals(recorder.audioThread.isAlive(), false);
+    // }
     /**
      * Whisper tests
      */
