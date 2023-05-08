@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Tests" tests="34" skipped="0" failures="0" errors="0" timestamp="2023-05-08T05:23:01" hostname="DESKTOP-A2O7FLT" time="1.312">
+  <properties/>
+  <testcase name="testQAPanelnullQA()" classname="Tests" time="0.393"/>
+  <testcase name="testdisplayAskedQConcat()" classname="Tests" time="0.016"/>
+  <testcase name="testQuestionAnswergetQuestionChange()" classname="Tests" time="0.0"/>
+  <testcase name="testRecorderFinish()" classname="Tests" time="0.232"/>
+  <testcase name="testQAPanelcreateQuestion()" classname="Tests" time="0.005"/>
+  <testcase name="testTranscriptNoFileFound()" classname="Tests" time="0.517"/>
+  <testcase name="testQAPanelclearDisplay()" classname="Tests" time="0.003"/>
+  <testcase name="testdisplayAskedQinBar()" classname="Tests" time="0.002"/>
+  <testcase name="testQAPanel()" classname="Tests" time="0.004"/>
+  <testcase name="testMainPanelStopRecSpam()" classname="Tests" time="0.004"/>
+  <testcase name="testQuestionAnswergetID()" classname="Tests" time="0.0"/>
+  <testcase name="testQAPanelupdateDisplay()" classname="Tests" time="0.005"/>
+  <testcase name="testQuestionAnswersetQuestion()" classname="Tests" time="0.001"/>
+  <testcase name="testQuestionAnswergetQuestion()" classname="Tests" time="0.0"/>
+  <testcase name="testMainPanelStartRec()" classname="Tests" time="0.007"/>
+  <testcase name="testQuestionAnswersetqIDChange()" classname="Tests" time="0.001"/>
+  <testcase name="testQuestionAnswergetAnswerChange()" classname="Tests" time="0.001"/>
+  <testcase name="testMainPanelStopRec()" classname="Tests" time="0.003"/>
+  <testcase name="testQuestionAnswersetqID()" classname="Tests" time="0.0"/>
+  <testcase name="testMainPanel()" classname="Tests" time="0.004"/>
+  <testcase name="testQuestionAnswersetAnswer()" classname="Tests" time="0.0"/>
+  <testcase name="testQuestionAnswergetAnswer()" classname="Tests" time="0.0"/>
+  <testcase name="testQAPanelchangeAnswer()" classname="Tests" time="0.003"/>
+  <testcase name="testQuestionAnswersetAnswerChange()" classname="Tests" time="0.0"/>
+  <testcase name="testQAPanelnullA()" classname="Tests" time="0.001"/>
+  <testcase name="testQAPanelnullQ()" classname="Tests" time="0.002"/>
+  <testcase name="testMainPanelStartRecSpam()" classname="Tests" time="0.002"/>
+  <testcase name="testQuestionAnswergetIDChange()" classname="Tests" time="0.0"/>
+  <testcase name="testQAPanelclearAnswer()" classname="Tests" time="0.001"/>
+  <testcase name="testArrangebyMostRecent()" classname="Tests" time="0.004"/>
+  <testcase name="testMainPanelStopRecOnStart()" classname="Tests" time="0.002"/>
+  <testcase name="testQAPanelchangeQuestion()" classname="Tests" time="0.002"/>
+  <testcase name="testQuestionAnswersetQuestionChange()" classname="Tests" time="0.0"/>
+  <testcase name="testRecorderStart()" classname="Tests" time="0.083"/>
+  <system-out><![CDATA[Starting Capturing...
+Finished Recording
+Starting Capturing...
+Starting Recording...
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
