@@ -95,7 +95,7 @@ class MockRecorder extends JRecorder{
             try {
                 throw new LineUnavailableException();
             } catch (LineUnavailableException ex) {
-                System.out.println("this tests LineUnavailableExeception");
+                System.out.println("this tests LineUnavailableExeception :)");
                 return isSuccess;
             }
         } else {

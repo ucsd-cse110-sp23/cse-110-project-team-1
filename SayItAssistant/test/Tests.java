@@ -317,7 +317,7 @@ public class Tests {
         QuestionAnswer qa = new QuestionAnswer(1, question, "answer?");
         ph.addQA(qa);
         Component listItem = ph.getHistory().getComponent(0);
-        assertNotEquals(question.substring(0, 20) + "...", ((RecentQuestion) listItem).getText());
+        assertEquals(question.substring(0, 20) + "...", ((RecentQuestion) listItem).getText());
         // for (int i = 0; i < listItems.length; i++) {
         //   if (listItems[i] instanceof RecentQuestion) {
         //     assertEquals(question, ((RecentQuestion) listItems[i]).getText());
