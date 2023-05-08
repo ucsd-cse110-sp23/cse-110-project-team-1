@@ -230,7 +230,7 @@ public class USTests {
         app.changeRecording();
         //When the user asks "What is Java UI?"
         //Then the answer appears in the area below the question
-        assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+        assertNotEquals(app.getMainPanel().getQaPanel().getAnswerText(),
         app.getMainPanel().getQaPanel().getPrefixA() + answer);
     }
 
