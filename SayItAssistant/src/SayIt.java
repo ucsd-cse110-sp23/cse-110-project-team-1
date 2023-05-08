@@ -165,6 +165,7 @@ class QAPanel extends JPanel{
 
     /**
      * change the answer of the QuestionAnswer being displayed on the QAPanel
+     * If qaPrompt is currently null, then it creates a new QuestionAnswer of null question and -1 qID
      * @param newAnswer the answer to set the displayed QuestionAnswer's answer to
      */
     public void changeAnswer(String newAnswer){
