@@ -73,4 +73,3 @@ public class JChatGPT{
     }
 }
 
-//hello

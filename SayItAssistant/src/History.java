@@ -187,5 +187,3 @@ public class History {
         History.removeEntry(5);
     }
 }
-
-//hello
