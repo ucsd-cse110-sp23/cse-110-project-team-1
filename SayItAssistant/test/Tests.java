@@ -311,6 +311,21 @@ public class Tests {
     }
 
     @Test
+    public void testdisplayAskedQConcat(){
+        PromptHistory ph = new PromptHistory();
+        String question = "long long long long long long long long long long question?";
+        QuestionAnswer qa = new QuestionAnswer(1, question, "answer?");
+        ph.addQA(qa);
+        Component listItem = ph.getHistory().getComponent(0);
+        assertEquals(question.substring(0, 20) + "...", ((RecentQuestion) listItem).getText());
+        // for (int i = 0; i < listItems.length; i++) {
+        //   if (listItems[i] instanceof RecentQuestion) {
+        //     assertEquals(question, ((RecentQuestion) listItems[i]).getText());
+        //   }
+        // }
+    }
+
+    @Test
     public void testArrangebyMostRecent(){
         PromptHistory ph = new PromptHistory();
         String question1 = "question1?";
