@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.internal.runners.statements.ExpectException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
