@@ -21,82 +21,8 @@ import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 
 
-// Mock ChatGPT returns strings given prompts (feels useless)
-class MockChatGPT extends JChatGPT{
-
-    static String mockRun(String transcription) {
-        if (transcription.equals("What is the smallest city in the world?")) {
-            return "The smallest city in the world is Hum, Croatia. It covers a mere 27 square metres and has a population of just 23 people.";
-        }
-        else {
-            return "Not accepted answer";
-        }
-    }
-
-    static String mockRunMicFailure(String transcription, boolean micFailure) {
-        if (transcription.equals("What is the smallest city in the world?") && micFailure == true) {
-            return "Sorry something is not working...";
-        }
-        else {
-            return "Question accepted";
-        }
-    }
-}
-
 public class Tests {
-    //US1T1: Main button for asking question 
-    //UI: CANNOT BE TESTED AUTOMATICALLY
-
-    //US1T2: Error handling for voice-to-text and microphone connection failure
-    //SKIP
-
-    //US1T3: JRecorder class
-
-    //US1T4: JWhisper
-
-    // @Test
-    // public void UItest() {
-    //     new SayIt();
-    // }
-
-    @Test
-    public void ChatGPTtestRight() {
-        String prompt = "What is the smallest city in the world?";
-        String testAnswer = "The smallest city in the world is Hum, Croatia. It covers a mere 27 square metres and has a population of just 23 people.";
-        String mockAnswer = MockChatGPT.mockRun(prompt);
-        assertEquals(testAnswer, mockAnswer);
-    }
-
-    @Test
-    public void ChatGPTtestWrong() {
-        String prompt = "What is Java UI?";
-        String testAnswer = "Not accepted answer";
-        String mockAnswer = MockChatGPT.mockRun(prompt);
-        assertEquals(testAnswer, mockAnswer);
-    }
-
-    @Test
-    public void ChatGPTtestMicFailure() {
-        String prompt = "What is the smallest city in the world?";
-        Boolean micFailure = true;
-        String testAnswer = "Sorry something is not working...";
-        String mockAnswer = MockChatGPT.mockRunMicFailure(prompt, micFailure);
-        assertEquals(testAnswer, mockAnswer);
-    }
-
-   
-    @Test
-    public void ChatGPTtestMicGood() {
-        String prompt = "What is the smallest city in the world?";
-        Boolean micFailure = false;
-    String testAnswer = "Question accepted";
-        String mockAnswer = MockChatGPT.mockRunMicFailure(prompt, micFailure);
-        assertEquals(testAnswer, mockAnswer);
-    }
-
     //UNITTESTS
-
-    //SayIt.java
     /**
      * QuestionAnswer Tests
      */
@@ -199,6 +125,48 @@ public class Tests {
      * QAPanel
      */
     @Test
+    public void testQAPanel(){
+        String question = "good morn";
+        String answer = "for an old";
+        QuestionAnswer qa = new QuestionAnswer(100, question, answer);
+        QAPanel tQAPanel = new QAPanel(qa);
+        assertEquals(qa, tQAPanel.getQuestionAnswer());
+        assertEquals(tQAPanel.getPrefixQ() + question, tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA() + answer, tQAPanel.getAnswerText());
+    }
+
+    @Test
+    public void testQAPanelnullQA(){
+        QAPanel tQAPanel = new QAPanel(null);
+        assertEquals(null, tQAPanel.getQuestionAnswer());
+        assertEquals(tQAPanel.getPrefixQ(), tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
+    }
+
+
+    @Test
+    public void testQAPanelnullQ(){
+        String question = null;
+        String answer = "for an old";
+        QuestionAnswer qa = new QuestionAnswer(100, question, answer);
+        QAPanel tQAPanel = new QAPanel(qa);
+        assertEquals(qa, tQAPanel.getQuestionAnswer());
+        assertEquals(tQAPanel.getPrefixQ(), tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA() + answer, tQAPanel.getAnswerText());
+    }
+
+    @Test
+    public void testQAPanelnullA(){
+        String question = "good morn";
+        String answer = null;
+        QuestionAnswer qa = new QuestionAnswer(100, question, answer);
+        QAPanel tQAPanel = new QAPanel(qa);
+        assertEquals(qa, tQAPanel.getQuestionAnswer());
+        assertEquals(tQAPanel.getPrefixQ() + question, tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
+    }
+
+    @Test
     public void testQAPanelcreateQuestion(){
         QuestionAnswer qa = new QuestionAnswer();
         QAPanel tQAPanel = new QAPanel(qa);
@@ -206,6 +174,8 @@ public class Tests {
         tQAPanel.createQuestion(newQuestion, 1);
         assertEquals(newQuestion, tQAPanel.getQuestion());
         assertNotEquals(qa, tQAPanel.getQuestionAnswer());
+        assertEquals(tQAPanel.getPrefixQ() + newQuestion, tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
     }
     
     @Test
@@ -215,19 +185,128 @@ public class Tests {
         QAPanel tQAPanel = new QAPanel(qa);
         tQAPanel.changeQuestion(newQa);
         assertEquals(newQa, tQAPanel.getQuestionAnswer());
+        assertEquals(tQAPanel.getPrefixQ() + newQa.getQuestion(), tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA() + newQa.getAnswer(), tQAPanel.getAnswerText());
     }
+
+    @Test
+    public void testQAPanelchangeAnswer(){
+        String oldQuestion = "good morning?";
+        QuestionAnswer qa = new QuestionAnswer(1, oldQuestion, "good evening");
+        QAPanel tQAPanel = new QAPanel(qa);
+        String newAnswer = "not a good morning";
+        tQAPanel.changeAnswer(newAnswer);
+        assertEquals(qa, tQAPanel.getQuestionAnswer());
+        assertEquals(newAnswer, tQAPanel.getAnswer());
+        assertEquals(tQAPanel.getPrefixQ() + oldQuestion, tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA() + newAnswer, tQAPanel.getAnswerText());
+    }
+
+    @Test
+    public void testQAPanelclearAnswer(){
+        QuestionAnswer qa = new QuestionAnswer(1, "good morning?", "good evening");
+        QAPanel tQAPanel = new QAPanel(qa);
+        tQAPanel.clearAnswer();
+        assertEquals(qa, tQAPanel.getQuestionAnswer());
+        assertEquals(null, tQAPanel.getAnswer());
+        assertEquals(tQAPanel.getPrefixQ() + qa.getQuestion(), tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
+    }
+
+    @Test
+    public void testQAPanelclearDisplay(){
+        QuestionAnswer qa = new QuestionAnswer(1, "good morning?", "good evening");
+        QAPanel tQAPanel = new QAPanel(qa);
+        tQAPanel.clearDisplay();
+        assertEquals(null, tQAPanel.getQuestionAnswer());
+        assertEquals(tQAPanel.getPrefixQ(), tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
+    }
+
+    @Test
+    public void testQAPanelupdateDisplay(){
+        QuestionAnswer qa = new QuestionAnswer(1, "", "good evening");
+        QAPanel tQAPanel = new QAPanel(qa);
+        String nAnswer = "changed answer";
+        tQAPanel.getQuestionAnswer().setAnswer(nAnswer);
+        tQAPanel.updateDisplay();
+        assertEquals(tQAPanel.getPrefixA() + nAnswer, tQAPanel.getAnswerText());
+    }
+
+    /**
+     * Main Panel tests
+     */
+
+    @Test
+    public void testMainPanel(){
+        MainPanel mp = new MainPanel();
+        assertEquals(mp.getQaPanel().getPrefixQ(), mp.getQaPanel().getQuestionText());
+        assertEquals(mp.getQaPanel().getPrefixA(), mp.getQaPanel().getAnswerText());
+        assertEquals(mp.getRecStartBlurb(), mp.getRecButton().getText());
+        assertEquals(false, mp.getIsRec());
+    }
+
+    @Test
+    public void testMainPanelStartRec(){
+        MainPanel mp = new MainPanel();
+        mp.startRecording();
+        assertEquals(mp.getRecStopBlurb(), mp.getRecButton().getText());
+        assertEquals(true, mp.getIsRec());
+    }
+
+    @Test
+    public void testMainPanelStartRecSpam(){
+        MainPanel mp = new MainPanel();
+        mp.startRecording();
+        mp.startRecording();
+        assertEquals(mp.getRecStopBlurb(), mp.getRecButton().getText());
+        assertEquals(true, mp.getIsRec());
+    }
+
+    @Test
+    public void testMainPanelStopRec(){
+        MainPanel mp = new MainPanel();
+        mp.startRecording();
+        mp.stopRecording();
+        assertEquals(mp.getRecStartBlurb(), mp.getRecButton().getText());
+        assertEquals(false, mp.getIsRec());
+    }
+
+    @Test
+    public void testMainPanelStopRecOnStart(){
+        MainPanel mp = new MainPanel();
+        mp.stopRecording();
+        assertEquals(mp.getRecStartBlurb(), mp.getRecButton().getText());
+        assertEquals(false, mp.getIsRec());
+    }
+
+    @Test
+    public void testMainPanelStopRecSpam(){
+        MainPanel mp = new MainPanel();
+        mp.stopRecording();
+        mp.stopRecording();
+        assertEquals(mp.getRecStartBlurb(), mp.getRecButton().getText());
+        assertEquals(false, mp.getIsRec());
+    }
+
+    /**
+     * SayIt tests
+     */
+
+
+
     /**
      * Recorder tests
      */
     @Test 
     public void testRecorderStart() {
-        MockRecorder recorder = new MockRecorder(true);
+        JRecorder recorder = new JRecorder();
         recorder.start();
         assertEquals(recorder.audioThread.isAlive(), true);
     }
     @Test 
     public void testRecorderFinish() {
-        MockRecorder recorder = new MockRecorder(true);
+        JRecorder recorder = new JRecorder();
         recorder.start();
         assertEquals(recorder.audioThread.isAlive(), true);
         recorder.finish();
@@ -249,12 +328,5 @@ public class Tests {
         }
         assertTrue(test);
     }
-    //testing MainPanel
-
-    //testing promptHistory
-
-    //testing SideBar
-
-    //testing SayIt
 
 }
