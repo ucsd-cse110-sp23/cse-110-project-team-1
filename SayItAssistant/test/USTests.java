@@ -99,7 +99,7 @@ class MockRecorder extends JRecorder{
                 return isSuccess;
             }
         } else {
-            return super.start();
+            return isSuccess;
         }
     }
 
