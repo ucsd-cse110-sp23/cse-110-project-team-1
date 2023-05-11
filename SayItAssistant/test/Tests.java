@@ -387,10 +387,10 @@ public class Tests {
      */
     @Test
     public void testInitializeNoFileFound() {
-        String filePath = "SayitAssistant/saveFiles/tempHistory.json";
+        String filePath = "SayitAssistant/saveFiles/tempHistoryNoFile.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
-            tempHistory.delete();
+            assertTrue(tempHistory.delete());
         }
         History.initial(filePath);
         assertTrue(tempHistory.exists());
@@ -430,10 +430,10 @@ public class Tests {
 
     @Test
     public void testAddEntry() {
-        String filePath = "SayitAssistant/saveFiles/tempHistory.json";
+        String filePath = "/SayitAssistant/saveFiles/tempHistory.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
-            tempHistory.delete();
+            assertTrue(tempHistory.delete());
         }
         ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
         assertEquals(0, entries.size());
@@ -450,10 +450,10 @@ public class Tests {
     }
     @Test
     public void testRemoveEntriesBackwards(){
-        String filePath = "SayitAssistant/saveFiles/tempHistoryRemove.json";
+        String filePath = "SayitAssistant/saveFiles/tempHistoryRemoveBackwards.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
-            tempHistory.delete();
+            assertTrue(tempHistory.delete());
         }
         ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
         assertEquals(0, entries.size());
@@ -469,25 +469,25 @@ public class Tests {
         }
 
         assertEquals(10, entries.size());
-        for (int i = 10; i > 1; i--) {
-            History.removeEntry(i);
+        for (int i = 10; i > 1; i--) { 
             entries = History.initial(filePath);
-            assertEquals(i-1, entries.size());
-            assertEquals(i-1, entries.get(i-2).getValue0());
-            assertEquals(question, entries.get(i-2).getValue1());
-            assertEquals(answer, entries.get(i-2).getValue2());
+            assertEquals(i, entries.size());
+            assertEquals(i, entries.get(i-1).getValue0());
+            assertEquals(question, entries.get(i-1).getValue1());
+            assertEquals(answer, entries.get(i-1).getValue2());
+            History.removeEntry(i);
         }
-
+        //remove nothing
         History.removeEntry(1);
         assertEquals(0, entries.size());
     }
 
     @Test
     public void testRemoveEntryForwards(){
-        String filePath = "SayitAssistant/saveFiles/tempHistoryRemove.json";
+        String filePath = "/SayitAssistant/saveFiles/tempHistoryRemove.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
-            tempHistory.delete();
+            assertTrue(tempHistory.delete());
         }
         ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
         assertEquals(0, entries.size());
@@ -506,12 +506,12 @@ public class Tests {
         int savedSize = entries.size();
 
         for (int i = 1; i < 10; i++) {
-            History.removeEntry(i);
             entries = History.initial(filePath);
-            assertEquals(savedSize - i, entries.size());
-            assertEquals(i+1, entries.get(0).getValue0());
+            assertEquals(i, entries.get(0).getValue0());
             assertEquals(question, entries.get(0).getValue1());
             assertEquals(answer, entries.get(0).getValue2());
+            History.removeEntry(i);
+            assertEquals(savedSize - i, entries.size());
         }
 
         History.removeEntry(savedSize);
@@ -525,7 +525,7 @@ public class Tests {
         String filePath = "SayitAssistant/saveFiles/tempHistoryRemove.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
-            tempHistory.delete();
+            assertTrue(tempHistory.delete());
         }
         ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
         assertEquals(0, entries.size());
