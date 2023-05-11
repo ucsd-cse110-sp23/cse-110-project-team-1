@@ -1,15 +1,10 @@
 import org.junit.jupiter.api.Test;
-import org.junit.internal.runners.statements.ExpectException;
-import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import javax.swing.JButton;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.javatuples.Triplet;
 
 import java.io.File;
@@ -19,10 +14,6 @@ import java.io.File;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
-
-// import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 
 import java.awt.*;
 
@@ -344,6 +335,26 @@ public class Tests {
         assertEquals(question1, ((RecentQuestion) listItem1).getText());
     }
 
+     @Test
+    public void testPromptHistoryLoad(){
+        SayIt app = new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), "saveFiles/testingFiles/historyTestingSave.json");
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        //assertEquals(3, ph.getComponentCount());
+        String question1 = "Hey Alexa, what happened to Meta?";
+        question1 = question1.substring(0, 20) + "...";
+        String question2 = "Hey Siri, do you know the top 10 Japanese pop songs today?";
+        question2 = question2.substring(0, 20) + "...";
+        String question3 = "Hey Google, what is Japanese pop?";
+        question3 = question3.substring(0, 20) + "...";
+        Component listItem3 = ph.getHistory().getComponent(0);
+        assertEquals(question1, ((RecentQuestion) listItem3).getText());
+        Component listItem2 = ph.getHistory().getComponent(1);
+        assertEquals(question2, ((RecentQuestion) listItem2).getText());
+        Component listItem1 = ph.getHistory().getComponent(2);
+        assertEquals(question3, ((RecentQuestion) listItem1).getText()); 
+        
+    } 
+
     /**
      * SayIt tests 
      */
@@ -387,7 +398,7 @@ public class Tests {
      */
     @Test
     public void testInitializeNoFileFound() {
-        String filePath = "saveFiles/tempHistoryNoFile.json";
+        String filePath = "saveFiles/testingFiles/tempHistoryNoFile.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
@@ -396,10 +407,12 @@ public class Tests {
         assertTrue(tempHistory.exists());
         assertTrue(History.saveBody.isEmpty());
     }
-
+    /*
+     * Dont delete the historyTestingSave
+     */
     @Test
     public void testInitializeFileFound() {
-        String filePath = "saveFiles/historyTestingSave.json";
+        String filePath = "saveFiles/testingFiles/historyTestingSave.json";
         File save = new File(filePath);
         assertTrue(save.exists());
         ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
@@ -430,7 +443,7 @@ public class Tests {
 
     @Test
     public void testAddEntry() {
-        String filePath = "saveFiles/tempHistory.json";
+        String filePath = "saveFiles/testingFiles/tempHistory.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
@@ -450,7 +463,7 @@ public class Tests {
     }
     @Test
     public void testRemoveEntriesBackwards(){
-        String filePath = "saveFiles/tempHistoryRemoveBackwards.json";
+        String filePath = "saveFiles/testingFiles/tempHistoryRemoveBackwards.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
@@ -484,7 +497,7 @@ public class Tests {
 
     @Test
     public void testRemoveEntryForwards(){
-        String filePath = "saveFiles/tempHistoryRemoveForward.json";
+        String filePath = "saveFiles/testingFiles/tempHistoryRemoveForward.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
@@ -516,13 +529,11 @@ public class Tests {
 
         History.removeEntry(savedSize);
         assertEquals(0, entries.size());
-
-        
     }
 
     @Test
     public void testHistoryClear(){
-        String filePath = "saveFiles/tempHistoryRemove.json";
+        String filePath = "saveFiles/testingFiles/tempHistoryRemove.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
