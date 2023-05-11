@@ -523,7 +523,7 @@ public class SayIt extends JFrame{
         addListeners();
 
         //TODO: save the array list of tuples and use it to load prompt history
-        History.initial();
+        History.initial(null);
     }
 
     private void finishRecording() {

@@ -10,11 +10,15 @@ import javax.swing.JButton;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.javatuples.Triplet;
+
+import java.io.File;
 
 // import static org.junit.Assert.assertEquals;
 // import static org.junit.Assert.assertNotEquals;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 // import org.junit.Test;
@@ -378,5 +382,75 @@ public class Tests {
         assertTrue(test);
     }
 
+    /**
+     * History Class test
+     */
+    @Test
+    public void testInitializeNoFileFound() {
+        String filePath = "SayitAssistant/saveFiles/tempHistory.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            tempHistory.delete();
+        }
+        History.initial(filePath);
+        assertTrue(tempHistory.exists());
+        assertTrue(History.saveBody.isEmpty());
+    }
+
+    @Test
+    public void testInitializeFileFound() {
+        String filePath = "SayitAssistant/saveFiles/historyTestingSave.json";
+        File save = new File(filePath);
+        assertTrue(save.exists());
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        assertFalse(History.saveBody.isEmpty());
+        assertEquals(1, entries.get(0).getValue0());
+        assertEquals("\n\nJapanese pop, or J-pop, is a musical genre that originated in Japan in the 1990s. It is widely known for its catchy, upbeat melodies, sophisticated production, and often over-the-top visual presentations. Common themes in J-pop include subject matter relating to love, romance, light themes and family. J-pop is often seen as a commercial, mainstream genre, though some artists explore more experimental or alternative themes in their music."
+        ,entries.get(0).getValue2());
+        assertEquals("Hey Google, what is Japanese pop?", entries.get(0).getValue1());
+
+        assertEquals(2, entries.get(1).getValue0());
+        assertEquals("\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services."
+        , entries.get(1).getValue2());
+        assertEquals("Hey Siri, do you know the top 10 Japanese pop songs today?", entries.get(1).getValue1());
+
+        assertEquals(3, entries.get(2).getValue0());
+        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive."
+        , entries.get(2).getValue2() );
+        assertEquals("Hey Alexa, what happened to Meta?", entries.get(2).getValue1());
+        boolean test = false;
+        try {
+            entries.get(3);
+        } catch(IndexOutOfBoundsException ex) {
+            test = true;
+        }
+        assertTrue(test);
+        assertEquals(3, entries.size());
+    }
+
+    @Test
+    public void testAddEntry() {
+        String filePath = "SayitAssistant/saveFiles/tempHistory.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            tempHistory.delete();
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        assertEquals(0, entries.size());
+        String question = null;
+        String answer = "testA";
+        for (int i = 0; i < 10; i++) {
+            History.addEntry(question, answer);
+            entries = History.initial(filePath);
+            assertEquals(i+1, entries.size());
+            assertEquals(i+1, entries.get(i).getValue0());
+            assertEquals(question, entries.get(i).getValue1());
+            assertEquals(answer, entries.get(i).getValue2());
+        }
+    }
+    @Test
+    public void testRemoveEntry(){
+
+    }
 }
 

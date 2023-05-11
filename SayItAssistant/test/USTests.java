@@ -252,7 +252,7 @@ public class USTests {
      */
     @Test
     public void US3S1Test(){
-        History.initial();
+        History.initial(null);
         History.clear();
         boolean test = false; 
         try {
@@ -296,7 +296,7 @@ public class USTests {
      */
     @Test 
     public void US3S2Test() {
-        History.initial();
+        History.initial(null);
         History.clear();
         String question = "What is Java Ui?";
         String answer = "Java Ui is a way to display graphical information with Java.";

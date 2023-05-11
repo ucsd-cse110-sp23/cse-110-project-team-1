@@ -12,7 +12,7 @@ import org.json.simple.parser.*;
 
 public class History {
     public static final String QUESTION_FIELD = "Question";
-    public static final String savePath = "saveFiles/history.json";
+    public static String savePath = "saveFiles/history.json";
     public static final String ANSWER_FIELD = "Answer";
     static JSONObject saveBody;
     //static JSONArray entries;
@@ -23,11 +23,15 @@ public class History {
      * Call this method before any other method in the class
      * Set the saveBody and entries field of this class from the file indicated by savePath
      * if the file is empty, saveBody and entries are defaulted to new 
+     * @param filePath to file you want to save too. Null for default "saveFiles/history.json"
      * @return pre-existing prompts in triplet form
      */
     @SuppressWarnings("unchecked")
-    public static ArrayList<Triplet<Integer,String,String>> initial() {
+    public static ArrayList<Triplet<Integer,String,String>> initial(String filePath) {
         //Tries to create new save File if one is not present 
+        if (filePath != null) {
+            savePath = filePath;
+        }
         File save = new File(savePath);
         try {
             save.getParentFile().mkdirs(); 
@@ -173,7 +177,7 @@ public class History {
 
     /*Testing purposes*/
     public static void main(String[] args) {
-        History.initial();
+        History.initial(null);
         History.clear();
         History.addEntry("What is java UI?", "Idk figure it out bro.");
         History.addEntry("Hi", "bye");
