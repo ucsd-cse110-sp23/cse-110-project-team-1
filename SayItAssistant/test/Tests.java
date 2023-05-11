@@ -449,8 +449,107 @@ public class Tests {
         }
     }
     @Test
-    public void testRemoveEntry(){
+    public void testRemoveEntriesBackwards(){
+        String filePath = "SayitAssistant/saveFiles/tempHistoryRemove.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            tempHistory.delete();
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        assertEquals(0, entries.size());
+        String question = null;
+        String answer = "testA";
+        for (int i = 0; i < 10; i++) {
+            History.addEntry(question, answer);
+            entries = History.initial(filePath);
+            assertEquals(i+1, entries.size());
+            assertEquals(i+1, entries.get(i).getValue0());
+            assertEquals(question, entries.get(i).getValue1());
+            assertEquals(answer, entries.get(i).getValue2());
+        }
 
+        assertEquals(10, entries.size());
+        for (int i = 10; i > 1; i--) {
+            History.removeEntry(i);
+            entries = History.initial(filePath);
+            assertEquals(i-1, entries.size());
+            assertEquals(i-1, entries.get(i-2).getValue0());
+            assertEquals(question, entries.get(i-2).getValue1());
+            assertEquals(answer, entries.get(i-2).getValue2());
+        }
+
+        History.removeEntry(1);
+        assertEquals(0, entries.size());
+    }
+
+    @Test
+    public void testRemoveEntryForwards(){
+        String filePath = "SayitAssistant/saveFiles/tempHistoryRemove.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            tempHistory.delete();
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        assertEquals(0, entries.size());
+        String question = null;
+        String answer = "testA";
+        for (int i = 0; i < 10; i++) {
+            History.addEntry(question, answer);
+            entries = History.initial(filePath);
+            assertEquals(i+1, entries.size());
+            assertEquals(i+1, entries.get(i).getValue0());
+            assertEquals(question, entries.get(i).getValue1());
+            assertEquals(answer, entries.get(i).getValue2());
+        }
+
+        assertEquals(10, entries.size());
+        int savedSize = entries.size();
+
+        for (int i = 1; i < 10; i++) {
+            History.removeEntry(i);
+            entries = History.initial(filePath);
+            assertEquals(savedSize - i, entries.size());
+            assertEquals(i+1, entries.get(0).getValue0());
+            assertEquals(question, entries.get(0).getValue1());
+            assertEquals(answer, entries.get(0).getValue2());
+        }
+
+        History.removeEntry(savedSize);
+        assertEquals(0, entries.size());
+
+        
+    }
+
+    @Test
+    public void testHistoryClear(){
+        String filePath = "SayitAssistant/saveFiles/tempHistoryRemove.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            tempHistory.delete();
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        assertEquals(0, entries.size());
+        String question = null;
+        String answer = "testA";
+        for (int i = 0; i < 10; i++) {
+            History.addEntry(question, answer);
+            entries = History.initial(filePath);
+            assertEquals(i+1, entries.size());
+            assertEquals(i+1, entries.get(i).getValue0());
+            assertEquals(question, entries.get(i).getValue1());
+            assertEquals(answer, entries.get(i).getValue2());
+        }
+
+        assertEquals(10, entries.size());
+
+        History.clear();
+        assertEquals(0, entries.size());
+
+        History.addEntry(question, answer);
+        assertEquals(1, entries.size());
+        assertEquals(1, entries.get(0).getValue0());
+        assertEquals(question, entries.get(0).getValue1());
+        assertEquals(answer, entries.get(0).getValue2());
     }
 }
 

@@ -123,7 +123,7 @@ public class History {
      */
     public static void removeEntry(int id) {
         int index = getEntryIndex(id);  //tries to find entry in array
-        System.out.println("id: " + id + "index: " + index);
+        System.out.println("id: " + id + ", index: " + index);
         if (index == -1) {  //if not present do nothing and return 
             return;
         }
