@@ -2,11 +2,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 
-import javax.sound.sampled.LineUnavailableException;
 // import javax.management.Query;
 // import javax.sound.sampled.*;
 import javax.swing.*;
 // import javax.swing.event.ChangeEvent;
+
+import org.javatuples.Triplet;
 
 class QuestionAnswer{
     private int qID;
@@ -356,7 +357,7 @@ class PromptHistory extends JPanel{
         title = new JLabel("Prompt History");
         this.add(title, BorderLayout.NORTH);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loadHist(); //update list
+        loadHistUI(); //update list
         histPane = new JScrollPane(history);
         //TODO: figure out how to get ScrollPane to not collapse when the width becomes too large
         //right now am using 200 arbitrarily.
@@ -367,7 +368,7 @@ class PromptHistory extends JPanel{
         histPane.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
-    public void loadHist(){
+    public void loadHistUI(){
         //TODO: implement loading history into list
         // String[] example = {"apple", "banana", "truffle", "death", "lasdjf askdjfasdjfagh woeg hiseroignsofjasdkjf kasda"};
         // history = new JList<String>(example);
@@ -381,11 +382,17 @@ class PromptHistory extends JPanel{
         c.weighty = 1;
         c.gridx = 0;
         c.gridy = GridBagConstraints.RELATIVE;
-        history.add(new JPanel(), c);
+        history.add(new JPanel(), c,-1);
         // for (int i = 0; i < 50; i++){
         //     addQA(new QuestionAnswer(0," ", "great"));
         //     addQA(new QuestionAnswer(0,"hello my name is not something you know " + i, "great"));
         // }
+    }
+    
+    public void loadHist(String filePath) {
+        for (Triplet<Integer,String,String> entry : History.initial(filePath)) {
+            addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
+        }
     }
 
     public JPanel getHistory(){
@@ -470,7 +477,7 @@ public class SayIt extends JFrame{
      * @param args
      */
     public static void main(String[] args){
-        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder());
+        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
     }
 
     // MainPanel mainPanel
@@ -480,7 +487,7 @@ public class SayIt extends JFrame{
      * @param whisper 
      * @param recorder
      */
-    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder) {
+    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile) {
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
@@ -505,6 +512,7 @@ public class SayIt extends JFrame{
         c.weighty = 1.0;
         c.weightx = 0.25;
         this.add(sideBar, c);
+        sideBar.promptHistory.loadHist(saveFile);
 
         this.mainPanel = new MainPanel();
         //TODO: might change so that SayIt() doesn't need mainpanel passed in
@@ -522,8 +530,6 @@ public class SayIt extends JFrame{
 
         addListeners();
 
-        //TODO: save the array list of tuples and use it to load prompt history
-        History.initial(null);
     }
 
     private void finishRecording() {

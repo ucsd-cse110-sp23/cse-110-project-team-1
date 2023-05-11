@@ -1,20 +1,13 @@
 import org.junit.jupiter.api.Test;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.internal.runners.statements.ExpectException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.sound.sampled.LineUnavailableException;
-import javax.swing.JButton;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 // import static org.junit.Assert.assertEquals;
@@ -22,11 +15,6 @@ import java.io.FileReader;
 
 import java.io.IOException;
 import java.lang.InterruptedException;
-import java.text.ParseException;
-import java.util.logging.Logger;
-
-// import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 
 class MockGPT extends JChatGPT {
     boolean isSuccessful;
@@ -133,7 +121,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
         //when the user has clicked new question
         app.changeRecording();
         //when the user says "What is the smallest city?"
@@ -169,7 +157,7 @@ public class USTests {
         MockWhisper mockWhisper = new MockWhisper(false, question);
         
         MockGPT mockGPT = new MockGPT(false, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
         // and the user has recorded their prompt
         app.changeRecording();
         app.changeRecording();
@@ -200,7 +188,7 @@ public class USTests {
          MockRecorder mockRec = new MockRecorder(false);
          MockWhisper mockWhisper = new MockWhisper(true, question);
          MockGPT mockGPT = new MockGPT(true, answer);
-         SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
+         SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
          //and user has clicked new question
          app.changeRecording();
          //When the user's mic is not connected
@@ -225,7 +213,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
         //and user has recorded a question successfully
         app.changeRecording();
         app.changeRecording();
@@ -254,9 +242,10 @@ public class USTests {
     public void US3S1Test(){
         History.initial(null);
         History.clear();
-        boolean test = false; 
+        boolean test = false;
+        Object obj;
         try {
-            Object obj = new JSONParser().parse(new FileReader(History.savePath));
+            obj = new JSONParser().parse(new FileReader(History.savePath));
         } catch (org.json.simple.parser.ParseException e) {
             test = true;
         } catch (IOException e) {
@@ -268,13 +257,13 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
         app.changeRecording();
         app.changeRecording();
         JSONObject saveBody = null;
         try {
 
-            Object obj = new JSONParser().parse(new FileReader(History.savePath));
+            obj = new JSONParser().parse(new FileReader(History.savePath));
             saveBody = (JSONObject) obj;
         } catch (IOException io) {
             test = false;
@@ -303,7 +292,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(false, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
         app.changeRecording();
         app.changeRecording();
         JSONObject saveBody = null;
