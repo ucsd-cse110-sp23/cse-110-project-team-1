@@ -387,10 +387,10 @@ public class Tests {
      */
     @Test
     public void testInitializeNoFileFound() {
-        String filePath = "SayitAssistant/saveFiles/tempHistory.json";
+        String filePath = "SayitAssistant/saveFiles/tempHistoryNoFile.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
-            tempHistory.delete();
+            assertTrue(tempHistory.delete());
         }
         History.initial(filePath);
         assertTrue(tempHistory.exists());
@@ -430,10 +430,10 @@ public class Tests {
 
     @Test
     public void testAddEntry() {
-        String filePath = "SayitAssistant/saveFiles/tempHistory.json";
+        String filePath = "/SayitAssistant/saveFiles/tempHistory.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
-            tempHistory.delete();
+            assertTrue(tempHistory.delete());
         }
         ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
         assertEquals(0, entries.size());
@@ -449,8 +449,107 @@ public class Tests {
         }
     }
     @Test
-    public void testRemoveEntry(){
+    public void testRemoveEntriesBackwards(){
+        String filePath = "SayitAssistant/saveFiles/tempHistoryRemoveBackwards.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        assertEquals(0, entries.size());
+        String question = null;
+        String answer = "testA";
+        for (int i = 0; i < 10; i++) {
+            History.addEntry(question, answer);
+            entries = History.initial(filePath);
+            assertEquals(i+1, entries.size());
+            assertEquals(i+1, entries.get(i).getValue0());
+            assertEquals(question, entries.get(i).getValue1());
+            assertEquals(answer, entries.get(i).getValue2());
+        }
 
+        assertEquals(10, entries.size());
+        for (int i = 10; i > 1; i--) { 
+            entries = History.initial(filePath);
+            assertEquals(i, entries.size());
+            assertEquals(i, entries.get(i-1).getValue0());
+            assertEquals(question, entries.get(i-1).getValue1());
+            assertEquals(answer, entries.get(i-1).getValue2());
+            History.removeEntry(i);
+        }
+        //remove nothing
+        History.removeEntry(1);
+        assertEquals(0, entries.size());
+    }
+
+    @Test
+    public void testRemoveEntryForwards(){
+        String filePath = "/SayitAssistant/saveFiles/tempHistoryRemove.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        assertEquals(0, entries.size());
+        String question = null;
+        String answer = "testA";
+        for (int i = 0; i < 10; i++) {
+            History.addEntry(question, answer);
+            entries = History.initial(filePath);
+            assertEquals(i+1, entries.size());
+            assertEquals(i+1, entries.get(i).getValue0());
+            assertEquals(question, entries.get(i).getValue1());
+            assertEquals(answer, entries.get(i).getValue2());
+        }
+
+        assertEquals(10, entries.size());
+        int savedSize = entries.size();
+
+        for (int i = 1; i < 10; i++) {
+            entries = History.initial(filePath);
+            assertEquals(i, entries.get(0).getValue0());
+            assertEquals(question, entries.get(0).getValue1());
+            assertEquals(answer, entries.get(0).getValue2());
+            History.removeEntry(i);
+            assertEquals(savedSize - i, entries.size());
+        }
+
+        History.removeEntry(savedSize);
+        assertEquals(0, entries.size());
+
+        
+    }
+
+    @Test
+    public void testHistoryClear(){
+        String filePath = "SayitAssistant/saveFiles/tempHistoryRemove.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        assertEquals(0, entries.size());
+        String question = null;
+        String answer = "testA";
+        for (int i = 0; i < 10; i++) {
+            History.addEntry(question, answer);
+            entries = History.initial(filePath);
+            assertEquals(i+1, entries.size());
+            assertEquals(i+1, entries.get(i).getValue0());
+            assertEquals(question, entries.get(i).getValue1());
+            assertEquals(answer, entries.get(i).getValue2());
+        }
+
+        assertEquals(10, entries.size());
+
+        History.clear();
+        assertEquals(0, entries.size());
+
+        History.addEntry(question, answer);
+        assertEquals(1, entries.size());
+        assertEquals(1, entries.get(0).getValue0());
+        assertEquals(question, entries.get(0).getValue1());
+        assertEquals(answer, entries.get(0).getValue2());
     }
 }
 
