@@ -387,7 +387,7 @@ public class Tests {
      */
     @Test
     public void testInitializeNoFileFound() {
-        String filePath = "SayitAssistant/saveFiles/tempHistoryNoFile.json";
+        String filePath = "saveFiles/tempHistoryNoFile.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
@@ -399,7 +399,7 @@ public class Tests {
 
     @Test
     public void testInitializeFileFound() {
-        String filePath = "SayitAssistant/saveFiles/historyTestingSave.json";
+        String filePath = "saveFiles/historyTestingSave.json";
         File save = new File(filePath);
         assertTrue(save.exists());
         ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
@@ -430,7 +430,7 @@ public class Tests {
 
     @Test
     public void testAddEntry() {
-        String filePath = "/SayitAssistant/saveFiles/tempHistory.json";
+        String filePath = "saveFiles/tempHistory.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
@@ -450,7 +450,7 @@ public class Tests {
     }
     @Test
     public void testRemoveEntriesBackwards(){
-        String filePath = "SayitAssistant/saveFiles/tempHistoryRemoveBackwards.json";
+        String filePath = "saveFiles/tempHistoryRemoveBackwards.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
@@ -484,7 +484,7 @@ public class Tests {
 
     @Test
     public void testRemoveEntryForwards(){
-        String filePath = "/SayitAssistant/saveFiles/tempHistoryRemove.json";
+        String filePath = "saveFiles/tempHistoryRemoveForward.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
@@ -522,7 +522,7 @@ public class Tests {
 
     @Test
     public void testHistoryClear(){
-        String filePath = "SayitAssistant/saveFiles/tempHistoryRemove.json";
+        String filePath = "saveFiles/tempHistoryRemove.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
