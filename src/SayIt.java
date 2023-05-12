@@ -393,6 +393,10 @@ class PromptHistory extends JPanel{
         return history;
     }
 
+    /**
+     * @param qa object of QuestionAnswer type with question and answer
+     * @return newly added question button
+     */
     public RecentQuestion addQA(QuestionAnswer qa){
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -406,7 +410,6 @@ class PromptHistory extends JPanel{
         history.add(recentQ, c, 0);
         // history.add(recentQ, 0);
         // recentQ.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // System.out.println("add the prompt");
 
         return recentQ;
     }
@@ -457,6 +460,7 @@ public class SayIt extends JFrame{
     JWhisper whisper;
     JRecorder recorder;
 
+    // testing purpose
     int i;
 
     /**
@@ -515,23 +519,19 @@ public class SayIt extends JFrame{
         this.add(sideBar, c);
         // sideBar.promptHistory.loadHist(saveFile);
 
-        // RecentQuestion recentQ;
+        // Load history and add listener
         for (Triplet<Integer,String,String> entry : History.initial(saveFile)) {
             RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
             recentQ.addMouseListener(
                 new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        System.out.println("load history: press prompt button");
-
                         int qID = recentQ.questionAnswer.getqID();
-                        System.out.println("load history: qID is " + qID);
+
                         QAPanel qaPanel = mainPanel.getQaPanel();
                         for (Triplet<Integer,String,String> entry : History.initial(null)) {
-                            System.out.println("load history: " + entry.getValue0() + " " + entry.getValue1() + " " + entry.getValue2());
                             // update QApanel
                             if(qID == entry.getValue0()) {
-                                System.out.println("load history: clicked");
                                 QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue2(), entry.getValue1());
                                 qaPanel.changeAnswer(entry.getValue1());
                                 qaPanel.changeQuestion(qa);
@@ -565,16 +565,19 @@ public class SayIt extends JFrame{
         String question;
         String answer;
         QAPanel qaPanel = mainPanel.getQaPanel();
-        // try {
-            // question = whisper.transcription(null);
-            question = "test " + i;
+        try {
+            question = whisper.transcription(null);
+            // question = "test " + i;
             //TODO: make questionID be an actual questionID and update for each question
             qaPanel.createQuestion(question,0);
-            // answer = chatGPT.run(question);
-            answer = "test answer " + i;
-            i++;
+            answer = chatGPT.run(question);
+            // answer = "test answer " + i;
+            // i++;
             qaPanel.changeAnswer(answer);
             int numEntriesJson = History.initial(null).size();
+
+            // WARNING: I don't understand why setQuestionID also creates question button in the prompt history
+            // when using addQA method, it creates two buttons: one works but another doesn't work
             qaPanel.setQuestionID(numEntriesJson + 1);
             // getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
 
@@ -591,17 +594,22 @@ public class SayIt extends JFrame{
             History.addEntry(question, answer);
 
             return recentQ;
-
-        // } catch( IOException io) {
-        //     io.printStackTrace();
-        //     System.out.println("IO exception at Whisper transcription");
-        //     qaPanel.changeAnswer("Sorry, we didn't quite catch that");
-        // } catch (InterruptedException ex) {
-        //     ex.printStackTrace();
-        //     System.out.println("Interupt exception chatGPT");
-        // }
+        } catch( IOException io) {
+            io.printStackTrace();
+            System.out.println("IO exception at Whisper transcription");
+            qaPanel.changeAnswer("Sorry, we didn't quite catch that");
+            return null;
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            System.out.println("Interupt exception chatGPT");
+            return null;
+        }
     }
 
+    /**
+     * @return return newly added question button. 
+     * If no question button is created, return null
+     */
     public RecentQuestion changeRecording(){
         RecentQuestion recentQ;
         if (mainPanel.getIsRec()){
@@ -621,8 +629,6 @@ public class SayIt extends JFrame{
     }
 
     public void addListeners() {
-        System.out.println("History.initial(null).size(); " + History.initial(null).size());
-        
         recButton.addActionListener(
         new ActionListener() {
             @Override
@@ -630,22 +636,18 @@ public class SayIt extends JFrame{
                 // int numEntriesJson = History.initial(null).size();
                 // get the added prompt button
                 RecentQuestion recentQ =  changeRecording();
+                // update the QApanel when clicking the question button
                 if(recentQ != null) {
-                    System.out.println("recentQ is not null");
                     recentQ.addMouseListener(
                         new MouseAdapter() {
                             @Override
                             public void mousePressed(MouseEvent e) {
-                                System.out.println("press prompt button");
-
                                 int qID = recentQ.questionAnswer.getqID();
-                                System.out.println("qID is " + qID);
+
                                 QAPanel qaPanel = mainPanel.getQaPanel();
                                 for (Triplet<Integer,String,String> entry : History.initial(null)) {
-                                    System.out.println(entry.getValue0() + " " + entry.getValue1() + " " + entry.getValue2());
                                     // update QApanel
                                     if(qID == entry.getValue0()) {
-                                        System.out.println("clicked");
                                         QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue2(), entry.getValue1());
                                         qaPanel.changeAnswer(entry.getValue1());
                                         qaPanel.changeQuestion(qa);
