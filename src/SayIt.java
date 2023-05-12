@@ -412,6 +412,7 @@ class PromptHistory extends JPanel{
         history.add(recentQ, c, 0);
         // history.add(recentQ, 0);
         // recentQ.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // System.out.println("add the prompt");
     }
 }
 
@@ -460,6 +461,8 @@ public class SayIt extends JFrame{
     JWhisper whisper;
     JRecorder recorder;
 
+    int i;
+
     /**
      * @return panel housing the record button and 
      * the question/answer panel where the current question/answer are displayed
@@ -488,6 +491,8 @@ public class SayIt extends JFrame{
      * @param recorder
      */
     public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile) {
+        i = 0;
+
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
@@ -532,33 +537,54 @@ public class SayIt extends JFrame{
 
     }
 
-    private void finishRecording() {
+    private RecentQuestion finishRecording() {
         recorder.finish();
         String question;
         String answer;
         QAPanel qaPanel = mainPanel.getQaPanel();
-        try {
-            question = whisper.transcription(null);
+        // try {
+            // question = whisper.transcription(null);
+            question = "test " + i;
             //TODO: make questionID be an actual questionID and update for each question
             qaPanel.createQuestion(question,0);
-            answer = chatGPT.run(question);
+            // answer = chatGPT.run(question);
+            answer = "test answer " + i;
+            i++;
             qaPanel.changeAnswer(answer);
+            int numEntriesJson = History.initial(null).size();
+            qaPanel.setQuestionID(numEntriesJson + 1);
             getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+
+            GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            // c.anchor = GridBagConstraints.NORTH;
+            c.weightx = 1;
+            // c.weighty = 0.00001;
+            c.gridx = 0;
+            c.gridy = GridBagConstraints.RELATIVE;
+            //c.weighty = 1.0;
+            RecentQuestion recentQ = new RecentQuestion(qaPanel.getQuestionAnswer());
+            getSideBar().getPromptHistory().history.add(recentQ, c, 0);
             History.addEntry(question, answer);
-        } catch( IOException io) {
-            io.printStackTrace();
-            System.out.println("IO exception at Whisper transcription");
-            qaPanel.changeAnswer("Sorry, we didn't quite catch that");
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-            System.out.println("Interupt exception chatGPT");
-        }
+
+            return recentQ;
+
+        // } catch( IOException io) {
+        //     io.printStackTrace();
+        //     System.out.println("IO exception at Whisper transcription");
+        //     qaPanel.changeAnswer("Sorry, we didn't quite catch that");
+        // } catch (InterruptedException ex) {
+        //     ex.printStackTrace();
+        //     System.out.println("Interupt exception chatGPT");
+        // }
     }
 
-    public void changeRecording(){
+    public RecentQuestion changeRecording(){
+        RecentQuestion recentQ;
         if (mainPanel.getIsRec()){
-            finishRecording();
+            recentQ = finishRecording();
             mainPanel.stopRecording();
+            return recentQ;
         } else {
             // recorder.start();
             mainPanel.startRecording();
@@ -566,15 +592,46 @@ public class SayIt extends JFrame{
                 mainPanel.stopRecording();
                 mainPanel.getQaPanel().changeAnswer("Please connect microphone");
             }
+
+            return null;
         }
     }
 
     public void addListeners() {
+        System.out.println("History.initial(null).size(); " + History.initial(null).size());
+        
         recButton.addActionListener(
         new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                changeRecording();
+                // int numEntriesJson = History.initial(null).size();
+                // get the added prompt button
+                RecentQuestion recentQ =  changeRecording();
+                if(recentQ != null) {
+                    System.out.println("recentQ is not null");
+                    recentQ.addMouseListener(
+                        new MouseAdapter() {
+                            @Override
+                            public void mousePressed(MouseEvent e) {
+                                System.out.println("press prompt button");
+
+                                int qID = recentQ.questionAnswer.getqID();
+                                System.out.println("qID is " + qID);
+                                QAPanel qaPanel = mainPanel.getQaPanel();
+                                for (Triplet<Integer,String,String> entry : History.initial(null)) {
+                                    System.out.println(entry.getValue0() + " " + entry.getValue1() + " " + entry.getValue2());
+                                    // update QApanel
+                                    if(qID == entry.getValue0()) {
+                                        System.out.println("clicked");
+                                        QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue2(), entry.getValue1());
+                                        qaPanel.changeAnswer(entry.getValue1());
+                                        qaPanel.changeQuestion(qa);
+                                    }
+                                }
+                            }
+                        }
+                    );
+                }
             }
         }
         );
