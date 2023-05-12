@@ -388,12 +388,6 @@ class PromptHistory extends JPanel{
         //     addQA(new QuestionAnswer(0,"hello my name is not something you know " + i, "great"));
         // }
     }
-    
-    // public void loadHist(String filePath) {
-    //     for (Triplet<Integer,String,String> entry : History.initial(filePath)) {
-    //         addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
-    //     }
-    // }
 
     public JPanel getHistory(){
         return history;
@@ -566,12 +560,6 @@ public class SayIt extends JFrame{
 
     }
 
-    // public void loadHist(String filePath) {
-    //     for (Triplet<Integer,String,String> entry : History.initial(filePath)) {
-    //         addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
-    //     }
-    // }
-
     private RecentQuestion finishRecording() {
         recorder.finish();
         String question;
@@ -588,7 +576,7 @@ public class SayIt extends JFrame{
             qaPanel.changeAnswer(answer);
             int numEntriesJson = History.initial(null).size();
             qaPanel.setQuestionID(numEntriesJson + 1);
-            getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+            // getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
 
             GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.HORIZONTAL;
