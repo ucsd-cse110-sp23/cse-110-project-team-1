@@ -16,6 +16,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.InterruptedException;
 
+import java.io.File;
+import java.awt.*;
+
 class MockGPT extends JChatGPT {
     boolean isSuccessful;
     String answer;
@@ -94,13 +97,13 @@ class MockRecorder extends JRecorder{
 
     @Override
     public void finish(){
-        if (!isSuccess) {
-            targetLine = null;
-            audioThread = null;
-            super.finish();
-        } else {
-            super.finish();
-        }
+        // if (!isSuccess) {
+        //     targetLine = null;
+        //     audioThread = null;
+        //     super.finish();
+        // } else {
+        //     super.finish();
+        // }
     }
 }
 
@@ -308,6 +311,114 @@ public class USTests {
         }
         assertTrue(test);
         assertEquals(null, saveBody);
+    }
+
+    /**
+     * User Story 4 Scenario 1: Showing a new question
+     * Given no questions are showing in the Prompt History
+     * And a new question, 'What is Java UI?' has been asked and answered
+     * And it's saving to the prompt history
+     * When this question is saved
+     * Then this question should be showed in prompt history.
+     */
+    @Test
+    public void US4S1Test() {
+        String filePath = "saveFiles/testingFiles/us4s1noHistory.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        String question = "What is Java UI?";
+        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, question), new MockRecorder(true), filePath);
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        app.changeRecording();
+        app.changeRecording();
+        //assertEquals(3, ph.getComponentCount());
+        Component prompt = ph.getHistory().getComponent(0);
+        assertEquals(question, ((RecentQuestion) prompt).getText());
+    }
+
+    /**
+     * User Story 4 Scenario 2: Empty Prompt History
+     * Given the application is open
+     * When there are no questions stored in prompt history
+     * Then don't display any questions under prompt hsitory
+     */
+    @Test
+    public void US4S2Test() {
+        String filePath = "saveFiles/testingFiles/us4s2noHistory.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        SayIt app = new SayIt(new MockGPT(true, null), new MockWhisper(true, null), new MockRecorder(true), filePath);
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        //assertEquals(3, ph.getComponentCount());
+        Component[] listItems = ph.getHistory().getComponents();
+        boolean noPrompts = true;
+        for(Component listItem : listItems){
+            if (listItem instanceof RecentQuestion){
+                noPrompts = false;
+            }
+        }
+        assertTrue(noPrompts);
+    }
+
+    /**
+     * User Story 4 Scenario 3: Showing long question
+     * Given a question has been asked and answered
+     * And this question is 100 characters
+     * And it's saving to the Prompt History
+     * When this question is saved
+     * Then this question is displayed as the first 20 characters followed by '...'
+     */
+    @Test
+    public void US4S3Test() {
+        String filePath = "saveFiles/testingFiles/us4s3noHistory.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        String question = "This is a long long long long long long long long long long long long question?";
+        SayIt app = new SayIt(new MockGPT(true, "yup"), new MockWhisper(true, question), new MockRecorder(true), filePath);
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        app.changeRecording();
+        app.changeRecording();
+        //assertEquals(3, ph.getComponentCount());
+        String displayedQ = question.substring(0, 20) + "...";
+        Component prompt = ph.getHistory().getComponent(0);
+        assertEquals(displayedQ, ((RecentQuestion) prompt).getText());
+    }
+
+    /**
+     * User Story 4 Scenario 4: Showing an additional new question
+     * Given some question is showing in the Prompt History
+     * And a new question has been asked and answered
+     * When this question is saved and is showing in Prompt History
+     * Then this question should be showed on top of the list.
+     */
+    @Test
+    public void US4S4Test() {
+        String filePath = "saveFiles/testingFiles/us4s4noHistory.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        String question1 = "What is Java UI?";
+        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, question1), new MockRecorder(true), filePath);
+        app.changeRecording();
+        app.changeRecording();
+        app.dispose();
+
+        String question2 = "What's up?";
+        SayIt app2 = new SayIt(new MockGPT(true, "Second Question Answer"), new MockWhisper(true, question2), new MockRecorder(true), filePath);
+        PromptHistory ph = app2.getSideBar().getPromptHistory();
+        app2.changeRecording();
+        app2.changeRecording();
+        Component prompt0 = ph.getHistory().getComponent(0);
+        Component prompt1 = ph.getHistory().getComponent(1);
+        assertEquals(question2, ((RecentQuestion) prompt0).getText());
+        assertEquals(question1, ((RecentQuestion) prompt1).getText());
     }
 }
 
