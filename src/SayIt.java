@@ -389,17 +389,17 @@ class PromptHistory extends JPanel{
         // }
     }
     
-    public void loadHist(String filePath) {
-        for (Triplet<Integer,String,String> entry : History.initial(filePath)) {
-            addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
-        }
-    }
+    // public void loadHist(String filePath) {
+    //     for (Triplet<Integer,String,String> entry : History.initial(filePath)) {
+    //         addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
+    //     }
+    // }
 
     public JPanel getHistory(){
         return history;
     }
 
-    public void addQA(QuestionAnswer qa){
+    public RecentQuestion addQA(QuestionAnswer qa){
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         // c.anchor = GridBagConstraints.NORTH;
@@ -413,6 +413,8 @@ class PromptHistory extends JPanel{
         // history.add(recentQ, 0);
         // recentQ.setAlignmentX(Component.CENTER_ALIGNMENT);
         // System.out.println("add the prompt");
+
+        return recentQ;
     }
 }
 
@@ -517,7 +519,34 @@ public class SayIt extends JFrame{
         c.weighty = 1.0;
         c.weightx = 0.25;
         this.add(sideBar, c);
-        sideBar.promptHistory.loadHist(saveFile);
+        // sideBar.promptHistory.loadHist(saveFile);
+
+        // RecentQuestion recentQ;
+        for (Triplet<Integer,String,String> entry : History.initial(saveFile)) {
+            RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
+            recentQ.addMouseListener(
+                new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        System.out.println("load history: press prompt button");
+
+                        int qID = recentQ.questionAnswer.getqID();
+                        System.out.println("load history: qID is " + qID);
+                        QAPanel qaPanel = mainPanel.getQaPanel();
+                        for (Triplet<Integer,String,String> entry : History.initial(null)) {
+                            System.out.println("load history: " + entry.getValue0() + " " + entry.getValue1() + " " + entry.getValue2());
+                            // update QApanel
+                            if(qID == entry.getValue0()) {
+                                System.out.println("load history: clicked");
+                                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue2(), entry.getValue1());
+                                qaPanel.changeAnswer(entry.getValue1());
+                                qaPanel.changeQuestion(qa);
+                            }
+                        }
+                    }
+                }
+            );
+        }
 
         this.mainPanel = new MainPanel();
         //TODO: might change so that SayIt() doesn't need mainpanel passed in
@@ -536,6 +565,12 @@ public class SayIt extends JFrame{
         addListeners();
 
     }
+
+    // public void loadHist(String filePath) {
+    //     for (Triplet<Integer,String,String> entry : History.initial(filePath)) {
+    //         addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
+    //     }
+    // }
 
     private RecentQuestion finishRecording() {
         recorder.finish();
