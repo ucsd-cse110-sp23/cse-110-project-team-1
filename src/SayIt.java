@@ -659,8 +659,7 @@ public class SayIt extends JFrame{
                                 for (Triplet<Integer,String,String> entry : History.initial(null)) {
                                     // update QApanel
                                     if(qID == entry.getValue0()) {
-                                        QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue2(), entry.getValue1());
-                                        qaPanel.changeAnswer(entry.getValue1());
+                                        QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
                                         qaPanel.changeQuestion(qa);
                                     }
                                 }
