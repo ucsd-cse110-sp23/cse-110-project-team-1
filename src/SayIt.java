@@ -422,6 +422,13 @@ class PromptHistory extends JPanel{
 
         return recentQ;
     }
+
+    public void dltQuestion(RecentQuestion currQ){
+        //delete the button with ID
+        history.remove(currQ);
+        revalidate();
+    }
+
 }
 
 // the side panel
@@ -463,6 +470,7 @@ public class SayIt extends JFrame{
 
     private SideBar sideBar;
     private JButton clearButton;
+    private static RecentQuestion currQ;
 
     boolean shouldFill = true;
 
@@ -537,7 +545,8 @@ public class SayIt extends JFrame{
                     @Override
                     public void mousePressed(MouseEvent e) {
                         int qID = recentQ.questionAnswer.getqID();
-
+                        SayIt.setCurrQ(recentQ);
+                        System.out.println(recentQ.getQuestionAnswer().getQuestion());
                         QAPanel qaPanel = mainPanel.getQaPanel();
                         for (Triplet<Integer,String,String> entry : History.initial(null)) {
                             // update QApanel
@@ -616,6 +625,22 @@ public class SayIt extends JFrame{
             return null;
         }
     }
+    
+    /*
+     * This method sets the RecentQustion(button) 
+     * that is showing QuestionAnswer in QAPanel 
+     */
+    public static RecentQuestion setCurrQ(RecentQuestion recentQ){
+        currQ = recentQ;
+        return recentQ;
+    }
+
+    /*
+     * This method get the RecentQustion(button) in QAPanel 
+     */
+    public static RecentQuestion getCurrQ(){
+        return currQ;
+    }
 
     /**
      * @return return newly added question button. 
@@ -682,6 +707,8 @@ public class SayIt extends JFrame{
         new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                History.removeEntry(currQ.getQuestionAnswer().getqID());
+                sideBar.getPromptHistory().dltQuestion(currQ);
                 mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
             }
         }
