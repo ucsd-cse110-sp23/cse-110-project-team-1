@@ -388,18 +388,16 @@ class PromptHistory extends JPanel{
         //     addQA(new QuestionAnswer(0,"hello my name is not something you know " + i, "great"));
         // }
     }
-    
-    public void loadHist(String filePath) {
-        for (Triplet<Integer,String,String> entry : History.initial(filePath)) {
-            addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
-        }
-    }
 
     public JPanel getHistory(){
         return history;
     }
 
-    public void addQA(QuestionAnswer qa){
+    /**
+     * @param qa object of QuestionAnswer type with question and answer
+     * @return newly added question button
+     */
+    public RecentQuestion addQA(QuestionAnswer qa){
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         // c.anchor = GridBagConstraints.NORTH;
@@ -412,6 +410,8 @@ class PromptHistory extends JPanel{
         history.add(recentQ, c, 0);
         // history.add(recentQ, 0);
         // recentQ.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        return recentQ;
     }
 }
 
@@ -460,6 +460,9 @@ public class SayIt extends JFrame{
     JWhisper whisper;
     JRecorder recorder;
 
+    // testing purpose
+    int i;
+
     /**
      * @return panel housing the record button and 
      * the question/answer panel where the current question/answer are displayed
@@ -488,6 +491,8 @@ public class SayIt extends JFrame{
      * @param recorder
      */
     public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile) {
+        i = 0;
+
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
@@ -512,7 +517,30 @@ public class SayIt extends JFrame{
         c.weighty = 1.0;
         c.weightx = 0.25;
         this.add(sideBar, c);
-        sideBar.promptHistory.loadHist(saveFile);
+        // sideBar.promptHistory.loadHist(saveFile);
+
+        // Load history and add listener
+        for (Triplet<Integer,String,String> entry : History.initial(saveFile)) {
+            RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
+            recentQ.addMouseListener(
+                new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        int qID = recentQ.questionAnswer.getqID();
+
+                        QAPanel qaPanel = mainPanel.getQaPanel();
+                        for (Triplet<Integer,String,String> entry : History.initial(null)) {
+                            // update QApanel
+                            if(qID == entry.getValue0()) {
+                                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
+                                //qaPanel.changeAnswer(entry.getValue2());
+                                qaPanel.changeQuestion(qa);
+                            }
+                        }
+                    }
+                }
+            );
+        }
 
         this.mainPanel = new MainPanel();
         //TODO: might change so that SayIt() doesn't need mainpanel passed in
@@ -532,33 +560,62 @@ public class SayIt extends JFrame{
 
     }
 
-    private void finishRecording() {
+    private RecentQuestion finishRecording() {
         recorder.finish();
         String question;
         String answer;
         QAPanel qaPanel = mainPanel.getQaPanel();
         try {
             question = whisper.transcription(null);
-            //TODO: make questionID be an actual questionID and update for each question
+            // question = "test " + i;
             qaPanel.createQuestion(question,0);
             answer = chatGPT.run(question);
+            // answer = "test answer " + i;
+            // i++;
             qaPanel.changeAnswer(answer);
-            getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+            int numEntriesJson = History.initial(null).size();
+
+            // WARNING: I don't understand why setQuestionID also creates question button in the prompt history
+            // when using addQA method, it creates two buttons: one works but another doesn't work 
+            //SHOULD BE RESOLVED (Sue)
+            qaPanel.setQuestionID(numEntriesJson + 1);
+            RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+
+            // GridBagConstraints c = new GridBagConstraints();
+            // c.fill = GridBagConstraints.HORIZONTAL;
+            // // c.anchor = GridBagConstraints.NORTH;
+            // c.weightx = 1;
+            // // c.weighty = 0.00001;
+            // c.gridx = 0;
+            // c.gridy = GridBagConstraints.RELATIVE;
+            // //c.weighty = 1.0;
+            // RecentQuestion recentQ = new RecentQuestion(qaPanel.getQuestionAnswer());
+            // getSideBar().getPromptHistory().history.add(recentQ, c, 0);
             History.addEntry(question, answer);
+
+            return recentQ;
         } catch( IOException io) {
             io.printStackTrace();
             System.out.println("IO exception at Whisper transcription");
             qaPanel.changeAnswer("Sorry, we didn't quite catch that");
+            return null;
         } catch (InterruptedException ex) {
             ex.printStackTrace();
             System.out.println("Interupt exception chatGPT");
+            return null;
         }
     }
 
-    public void changeRecording(){
+    /**
+     * @return return newly added question button. 
+     * If no question button is created, return null
+     */
+    public RecentQuestion changeRecording(){
+        RecentQuestion recentQ;
         if (mainPanel.getIsRec()){
-            finishRecording();
+            recentQ = finishRecording();
             mainPanel.stopRecording();
+            return recentQ;
         } else {
             // recorder.start();
             mainPanel.startRecording();
@@ -566,6 +623,8 @@ public class SayIt extends JFrame{
                 mainPanel.stopRecording();
                 mainPanel.getQaPanel().changeAnswer("Please connect microphone");
             }
+
+            return null;
         }
     }
 
@@ -574,7 +633,30 @@ public class SayIt extends JFrame{
         new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                changeRecording();
+                // int numEntriesJson = History.initial(null).size();
+                // get the added prompt button
+                RecentQuestion recentQ =  changeRecording();
+                // update the QApanel when clicking the question button
+                if(recentQ != null) {
+                    recentQ.addMouseListener(
+                        new MouseAdapter() {
+                            @Override
+                            public void mousePressed(MouseEvent e) {
+                                int qID = recentQ.questionAnswer.getqID();
+
+                                QAPanel qaPanel = mainPanel.getQaPanel();
+                                for (Triplet<Integer,String,String> entry : History.initial(null)) {
+                                    // update QApanel
+                                    if(qID == entry.getValue0()) {
+                                        QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue2(), entry.getValue1());
+                                        qaPanel.changeAnswer(entry.getValue1());
+                                        qaPanel.changeQuestion(qa);
+                                    }
+                                }
+                            }
+                        }
+                    );
+                }
             }
         }
         );
