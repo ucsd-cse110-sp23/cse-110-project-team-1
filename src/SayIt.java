@@ -249,9 +249,11 @@ class QAPanel extends JPanel{
 
 class MainPanel extends JPanel{
     JButton recButton;
+    JButton dltButton;
     boolean isRec = false;
     String startBlurb = "New Question";
     String stopBlurb = "Stop Recording";
+    String deletBlurd = "Delete";
 
     QAPanel qaPanel;
 
@@ -275,6 +277,9 @@ class MainPanel extends JPanel{
 
         recButton = new JButton(startBlurb);
         this.add(recButton, BorderLayout.SOUTH);
+
+        dltButton = new JButton(deletBlurd);
+        this.add(dltButton, BorderLayout.EAST);
     }
 
     public String getRecStartBlurb(){ return startBlurb;}
@@ -292,6 +297,10 @@ class MainPanel extends JPanel{
      */
     public JButton getRecButton() {
         return recButton;
+    }
+
+    public JButton getdltButton(){
+        return dltButton;
     }
 
     /**
@@ -450,6 +459,7 @@ public class SayIt extends JFrame{
 
     private MainPanel mainPanel;
     private JButton recButton;
+    private JButton dltButton;
 
     private SideBar sideBar;
     private JButton clearButton;
@@ -555,6 +565,7 @@ public class SayIt extends JFrame{
 
         recButton = mainPanel.getRecButton();
         clearButton = sideBar.getClearButton();
+        dltButton = mainPanel.getdltButton();
 
         addListeners();
 
@@ -665,6 +676,14 @@ public class SayIt extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 sideBar.clearHistory();
+            }
+        }
+        );
+        dltButton.addActionListener(
+        new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
             }
         }
         );
