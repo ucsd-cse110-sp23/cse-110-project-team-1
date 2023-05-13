@@ -532,8 +532,8 @@ public class SayIt extends JFrame{
                         for (Triplet<Integer,String,String> entry : History.initial(null)) {
                             // update QApanel
                             if(qID == entry.getValue0()) {
-                                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue2(), entry.getValue1());
-                                qaPanel.changeAnswer(entry.getValue1());
+                                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
+                                //qaPanel.changeAnswer(entry.getValue2());
                                 qaPanel.changeQuestion(qa);
                             }
                         }
@@ -568,7 +568,6 @@ public class SayIt extends JFrame{
         try {
             question = whisper.transcription(null);
             // question = "test " + i;
-            //TODO: make questionID be an actual questionID and update for each question
             qaPanel.createQuestion(question,0);
             answer = chatGPT.run(question);
             // answer = "test answer " + i;
@@ -577,20 +576,21 @@ public class SayIt extends JFrame{
             int numEntriesJson = History.initial(null).size();
 
             // WARNING: I don't understand why setQuestionID also creates question button in the prompt history
-            // when using addQA method, it creates two buttons: one works but another doesn't work
+            // when using addQA method, it creates two buttons: one works but another doesn't work 
+            //SHOULD BE RESOLVED (Sue)
             qaPanel.setQuestionID(numEntriesJson + 1);
-            // getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+            RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
 
-            GridBagConstraints c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            // c.anchor = GridBagConstraints.NORTH;
-            c.weightx = 1;
-            // c.weighty = 0.00001;
-            c.gridx = 0;
-            c.gridy = GridBagConstraints.RELATIVE;
-            //c.weighty = 1.0;
-            RecentQuestion recentQ = new RecentQuestion(qaPanel.getQuestionAnswer());
-            getSideBar().getPromptHistory().history.add(recentQ, c, 0);
+            // GridBagConstraints c = new GridBagConstraints();
+            // c.fill = GridBagConstraints.HORIZONTAL;
+            // // c.anchor = GridBagConstraints.NORTH;
+            // c.weightx = 1;
+            // // c.weighty = 0.00001;
+            // c.gridx = 0;
+            // c.gridy = GridBagConstraints.RELATIVE;
+            // //c.weighty = 1.0;
+            // RecentQuestion recentQ = new RecentQuestion(qaPanel.getQuestionAnswer());
+            // getSideBar().getPromptHistory().history.add(recentQ, c, 0);
             History.addEntry(question, answer);
 
             return recentQ;
