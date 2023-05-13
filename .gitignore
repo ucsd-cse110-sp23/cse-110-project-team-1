@@ -1,3 +1,2 @@
 *.class
-/build/test-results
-/build/reports
+/build
