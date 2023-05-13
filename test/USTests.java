@@ -19,6 +19,8 @@ import java.lang.InterruptedException;
 import java.io.File;
 import java.awt.*;
 
+import org.javatuples.Triplet;
+
 class MockGPT extends JChatGPT {
     boolean isSuccessful;
     String answer;
@@ -419,6 +421,81 @@ public class USTests {
         Component prompt1 = ph.getHistory().getComponent(1);
         assertEquals(question2, ((RecentQuestion) prompt0).getText());
         assertEquals(question1, ((RecentQuestion) prompt1).getText());
+    }
+
+    /**
+     * User Story 6 Scenario 1: Click the question button in the prompt history
+     * Given some questions are displayed in the Prompt History 
+     * And Q&A of the current questionis shown in the QApanel 
+     * When user clicks on question button
+     * Then question and answer shown in the QApanel
+     */
+    @Test
+    public void US6S1Test() {
+        String filePath = "saveFiles/testingFiles/us6s1.json";
+
+        //given the application is open
+        String question = "question 1";
+        String answer = "question 1 answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, question);
+        MockGPT mockGPT = new MockGPT(true, answer);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
+
+        int beforeQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
+
+        // Record user's question
+        // Current question is displayed
+        app.changeRecording();
+        app.changeRecording();
+
+        int afterQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
+
+        assertEquals("question 1", app.getMainPanel().getQaPanel().getQuestion());
+        assertEquals("question 1 answer", app.getMainPanel().getQaPanel().getAnswer());
+        assertEquals(1, afterQ - beforeQ);
+
+        // when the user clicks the question button
+        int qID1 = 1;
+
+        QAPanel qaPanel1 = app.getMainPanel().getQaPanel();
+        for (Triplet<Integer,String,String> entry : History.initial(null)) {
+            // update QApanel
+            if(qID1 == entry.getValue0()) {
+                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
+                qaPanel1.changeQuestion(qa);
+            }
+        }
+
+        assertEquals("What is Java UI?", app.getMainPanel().getQaPanel().getQuestion());
+
+        // when the user clicks another question button
+        int qID2 = 2;
+
+        QAPanel qaPanel2 = app.getMainPanel().getQaPanel();
+        for (Triplet<Integer,String,String> entry : History.initial(null)) {
+            // update QApanel
+            if(qID2 == entry.getValue0()) {
+                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
+                qaPanel2.changeQuestion(qa);
+            }
+        }
+
+        assertEquals("What's up?", app.getMainPanel().getQaPanel().getQuestion());
+
+        // when the user clicks another question button
+        int qID3 = 3;
+
+        QAPanel qaPanel3 = app.getMainPanel().getQaPanel();
+        for (Triplet<Integer,String,String> entry : History.initial(null)) {
+            // update QApanel
+            if(qID3 == entry.getValue0()) {
+                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
+                qaPanel3.changeQuestion(qa);
+            }
+        }
+
+        assertEquals("question 1", app.getMainPanel().getQaPanel().getQuestion());
     }
 }
 

@@ -562,5 +562,21 @@ public class Tests {
         assertEquals(question, entries.get(0).getValue1());
         assertEquals(answer, entries.get(0).getValue2());
     }
+
+    @Test
+    public void testSetQuestionID() {
+        QAPanel qapanel = new QAPanel(new QuestionAnswer(1, "question 1", "question 1 answer"));
+
+        qapanel.setQuestionID(2);
+
+        assertEquals(2, qapanel.getQuestionID());
+    }
+
+    @Test
+    public void testGetQuestionID() {
+        QAPanel qapanel = new QAPanel(new QuestionAnswer(1, "question 1", "question 1 answer"));
+
+        assertEquals(1, qapanel.getQuestionID());
+    }
 }
 
