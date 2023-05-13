@@ -377,6 +377,7 @@ class PromptHistory extends JPanel{
         histPane.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
+
     public void loadHistUI(){
         //TODO: implement loading history into list
         // String[] example = {"apple", "banana", "truffle", "death", "lasdjf askdjfasdjfagh woeg hiseroignsofjasdkjf kasda"};
@@ -424,11 +425,23 @@ class PromptHistory extends JPanel{
     }
 
     public void dltQuestion(RecentQuestion currQ){
-        //delete the button with ID
+        //delete the currQ Jbutton on promptHistory
         history.remove(currQ);
         revalidate();
     }
 
+    public void clearAll() {
+        //delete all question in json file
+        History.clear();
+        //delete all buttons
+        Component[] components = history.getComponents();
+        for (Component component : components) {
+            if (component instanceof RecentQuestion) {
+                history.remove(component);
+            }
+        }
+        revalidate();
+    }
 }
 
 // the side panel
@@ -451,13 +464,12 @@ class SideBar extends JPanel{
         return clearButton;
     }
 
-    public void clearHistory(){
-        History.clear();
-        //TODO: implement clearing history
-    }
-
     public PromptHistory getPromptHistory(){
         return promptHistory;
+    }
+
+    public void clearHistory(){
+        promptHistory.clearAll();
     }
 }
 
@@ -700,6 +712,8 @@ public class SayIt extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 sideBar.clearHistory();
+                mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
+                currQ = null;
             }
         }
         );
@@ -707,9 +721,12 @@ public class SayIt extends JFrame{
         new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+            if(currQ != null){
                 History.removeEntry(currQ.getQuestionAnswer().getqID());
                 sideBar.getPromptHistory().dltQuestion(currQ);
                 mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
+                currQ = null;
+            }
             }
         }
         );
