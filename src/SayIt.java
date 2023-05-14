@@ -692,6 +692,15 @@ public class SayIt extends JFrame{
         qaPanel.changeQuestion(toDisplay);
     }
 
+    public void deleteClicked(){
+        if(currQ != null){
+            histClass.removeEntry(currQ.getQuestionAnswer().getqID());
+            sideBar.getPromptHistory().dltQuestion(currQ);
+            mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
+            currQ = null;
+        }
+    }
+
     public void addListeners() {
         recButton.addActionListener(
         new ActionListener() {

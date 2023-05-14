@@ -491,5 +491,36 @@ public class USTests {
 
         assertEquals("What is Java UI?", app.getMainPanel().getQaPanel().getQuestion());
     }
+
+            /**
+    * User Story 7 Scenario 1: User deletes a question that is shown
+    * Given the application is open
+    * And the user has already asked exactly one question
+    * When the user clicks the delete button
+    * Then the question and answer should disappear from the main screen. 
+    * And the question should disappear from the prompt history 
+    * side window and history, leaving the prompt 
+    * side window and main display empty */
+    @Test
+    public void US7S1Test() {
+        History history = new History();
+        String filePath = "saveFiles/testingFiles/us7s1.json";
+
+        //given the application is open
+        String question1 = "question 1";
+        String answer1 = "question 1 answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, question1);
+        MockGPT mockGPT = new MockGPT(true, answer1);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
+
+        app.changeRecording();
+
+        app.changeRecording();
+        
+        //when the user clicks the delete button
+        app.deleteClicked();
+
+    }
 }
 
