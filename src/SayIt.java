@@ -685,6 +685,12 @@ public class SayIt extends JFrame{
         }
     }
 
+    public void showPromptHistQuestionOnQAPrompt(RecentQuestion recentQ){
+        QuestionAnswer toDisplay = recentQ.getQuestionAnswer();
+        QAPanel qaPanel = mainPanel.getQaPanel();
+        qaPanel.changeQuestion(toDisplay);
+    }
+
     public void addListeners() {
         recButton.addActionListener(
         new ActionListener() {
@@ -699,16 +705,7 @@ public class SayIt extends JFrame{
                         new MouseAdapter() {
                             @Override
                             public void mousePressed(MouseEvent e) {
-                                int qID = recentQ.questionAnswer.getqID();
-
-                                QAPanel qaPanel = mainPanel.getQaPanel();
-                                for (Triplet<Integer,String,String> entry : History.initial(null)) {
-                                    // update QApanel
-                                    if(qID == entry.getValue0()) {
-                                        QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
-                                        qaPanel.changeQuestion(qa);
-                                    }
-                                }
+                                showPromptHistQuestionOnQAPrompt(recentQ);
                             }
                         }
                     );

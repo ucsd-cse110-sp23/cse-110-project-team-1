@@ -126,7 +126,8 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
+        String filePath = "saveFiles/testingFiles/us1.json";
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
         //when the user has clicked new question
         app.changeRecording();
         //when the user says "What is the smallest city?"
@@ -162,7 +163,8 @@ public class USTests {
         MockWhisper mockWhisper = new MockWhisper(false, question);
         
         MockGPT mockGPT = new MockGPT(false, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
+        String filePath = "saveFiles/testingFiles/us1.json";
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
         // and the user has recorded their prompt
         app.changeRecording();
         app.changeRecording();
@@ -187,13 +189,14 @@ public class USTests {
 
      @Test
      public void US1S3Test(){
+        String filePath = "saveFiles/testingFiles/us1.json";
          //Given that the application is open
          String question = "What is Java UI?";
          String answer = "Java UI is Java UI";
          MockRecorder mockRec = new MockRecorder(false);
          MockWhisper mockWhisper = new MockWhisper(true, question);
          MockGPT mockGPT = new MockGPT(true, answer);
-         SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
+         SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
          //and user has clicked new question
          app.changeRecording();
          //When the user's mic is not connected
@@ -443,6 +446,7 @@ public class USTests {
         SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
 
         int beforeQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
+        System.out.println(beforeQ);
 
         // Record user's question
         // Current question is displayed
@@ -455,47 +459,26 @@ public class USTests {
         assertEquals("question 1 answer", app.getMainPanel().getQaPanel().getAnswer());
         assertEquals(1, afterQ - beforeQ);
 
-        // when the user clicks the question button
-        int qID1 = 1;
+        PromptHistory ph = app.getSideBar().getPromptHistory();
 
-        QAPanel qaPanel1 = app.getMainPanel().getQaPanel();
-        for (Triplet<Integer,String,String> entry : History.initial(null)) {
-            // update QApanel
-            if(qID1 == entry.getValue0()) {
-                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
-                qaPanel1.changeQuestion(qa);
-            }
-        }
+        // when the user clicks the (top ie. most recent) question button
+        int i = 0;
+        Component qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
-        assertEquals("What is Java UI?", app.getMainPanel().getQaPanel().getQuestion());
+        assertEquals("question 1", app.getMainPanel().getQaPanel().getQuestion());
 
-        // when the user clicks another question button
-        int qID2 = 2;
-
-        QAPanel qaPanel2 = app.getMainPanel().getQaPanel();
-        for (Triplet<Integer,String,String> entry : History.initial(null)) {
-            // update QApanel
-            if(qID2 == entry.getValue0()) {
-                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
-                qaPanel2.changeQuestion(qa);
-            }
-        }
+        // when the user clicks another (second) question button
+        qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
         assertEquals("What's up?", app.getMainPanel().getQaPanel().getQuestion());
 
-        // when the user clicks another question button
-        int qID3 = 3;
+        // when the user clicks another (third) question button
+        qa = ph.getHistory().getComponent(i);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
-        QAPanel qaPanel3 = app.getMainPanel().getQaPanel();
-        for (Triplet<Integer,String,String> entry : History.initial(null)) {
-            // update QApanel
-            if(qID3 == entry.getValue0()) {
-                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
-                qaPanel3.changeQuestion(qa);
-            }
-        }
-
-        assertEquals("question 1", app.getMainPanel().getQaPanel().getQuestion());
+        assertEquals("What is Java UI?", app.getMainPanel().getQaPanel().getQuestion());
     }
 }
 
