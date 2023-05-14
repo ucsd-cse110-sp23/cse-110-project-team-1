@@ -288,7 +288,7 @@ public class Tests {
     }
 
     /**
-     * PromptHistory tests
+     * PromptHistory tests (US4)
      */
     @Test
     public void testdisplayAskedQinBar(){
@@ -304,6 +304,7 @@ public class Tests {
         //   }
         // }
     }
+
 
     @Test
     public void testdisplayAskedQConcat(){
@@ -358,6 +359,8 @@ public class Tests {
     /**
      * SayIt tests 
      */
+
+
 
     /**
      * Recorder tests
@@ -584,5 +587,45 @@ public class Tests {
 
         assertEquals(1, qapanel.getQuestionID());
     }
-}
 
+
+    @Test
+    public void testClickedQuestionFromDatabase(){
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), "saveFiles/testingFiles/readOnlyHistory.json");
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        int i = 0;
+        Component qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+
+        assertEquals("Hey Alexa, what happened to Meta?", app.getMainPanel().getQaPanel().getQuestion());
+
+        qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+        assertEquals("Hey Siri, do you know the top 10 Japanese pop songs today?", app.getMainPanel().getQaPanel().getQuestion());
+        qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+        assertEquals("Hey Google, what is Japanese pop?", app.getMainPanel().getQaPanel().getQuestion());
+        //includes 1 because of Jpanel for UI usage
+        assertEquals(3+1, ph.getHistory().getComponents().length);
+    }
+
+    @Test
+    public void testClickedAnswerFromDatabase(){
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), "saveFiles/testingFiles/readOnlyHistory.json");
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        int i = 0;
+        Component qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+
+        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive.", app.getMainPanel().getQaPanel().getAnswer());
+        qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+        assertEquals("\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services.", app.getMainPanel().getQaPanel().getAnswer());
+        qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+        assertEquals("\n\nJapanese pop, or J-pop, is a musical genre that originated in Japan in the 1990s. It is widely known for its catchy, upbeat melodies, sophisticated production, and often over-the-top visual presentations. Common themes in J-pop include subject matter relating to love, romance, light themes and family. J-pop is often seen as a commercial, mainstream genre, though some artists explore more experimental or alternative themes in their music."
+        , app.getMainPanel().getQaPanel().getAnswer());
+        //includes 1 because of Jpanel for UI usage
+        assertEquals(3+1, ph.getHistory().getComponents().length);
+    }
+}

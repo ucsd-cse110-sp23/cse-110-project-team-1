@@ -495,7 +495,6 @@ public class SayIt extends JFrame{
     JWhisper whisper;
     JRecorder recorder;
 
-    static int mostRecentQID=-1;//keeps track of the last used QID
     // testing purpose
     //int i;
 
@@ -561,7 +560,6 @@ public class SayIt extends JFrame{
         // Load history and add listener
         for (Triplet<Integer,String,String> entry : histClass.initial(saveFile)) {
             RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
-            mostRecentQID = Math.max(mostRecentQID, entry.getValue0());
             addListenerToRecentQ(recentQ);
         }
 
@@ -624,23 +622,14 @@ public class SayIt extends JFrame{
             qaPanel.changeAnswer(answer);
             //int numEntriesJson = History.initial(null).size();
 
-            qaPanel.setQuestionID(++mostRecentQID);
             RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
             addListenerToRecentQ(recentQ);
             //set the current question on screen to be 
             currQ = recentQ;
+            //set the delete button to be enabled (can delete now)
             dltButton.setEnabled(true);
-            // GridBagConstraints c = new GridBagConstraints();
-            // c.fill = GridBagConstraints.HORIZONTAL;
-            // // c.anchor = GridBagConstraints.NORTH;
-            // c.weightx = 1;
-            // // c.weighty = 0.00001;
-            // c.gridx = 0;
-            // c.gridy = GridBagConstraints.RELATIVE;
-            // //c.weighty = 1.0;
-            // RecentQuestion recentQ = new RecentQuestion(qaPanel.getQuestionAnswer());
-            // getSideBar().getPromptHistory().history.add(recentQ, c, 0);
-            histClass.addEntry(question, answer);
+
+            qaPanel.setQuestionID(histClass.addEntry(question, answer));
 
             return recentQ;
         } catch( IOException io) {
@@ -693,6 +682,16 @@ public class SayIt extends JFrame{
         }
     }
 
+    public History getHistClass(){
+        return histClass;
+    }
+
+    public void showPromptHistQuestionOnQAPrompt(RecentQuestion recentQ){
+        QuestionAnswer toDisplay = recentQ.getQuestionAnswer();
+        QAPanel qaPanel = mainPanel.getQaPanel();
+        qaPanel.changeQuestion(toDisplay);
+    }
+
     public void addListeners() {
         recButton.addActionListener(
         new ActionListener() {
@@ -707,16 +706,7 @@ public class SayIt extends JFrame{
                         new MouseAdapter() {
                             @Override
                             public void mousePressed(MouseEvent e) {
-                                int qID = recentQ.questionAnswer.getqID();
-
-                                QAPanel qaPanel = mainPanel.getQaPanel();
-                                for (Triplet<Integer,String,String> entry : histClass.initial(null)) {
-                                    // update QApanel
-                                    if(qID == entry.getValue0()) {
-                                        QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
-                                        qaPanel.changeQuestion(qa);
-                                    }
-                                }
+                                showPromptHistQuestionOnQAPrompt(recentQ);
                             }
                         }
                     );
