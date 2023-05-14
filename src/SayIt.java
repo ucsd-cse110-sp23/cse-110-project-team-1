@@ -490,8 +490,9 @@ public class SayIt extends JFrame{
     JWhisper whisper;
     JRecorder recorder;
 
+    static int mostRecentQID=-1;//keeps track of the last used QID
     // testing purpose
-    int i;
+    //int i;
 
     /**
      * @return panel housing the record button and 
@@ -521,7 +522,7 @@ public class SayIt extends JFrame{
      * @param recorder
      */
     public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile) {
-        i = 0;
+        //i = 0;
 
         setTitle("SayIt Assistant");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -552,25 +553,8 @@ public class SayIt extends JFrame{
         // Load history and add listener
         for (Triplet<Integer,String,String> entry : History.initial(saveFile)) {
             RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
-            recentQ.addMouseListener(
-                new MouseAdapter() {
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        int qID = recentQ.questionAnswer.getqID();
-                        SayIt.setCurrQ(recentQ);
-                        System.out.println(recentQ.getQuestionAnswer().getQuestion());
-                        QAPanel qaPanel = mainPanel.getQaPanel();
-                        for (Triplet<Integer,String,String> entry : History.initial(null)) {
-                            // update QApanel
-                            if(qID == entry.getValue0()) {
-                                QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
-                                //qaPanel.changeAnswer(entry.getValue2());
-                                qaPanel.changeQuestion(qa);
-                            }
-                        }
-                    }
-                }
-            );
+            mostRecentQID = Math.max(mostRecentQID, entry.getValue0());
+            addListenerToRecentQ(recentQ);
         }
 
         this.mainPanel = new MainPanel();
@@ -588,8 +572,33 @@ public class SayIt extends JFrame{
         clearButton = sideBar.getClearButton();
         dltButton = mainPanel.getdltButton();
 
+        dltButton.setEnabled(false);
+
         addListeners();
 
+    }
+
+    private void addListenerToRecentQ(RecentQuestion recentQ){
+        recentQ.addMouseListener(
+            new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    int qID = recentQ.questionAnswer.getqID();
+                    SayIt.setCurrQ(recentQ);
+                    System.out.println(recentQ.getQuestionAnswer().getQuestion());
+                    QAPanel qaPanel = mainPanel.getQaPanel();
+                    for (Triplet<Integer,String,String> entry : History.initial(null)) {
+                        // update QApanel
+                        if(qID == entry.getValue0()) {
+                            QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
+                            //qaPanel.changeAnswer(entry.getValue2());
+                            qaPanel.changeQuestion(qa);
+                        }
+                    }
+                    dltButton.setEnabled(true);
+                }
+            }
+        );
     }
 
     private RecentQuestion finishRecording() {
@@ -605,14 +614,14 @@ public class SayIt extends JFrame{
             // answer = "test answer " + i;
             // i++;
             qaPanel.changeAnswer(answer);
-            int numEntriesJson = History.initial(null).size();
+            //int numEntriesJson = History.initial(null).size();
 
-            // WARNING: I don't understand why setQuestionID also creates question button in the prompt history
-            // when using addQA method, it creates two buttons: one works but another doesn't work 
-            //SHOULD BE RESOLVED (Sue)
-            qaPanel.setQuestionID(numEntriesJson + 1);
+            qaPanel.setQuestionID(++mostRecentQID);
             RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
-
+            addListenerToRecentQ(recentQ);
+            //set the current question on screen to be 
+            currQ = recentQ;
+            dltButton.setEnabled(true);
             // GridBagConstraints c = new GridBagConstraints();
             // c.fill = GridBagConstraints.HORIZONTAL;
             // // c.anchor = GridBagConstraints.NORTH;
