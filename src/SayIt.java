@@ -359,6 +359,7 @@ class PromptHistory extends JPanel{
     JLabel title;
     JPanel history;
     JScrollPane histPane;
+    History histClass;
 
     PromptHistory(){
         // history = new JList<String>(getHistory());
@@ -430,9 +431,10 @@ class PromptHistory extends JPanel{
         revalidate();
     }
 
+    /**
+     * only does the ui part of clearing questions (removes all buttons)
+     */
     public void clearAll() {
-        //delete all question in json file
-        History.clear();
         //delete all buttons
         Component[] components = history.getComponents();
         for (Component component : components) {
@@ -468,6 +470,9 @@ class SideBar extends JPanel{
         return promptHistory;
     }
 
+    /**
+     * only does the UI part of clearing the buttons from prompt history
+     */
     public void clearHistory(){
         promptHistory.clearAll();
     }
@@ -493,6 +498,8 @@ public class SayIt extends JFrame{
     static int mostRecentQID=-1;//keeps track of the last used QID
     // testing purpose
     //int i;
+
+    History histClass;
 
     /**
      * @return panel housing the record button and 
@@ -540,6 +547,7 @@ public class SayIt extends JFrame{
         this.chatGPT = chatGPT;
         this.whisper = whisper;
         this.recorder = recorder;
+        histClass = new History();
 
         sideBar = new SideBar();
         c.fill = GridBagConstraints.BOTH;
@@ -551,7 +559,7 @@ public class SayIt extends JFrame{
         // sideBar.promptHistory.loadHist(saveFile);
 
         // Load history and add listener
-        for (Triplet<Integer,String,String> entry : History.initial(saveFile)) {
+        for (Triplet<Integer,String,String> entry : histClass.initial(saveFile)) {
             RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
             mostRecentQID = Math.max(mostRecentQID, entry.getValue0());
             addListenerToRecentQ(recentQ);
@@ -587,7 +595,7 @@ public class SayIt extends JFrame{
                     SayIt.setCurrQ(recentQ);
                     System.out.println(recentQ.getQuestionAnswer().getQuestion());
                     QAPanel qaPanel = mainPanel.getQaPanel();
-                    for (Triplet<Integer,String,String> entry : History.initial(null)) {
+                    for (Triplet<Integer,String,String> entry : histClass.initial(null)) {
                         // update QApanel
                         if(qID == entry.getValue0()) {
                             QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
@@ -632,7 +640,7 @@ public class SayIt extends JFrame{
             // //c.weighty = 1.0;
             // RecentQuestion recentQ = new RecentQuestion(qaPanel.getQuestionAnswer());
             // getSideBar().getPromptHistory().history.add(recentQ, c, 0);
-            History.addEntry(question, answer);
+            histClass.addEntry(question, answer);
 
             return recentQ;
         } catch( IOException io) {
@@ -702,7 +710,7 @@ public class SayIt extends JFrame{
                                 int qID = recentQ.questionAnswer.getqID();
 
                                 QAPanel qaPanel = mainPanel.getQaPanel();
-                                for (Triplet<Integer,String,String> entry : History.initial(null)) {
+                                for (Triplet<Integer,String,String> entry : histClass.initial(null)) {
                                     // update QApanel
                                     if(qID == entry.getValue0()) {
                                         QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
@@ -720,7 +728,9 @@ public class SayIt extends JFrame{
         new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                histClass.clear();
                 sideBar.clearHistory();
+                
                 mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
                 currQ = null;
             }
@@ -731,7 +741,7 @@ public class SayIt extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
             if(currQ != null){
-                History.removeEntry(currQ.getQuestionAnswer().getqID());
+                histClass.removeEntry(currQ.getQuestionAnswer().getqID());
                 sideBar.getPromptHistory().dltQuestion(currQ);
                 mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
                 currQ = null;

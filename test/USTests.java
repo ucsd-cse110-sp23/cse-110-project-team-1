@@ -245,12 +245,13 @@ public class USTests {
      */
     @Test
     public void US3S1Test(){
-        History.initial(null);
-        History.clear();
+        History history = new History();
+        history.initial(null);
+        history.clear();
         boolean test = false;
         Object obj;
         try {
-            obj = new JSONParser().parse(new FileReader(History.savePath));
+            obj = new JSONParser().parse(new FileReader(history.savePath));
         } catch (org.json.simple.parser.ParseException e) {
             test = true;
         } catch (IOException e) {
@@ -268,7 +269,7 @@ public class USTests {
         JSONObject saveBody = null;
         try {
 
-            obj = new JSONParser().parse(new FileReader(History.savePath));
+            obj = new JSONParser().parse(new FileReader(history.savePath));
             saveBody = (JSONObject) obj;
         } catch (IOException io) {
             test = false;
@@ -280,7 +281,7 @@ public class USTests {
         }
         assertTrue(test);
         JSONObject entry = (JSONObject)saveBody.get("1");
-        assertEquals(answer, entry.get(History.ANSWER_FIELD));
+        assertEquals(answer, entry.get(history.ANSWER_FIELD));
     }
     /*
      * User Story 3 Scenario 2: Whisper has error
@@ -290,8 +291,9 @@ public class USTests {
      */
     @Test 
     public void US3S2Test() {
-        History.initial(null);
-        History.clear();
+        History history = new History();
+        history.initial(null);
+        history.clear();
         String question = "What is Java Ui?";
         String answer = "Java Ui is a way to display graphical information with Java.";
         MockRecorder mockRec = new MockRecorder(true);
@@ -304,7 +306,7 @@ public class USTests {
         boolean test = false;
         try {
 
-            Object obj = new JSONParser().parse(new FileReader(History.savePath));
+            Object obj = new JSONParser().parse(new FileReader(history.savePath));
             saveBody = (JSONObject) obj;
         } catch (IOException io) {
             test = false;
@@ -432,6 +434,7 @@ public class USTests {
      */
     @Test
     public void US6S1Test() {
+        History history = new History();
         String filePath = "saveFiles/testingFiles/us6s1.json";
 
         //given the application is open
@@ -459,7 +462,7 @@ public class USTests {
         int qID1 = 1;
 
         QAPanel qaPanel1 = app.getMainPanel().getQaPanel();
-        for (Triplet<Integer,String,String> entry : History.initial(null)) {
+        for (Triplet<Integer,String,String> entry : history.initial(filePath)) {
             // update QApanel
             if(qID1 == entry.getValue0()) {
                 QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
@@ -473,7 +476,7 @@ public class USTests {
         int qID2 = 2;
 
         QAPanel qaPanel2 = app.getMainPanel().getQaPanel();
-        for (Triplet<Integer,String,String> entry : History.initial(null)) {
+        for (Triplet<Integer,String,String> entry : history.initial(filePath)) {
             // update QApanel
             if(qID2 == entry.getValue0()) {
                 QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
@@ -487,7 +490,7 @@ public class USTests {
         int qID3 = 3;
 
         QAPanel qaPanel3 = app.getMainPanel().getQaPanel();
-        for (Triplet<Integer,String,String> entry : History.initial(null)) {
+        for (Triplet<Integer,String,String> entry : history.initial(filePath)) {
             // update QApanel
             if(qID3 == entry.getValue0()) {
                 QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());

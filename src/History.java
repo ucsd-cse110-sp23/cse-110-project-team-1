@@ -11,12 +11,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
 public class History {
-    public static final String QUESTION_FIELD = "Question";
-    public static String savePath = "saveFiles/history.json";
-    public static final String ANSWER_FIELD = "Answer";
-    static JSONObject saveBody;
+    public final String QUESTION_FIELD = "Question";
+    public String savePath = "saveFiles/history.json";
+    public final String ANSWER_FIELD = "Answer";
+    JSONObject saveBody;
     //static JSONArray entries;
-    static ArrayList<Triplet<Integer,String,String>> entries;
+    ArrayList<Triplet<Integer,String,String>> entries;
 
     /*
      * Intialize method to be called to recieve all previous prompts and answers
@@ -27,7 +27,7 @@ public class History {
      * @return pre-existing prompts in triplet form
      */
     @SuppressWarnings("unchecked")
-    public static ArrayList<Triplet<Integer,String,String>> initial(String filePath) {
+    public ArrayList<Triplet<Integer,String,String>> initial(String filePath) {
         //Tries to create new save File if one is not present 
         if (filePath != null) {
             savePath = filePath;
@@ -66,7 +66,7 @@ public class History {
      * Uses binary search to quickly get entry by ID
      * @param id of entry to be searched
     */
-    private static int getEntryIndex(int id) {
+    private int getEntryIndex(int id) {
         int left = 0, right = entries.size() - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
@@ -91,7 +91,7 @@ public class History {
      * Saves entry into a Json file with the id of array
      * @returns -1 if initial is not called else id of prompt
      */
-    public static int addEntry(String prompt, String answer) {
+    public int addEntry(String prompt, String answer) {
 
         //Check if initial hasn't been called
         if (entries == null) {
@@ -121,7 +121,7 @@ public class History {
      * @param id of the entry to be deleted
      * removes entry from saveFile
      */
-    public static void removeEntry(int id) {
+    public void removeEntry(int id) {
         int index = getEntryIndex(id);  //tries to find entry in array
         System.out.println("id: " + id + ", index: " + index);
         if (index == -1) {  //if not present do nothing and return 
@@ -138,7 +138,7 @@ public class History {
      * Helper method to write to saveFile
      */
     @SuppressWarnings("unchecked")
-    private static void writeToFile() {
+    private void writeToFile() {
         saveBody.clear();
         for (Triplet<Integer,String,String> info: entries) {
             JSONObject newEntry = new JSONObject();
@@ -161,7 +161,7 @@ public class History {
      * Clear all method to delete all entries in saveFile
      * Call initial first 
      */
-    public static void clear() {
+    public void clear() {
         try {
             PrintWriter pw = new PrintWriter(savePath);
             pw.write("");
@@ -176,18 +176,18 @@ public class History {
     }
 
     /*Testing purposes*/
-    public static void main(String[] args) {
-        History.initial(null);
-        History.clear();
-        History.addEntry("What is java UI?", "Idk figure it out bro.");
-        History.addEntry("Hi", "bye");
-        History.addEntry("this should be prompt 3", "Okay prompt 3");
-        History.removeEntry(0);
-        History.removeEntry(0);
-        History.removeEntry(0);
-        History.addEntry("What is java UI?", "Idk figure it out bro.");
-        History.addEntry("Hi", "bye");
-        History.removeEntry(1);
-        History.removeEntry(5);
+    public void main(String[] args) {
+        this.initial(null);
+        this.clear();
+        this.addEntry("What is java UI?", "Idk figure it out bro.");
+        this.addEntry("Hi", "bye");
+        this.addEntry("this should be prompt 3", "Okay prompt 3");
+        this.removeEntry(0);
+        this.removeEntry(0);
+        this.removeEntry(0);
+        this.addEntry("What is java UI?", "Idk figure it out bro.");
+        this.addEntry("Hi", "bye");
+        this.removeEntry(1);
+        this.removeEntry(5);
     }
 }
