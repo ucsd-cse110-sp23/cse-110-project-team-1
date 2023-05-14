@@ -398,25 +398,27 @@ public class Tests {
      */
     @Test
     public void testInitializeNoFileFound() {
+        History history = new History();
         String filePath = "saveFiles/testingFiles/tempHistoryNoFile.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
         }
-        History.initial(filePath);
+        history.initial(filePath);
         assertTrue(tempHistory.exists());
-        assertTrue(History.saveBody.isEmpty());
+        assertTrue(history.saveBody.isEmpty());
     }
     /*
      * Dont delete the historyTestingSave
      */
     @Test
     public void testInitializeFileFound() {
+        History history = new History();
         String filePath = "saveFiles/testingFiles/historyTestingSave.json";
         File save = new File(filePath);
         assertTrue(save.exists());
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
-        assertFalse(History.saveBody.isEmpty());
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        assertFalse(history.saveBody.isEmpty());
         assertEquals(1, entries.get(0).getValue0());
         assertEquals("\n\nJapanese pop, or J-pop, is a musical genre that originated in Japan in the 1990s. It is widely known for its catchy, upbeat melodies, sophisticated production, and often over-the-top visual presentations. Common themes in J-pop include subject matter relating to love, romance, light themes and family. J-pop is often seen as a commercial, mainstream genre, though some artists explore more experimental or alternative themes in their music."
         ,entries.get(0).getValue2());
@@ -443,18 +445,19 @@ public class Tests {
 
     @Test
     public void testAddEntry() {
+        History history = new History();
         String filePath = "saveFiles/testingFiles/tempHistory.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
         }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
         assertEquals(0, entries.size());
         String question = null;
         String answer = "testA";
         for (int i = 0; i < 10; i++) {
-            History.addEntry(question, answer);
-            entries = History.initial(filePath);
+            history.addEntry(question, answer);
+            entries = history.initial(filePath);
             assertEquals(i+1, entries.size());
             assertEquals(i+1, entries.get(i).getValue0());
             assertEquals(question, entries.get(i).getValue1());
@@ -463,18 +466,19 @@ public class Tests {
     }
     @Test
     public void testRemoveEntriesBackwards(){
+        History history = new History();
         String filePath = "saveFiles/testingFiles/tempHistoryRemoveBackwards.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
         }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
         assertEquals(0, entries.size());
         String question = null;
         String answer = "testA";
         for (int i = 0; i < 10; i++) {
-            History.addEntry(question, answer);
-            entries = History.initial(filePath);
+            history.addEntry(question, answer);
+            entries = history.initial(filePath);
             assertEquals(i+1, entries.size());
             assertEquals(i+1, entries.get(i).getValue0());
             assertEquals(question, entries.get(i).getValue1());
@@ -483,32 +487,33 @@ public class Tests {
 
         assertEquals(10, entries.size());
         for (int i = 10; i > 1; i--) { 
-            entries = History.initial(filePath);
+            entries = history.initial(filePath);
             assertEquals(i, entries.size());
             assertEquals(i, entries.get(i-1).getValue0());
             assertEquals(question, entries.get(i-1).getValue1());
             assertEquals(answer, entries.get(i-1).getValue2());
-            History.removeEntry(i);
+            history.removeEntry(i);
         }
         //remove nothing
-        History.removeEntry(1);
+        history.removeEntry(1);
         assertEquals(0, entries.size());
     }
 
     @Test
     public void testRemoveEntryForwards(){
+        History history = new History();
         String filePath = "saveFiles/testingFiles/tempHistoryRemoveForward.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
         }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
         assertEquals(0, entries.size());
         String question = null;
         String answer = "testA";
         for (int i = 0; i < 10; i++) {
-            History.addEntry(question, answer);
-            entries = History.initial(filePath);
+            history.addEntry(question, answer);
+            entries = history.initial(filePath);
             assertEquals(i+1, entries.size());
             assertEquals(i+1, entries.get(i).getValue0());
             assertEquals(question, entries.get(i).getValue1());
@@ -519,32 +524,33 @@ public class Tests {
         int savedSize = entries.size();
 
         for (int i = 1; i < 10; i++) {
-            entries = History.initial(filePath);
+            entries = history.initial(filePath);
             assertEquals(i, entries.get(0).getValue0());
             assertEquals(question, entries.get(0).getValue1());
             assertEquals(answer, entries.get(0).getValue2());
-            History.removeEntry(i);
+            history.removeEntry(i);
             assertEquals(savedSize - i, entries.size());
         }
 
-        History.removeEntry(savedSize);
+        history.removeEntry(savedSize);
         assertEquals(0, entries.size());
     }
 
     @Test
     public void testHistoryClear(){
+        History history = new History();
         String filePath = "saveFiles/testingFiles/tempHistoryRemove.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
             assertTrue(tempHistory.delete());
         }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(History.initial(filePath));
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
         assertEquals(0, entries.size());
         String question = null;
         String answer = "testA";
         for (int i = 0; i < 10; i++) {
-            History.addEntry(question, answer);
-            entries = History.initial(filePath);
+            history.addEntry(question, answer);
+            entries = history.initial(filePath);
             assertEquals(i+1, entries.size());
             assertEquals(i+1, entries.get(i).getValue0());
             assertEquals(question, entries.get(i).getValue1());
@@ -553,10 +559,10 @@ public class Tests {
 
         assertEquals(10, entries.size());
 
-        History.clear();
+        history.clear();
         assertEquals(0, entries.size());
 
-        History.addEntry(question, answer);
+        history.addEntry(question, answer);
         assertEquals(1, entries.size());
         assertEquals(1, entries.get(0).getValue0());
         assertEquals(question, entries.get(0).getValue1());
