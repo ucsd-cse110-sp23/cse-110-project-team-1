@@ -628,4 +628,18 @@ public class Tests {
         //includes 1 because of Jpanel for UI usage
         assertEquals(3+1, ph.getHistory().getComponents().length);
     }
+    @Test 
+    public void testDeleteQAFromMainUI() {
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), "saveFiles/testingFiles/readOnlyHistory.json");
+        QAPanel panel = app.getMainPanel().getQaPanel();
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        Component qa = ph.getHistory().getComponent(0);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive.", panel.getAnswer());
+        assertEquals("Hey Alexa, what happened to Meta?", panel.getQuestion());
+        assertTrue(SayIt.getCurrQ() != null);
+        app.deleteClicked();
+        assertEquals(null, panel.getAnswer());
+        assertEquals(null, panel.getQuestion());
+    }
 }
