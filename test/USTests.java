@@ -517,9 +517,88 @@ public class USTests {
         app.changeRecording();
 
         app.changeRecording();
-        
+
         //when the user clicks the delete button
         app.deleteClicked();
+
+    }
+
+    /**
+     * Scenario 2: User deletes an empty question 
+     *  Given the application is open
+     *  When there is no question answer displayed
+     *  Then there is no delete button
+     */
+    @Test
+    public void US7S2Test(){
+        History history = new History();
+        String filePath = "saveFiles/testingFiles/us7s2.json";
+
+        String question1 = "question 1";
+        String answer1 = "question 1 answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, question1);
+        MockGPT mockGPT = new MockGPT(true, answer1);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
+        //There is no deleteButton enabled
+        assertEquals(null, app.getCurrQ());
+    }
+
+    /*
+     * Scenario 3: User deletes a question with multiple questions asked
+     * Given the application is open
+     * And the user has already asked more than one question
+     * When the user clicks the delete button
+     * Then the question and answer should disappear from the main screen. 
+     * And the question should disappear from the prompt history side window and history. 
+     * However it should also leave other asked questions untouched.
+     */
+    @Test
+    public void US7S3Test(){
+        History history = new History();
+        String filePath = "saveFiles/testingFiles/us7s2.json";
+
+        String question1 = "question 1";
+        String answer1 = "question 1 answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, question1);
+        MockGPT mockGPT = new MockGPT(true, answer1);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
+
+        //asked 1st question
+        app.changeRecording();
+        app.changeRecording();
+
+        //asked 2nd question
+        app.changeRecording();
+        app.changeRecording();
+        
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        int i = 0;
+        Component qa = ph.getHistory().getComponent(i);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+
+        //get the 2nd Question ID
+        int question2ID = ((RecentQuestion)qa).getQuestionAnswer().getqID();
+
+        qa = ph.getHistory().getComponent(i++);
+        app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
+
+        //get the 1st question ID
+        int question1ID = ((RecentQuestion)qa).getQuestionAnswer().getqID();
+
+        //delete the currentQuestion
+        app.deleteClicked();
+
+        assertEquals(question1ID, ((RecentQuestion)qa).getQuestionAnswer().getqID());
+
+
+
+
+
+
+
+
 
     }
 }
