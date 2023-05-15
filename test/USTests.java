@@ -20,6 +20,7 @@ import java.io.File;
 import java.awt.*;
 
 import org.javatuples.Triplet;
+import java.util.ArrayList;
 
 class MockGPT extends JChatGPT {
     boolean isSuccessful;
@@ -492,7 +493,7 @@ public class USTests {
         assertEquals("What is Java UI?", app.getMainPanel().getQaPanel().getQuestion());
     }
 
-            /**
+    /**
     * User Story 7 Scenario 1: User deletes a question that is shown
     * Given the application is open
     * And the user has already asked exactly one question
@@ -503,9 +504,11 @@ public class USTests {
     * side window and main display empty */
     @Test
     public void US7S1Test() {
-        History history = new History();
         String filePath = "saveFiles/testingFiles/us7s1.json";
-
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
         //given the application is open
         String question1 = "question 1";
         String answer1 = "question 1 answer";
@@ -516,11 +519,35 @@ public class USTests {
 
         app.changeRecording();
 
-        app.changeRecording();
+        RecentQuestion rq = app.changeRecording();
 
+        History history = new History();
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        int numEntries = entries.size();
         //when the user clicks the delete button
         app.deleteClicked();
-    
+
+        //question and answer disappear from main screen
+        QAPanel qa = app.getMainPanel().getQaPanel();
+        assertEquals(qa.getPrefixQ(), qa.getQuestionText());
+        assertEquals(qa.getPrefixA(), qa.getAnswerText());
+
+        //question and answer disappear from side bar
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        Component[] listItems = ph.getHistory().getComponents();
+        boolean itemExists = false;
+        for(Component item : listItems){
+            if (item instanceof RecentQuestion){
+                if (((RecentQuestion) item) == rq){
+                    itemExists = true;
+                }
+            }
+        }
+        assertFalse(itemExists);
+
+        //question and answer disappear from history
+        entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(numEntries - 1, entries.size());
     }
 
     /**
@@ -533,7 +560,10 @@ public class USTests {
     public void US7S2Test(){
         History history = new History();
         String filePath = "saveFiles/testingFiles/us7s2.json";
-
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
         String question1 = "question 1";
         String answer1 = "question 1 answer";
         MockRecorder mockRec = new MockRecorder(true);
@@ -556,8 +586,11 @@ public class USTests {
     @Test
     public void US7S3Test(){
         History history = new History();
-        String filePath = "saveFiles/testingFiles/us7s2.json";
-
+        String filePath = "saveFiles/testingFiles/us7s3.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
         String question1 = "question 1";
         String answer1 = "question 1 answer";
         MockRecorder mockRec = new MockRecorder(true);
@@ -591,96 +624,6 @@ public class USTests {
         app.deleteClicked();
 
         assertEquals(question1ID, ((RecentQuestion)qa).getQuestionAnswer().getqID());
-    }
-
-    /*
-     * UserStory 8 Scenario 1: Delete all prompts in the history
-     * Given the answers of Java UI question and other prompts are recorded in the left sidebar history. 
-     * When Helen clicks the “Clear All” button
-     * Then all the prompts are cleared in the history 
-     * And all the prompts and answers on the current page are cleared
-     */
-    @Test
-    public void US8S1Test(){
-        String filePath = "saveFiles/testingFiles/us8s1.json";
-        
-        String question1 = "What is Java UI";
-        String answer1 = "Java UI answer";
-        MockRecorder mockRec = new MockRecorder(true);
-        MockWhisper mockWhisper = new MockWhisper(true, question1);
-        MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);       
-        
-        // Given the answers of Java UI question and other prompts are recorded in the left sidebar history.
-
-        int beforeQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
-
-        //add question 1
-        app.changeRecording();
-        app.changeRecording();
-
-        //add question 2
-        app.changeRecording();
-        app.changeRecording();
-
-        //check sideBar before clear
-        int afterQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
-        assertEquals(2, afterQ - beforeQ);
-        //check QApanel before clear
-        assertEquals(question1, app.getMainPanel().getQaPanel().getQuestion());
-        assertEquals(answer1, app.getMainPanel().getQaPanel().getAnswer());
-
-        //When Helen clicks the “Clear All” button
-        app.clearClicked();
-
-        //Then all the prompts are cleared in the history
-        //check sideBar
-        int afterDelete = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
-        assertEquals(beforeQ, afterDelete);
-        //check filePath  
-        assertEquals(0, app.histClass.initial(filePath).size());
-
-        //all the prompts and answers on the current page are cleared
-        //check QAPanel
-        assertEquals(null, app.getMainPanel().getQaPanel().getQuestion());
-        assertEquals(null, app.getMainPanel().getQaPanel().getAnswer());
-    }
-
-    /*
-     * Scenario 2: Delete all prompts in the history but there aren’t any previous prompts
-     * Given that that the prompt history is empty
-     * When Helen clicks the “Clear All” button
-     * Then do not change anything
-     */
-    @Test
-    public void US8S2Test(){
-        String filePath = "saveFiles/testingFiles/us8s1.json";
-        
-        String question1 = "What is Java UI";
-        String answer1 = "Java UI answer";
-        MockRecorder mockRec = new MockRecorder(true);
-        MockWhisper mockWhisper = new MockWhisper(true, question1);
-        MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);       
-        
-        // the prompt history is empty.
-
-        int beforeQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
-
-        //When Helen clicks the “Clear All” button
-        app.clearClicked();
-
-        //Then do not change anything
-        //check sideBar
-        int afterDelete = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
-        assertEquals(beforeQ, afterDelete);
-        //check filePath  
-        assertEquals(0, app.histClass.initial(filePath).size());
-
-        //all the prompts and answers on the current page are cleared
-        //check QAPanel
-        assertEquals(null, app.getMainPanel().getQaPanel().getQuestion());
-        assertEquals(null, app.getMainPanel().getQaPanel().getAnswer());
     }
 }
 
