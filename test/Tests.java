@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import org.hamcrest.core.IsInstanceOf;
 import org.javatuples.Triplet;
 
 import java.io.File;
@@ -630,16 +632,118 @@ public class Tests {
     }
     @Test 
     public void testDeleteQAFromMainUI() {
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), "saveFiles/testingFiles/readOnlyHistory.json");
+        History history = new History();
+        String filePath = "saveFiles/testingFiles/testDelQAFromMainUI.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        String question = "Question ";
+        String answer = "Answer ";
+        int end = 10;
+        for (int i = 0; i < end; i++) {
+            history.addEntry(question + i, answer + i);
+        }
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         Component qa = ph.getHistory().getComponent(0);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
-        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive.", panel.getAnswer());
-        assertEquals("Hey Alexa, what happened to Meta?", panel.getQuestion());
+        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(question + (end-1), panel.getQuestion());
         assertTrue(SayIt.getCurrQ() != null);
         app.deleteClicked();
         assertEquals(null, panel.getAnswer());
         assertEquals(null, panel.getQuestion());
+    }
+
+    @Test 
+    public void testDeleteQAFromSideBar() {
+        //intialize file
+        History history = new History();
+        String filePath = "saveFiles/testingFiles/testDeleteQAFromSideBar.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        String question = "Question ";
+        String answer = "Answer ";
+        int end = 10;
+        for (int i = 0; i < end; i++) {
+            history.addEntry(question + i, answer + i);
+        }
+
+        //start the app
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        QAPanel panel = app.getMainPanel().getQaPanel();
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        //get number of items in prompt history
+        Component[] listItems = ph.getHistory().getComponents();
+        int numItems = listItems.length;
+        //click on the question
+        Component qa = ph.getHistory().getComponent(0);
+        RecentQuestion rq = (RecentQuestion) qa;
+        app.showPromptHistQuestionOnQAPrompt(rq);
+
+        //check it's the correct question/answer
+        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(question + (end-1), panel.getQuestion());
+        //delete it
+        assertTrue(SayIt.getCurrQ() != null);
+        app.deleteClicked();
+
+        listItems = ph.getHistory().getComponents();
+        assertEquals(numItems - 1, listItems.length);
+        boolean itemExists = false;
+        for(Component item : listItems){
+            if (item instanceof RecentQuestion){
+                if (((RecentQuestion) item) == rq){
+                    itemExists = true;
+                }
+            }
+        }
+        assertFalse(itemExists);
+    }
+
+    @Test 
+    public void testDeleteQAwHist() {
+        //intialize file
+        History history = new History();
+        String filePath = "saveFiles/testingFiles/testDeleteQAwHist.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        String question = "Question ";
+        String answer = "Answer ";
+        int end = 10;
+        for (int i = 0; i < end; i++) {
+            history.addEntry(question + i, answer + i);
+        }
+        entries = new ArrayList<>(history.initial(filePath));
+        
+        int numEntries = entries.size();
+        //start the app
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        QAPanel panel = app.getMainPanel().getQaPanel();
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        //click on the question
+        Component qa = ph.getHistory().getComponent(0);
+        RecentQuestion rq = (RecentQuestion) qa;
+        // int qIDofDel = rq.getQuestionAnswer().getqID();
+        app.showPromptHistQuestionOnQAPrompt(rq);
+        
+        
+        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(question + (end-1), panel.getQuestion());
+        //delete it
+        assertTrue(SayIt.getCurrQ() != null);
+        app.deleteClicked();
+
+        entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(numEntries - 1, entries.size());
     }
 }

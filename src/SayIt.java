@@ -589,19 +589,8 @@ public class SayIt extends JFrame{
             new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    int qID = recentQ.questionAnswer.getqID();
-                    SayIt.setCurrQ(recentQ);
                     System.out.println(recentQ.getQuestionAnswer().getQuestion());
-                    QAPanel qaPanel = mainPanel.getQaPanel();
-                    for (Triplet<Integer,String,String> entry : histClass.initial(null)) {
-                        // update QApanel
-                        if(qID == entry.getValue0()) {
-                            QuestionAnswer qa = new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2());
-                            //qaPanel.changeAnswer(entry.getValue2());
-                            qaPanel.changeQuestion(qa);
-                        }
-                    }
-                    dltButton.setEnabled(true);
+                    showPromptHistQuestionOnQAPrompt(recentQ);
                 }
             }
         );
@@ -687,9 +676,11 @@ public class SayIt extends JFrame{
     }
 
     public void showPromptHistQuestionOnQAPrompt(RecentQuestion recentQ){
+        SayIt.setCurrQ(recentQ);
         QuestionAnswer toDisplay = recentQ.getQuestionAnswer();
         QAPanel qaPanel = mainPanel.getQaPanel();
         qaPanel.changeQuestion(toDisplay);
+        dltButton.setEnabled(true);
     }
 
     public void deleteClicked(){
@@ -711,14 +702,7 @@ public class SayIt extends JFrame{
                 RecentQuestion recentQ =  changeRecording();
                 // update the QApanel when clicking the question button
                 if(recentQ != null) {
-                    recentQ.addMouseListener(
-                        new MouseAdapter() {
-                            @Override
-                            public void mousePressed(MouseEvent e) {
-                                showPromptHistQuestionOnQAPrompt(recentQ);
-                            }
-                        }
-                    );
+                    addListenerToRecentQ(recentQ);
                 }
             }
         }
