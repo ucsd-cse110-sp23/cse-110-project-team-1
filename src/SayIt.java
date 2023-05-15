@@ -580,6 +580,10 @@ public class SayIt extends JFrame{
 
         dltButton.setEnabled(false);
 
+        if (histClass.entries.size() == 0) {
+            clearButton.setEnabled(false);
+        }
+
         addListeners();
 
     }
@@ -617,6 +621,7 @@ public class SayIt extends JFrame{
             currQ = recentQ;
             //set the delete button to be enabled (can delete now)
             dltButton.setEnabled(true);
+            clearButton.setEnabled(true);
 
             qaPanel.setQuestionID(histClass.addEntry(question, answer));
 
@@ -716,6 +721,8 @@ public class SayIt extends JFrame{
                 
                 mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
                 currQ = null;
+                clearButton.setEnabled(false);
+                dltButton.setEnabled(false);
             }
         }
         );
@@ -728,6 +735,10 @@ public class SayIt extends JFrame{
                 sideBar.getPromptHistory().dltQuestion(currQ);
                 mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
                 currQ = null;
+                dltButton.setEnabled(false);
+                if (histClass.entries.size() == 0 ) {
+                    clearButton.setEnabled(false);
+                }
             }
             }
         }
