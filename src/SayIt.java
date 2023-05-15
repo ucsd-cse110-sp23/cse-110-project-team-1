@@ -697,6 +697,16 @@ public class SayIt extends JFrame{
         }
     }
 
+    public void clearClicked(){
+        histClass.clear();
+        sideBar.clearHistory();
+                
+        mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
+        currQ = null;
+        clearButton.setEnabled(false);
+        dltButton.setEnabled(false);
+    }
+
     public void addListeners() {
         recButton.addActionListener(
         new ActionListener() {
