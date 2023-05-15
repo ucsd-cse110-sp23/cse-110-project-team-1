@@ -828,9 +828,7 @@ public class Tests {
         boolean itemExists = false;
         for(Component item : listItems){
             if (item instanceof RecentQuestion){
-                if (((RecentQuestion) item) == rq){
-                    itemExists = true;
-                }
+                itemExists = true;
             }
         }
         assertFalse(itemExists);
