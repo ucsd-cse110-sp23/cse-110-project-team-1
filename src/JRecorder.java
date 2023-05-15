@@ -152,27 +152,5 @@ public class JRecorder {
             }
         }
     }
-    /*
-     * Test main that uses time
-     */
-    public static void main(String[] args) {
-        final JRecorder recorder = new JRecorder();
-        /*
-        Testing using limited time 
-        */ 
-        Thread stopper = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                recorder.finish();
-            }
-        });
- 
-        stopper.start();
-        recorder.start();
-    }
 }
 
