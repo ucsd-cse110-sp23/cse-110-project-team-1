@@ -746,4 +746,93 @@ public class Tests {
         entries = new ArrayList<>(history.initial(filePath));
         assertEquals(numEntries - 1, entries.size());
     }
+
+    @Test 
+    public void testClearQAwHist() {
+        //intialize file
+        History history = new History();
+        String filePath = "saveFiles/testingFiles/testClearQAwHist.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        String question = "Question ";
+        String answer = "Answer ";
+        int end = 10;
+        for (int i = 0; i < end; i++) {
+            history.addEntry(question + i, answer + i);
+        }
+        entries = new ArrayList<>(history.initial(filePath));
+        
+        int numEntries = entries.size();
+        //start the app
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        QAPanel panel = app.getMainPanel().getQaPanel();
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        //click on the question
+        Component qa = ph.getHistory().getComponent(0);
+        RecentQuestion rq = (RecentQuestion) qa;
+        // int qIDofDel = rq.getQuestionAnswer().getqID();
+        app.showPromptHistQuestionOnQAPrompt(rq);
+        
+        
+        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(question + (end-1), panel.getQuestion());
+        //delete it
+        assertTrue(SayIt.getCurrQ() != null);
+        app.clearClicked();
+
+        entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(0, entries.size());
+    }
+
+    @Test 
+    public void testClearQAFromSideBar() {
+        //intialize file
+        History history = new History();
+        String filePath = "saveFiles/testingFiles/testClearQAFromSideBar.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        String question = "Question ";
+        String answer = "Answer ";
+        int end = 10;
+        for (int i = 0; i < end; i++) {
+            history.addEntry(question + i, answer + i);
+        }
+
+        //start the app
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        QAPanel panel = app.getMainPanel().getQaPanel();
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        //get number of items in prompt history
+        Component[] listItems = ph.getHistory().getComponents();
+        int numItems = listItems.length;
+        //click on the question
+        Component qa = ph.getHistory().getComponent(0);
+        RecentQuestion rq = (RecentQuestion) qa;
+        app.showPromptHistQuestionOnQAPrompt(rq);
+
+        //check it's the correct question/answer
+        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(question + (end-1), panel.getQuestion());
+        //delete it
+        assertTrue(SayIt.getCurrQ() != null);
+        app.clearClicked();
+
+        listItems = ph.getHistory().getComponents();
+        assertEquals(numItems - end, listItems.length);
+        boolean itemExists = false;
+        for(Component item : listItems){
+            if (item instanceof RecentQuestion){
+                if (((RecentQuestion) item) == rq){
+                    itemExists = true;
+                }
+            }
+        }
+        assertFalse(itemExists);
+    }
 }
