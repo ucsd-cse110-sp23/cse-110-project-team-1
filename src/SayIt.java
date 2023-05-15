@@ -694,6 +694,10 @@ public class SayIt extends JFrame{
             sideBar.getPromptHistory().dltQuestion(currQ);
             mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
             currQ = null;
+            dltButton.setEnabled(false);
+            if (histClass.entries.size() == 0 ) {
+                clearButton.setEnabled(false);
+            }
         }
     }
 
@@ -740,16 +744,7 @@ public class SayIt extends JFrame{
         new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            if(currQ != null){
-                histClass.removeEntry(currQ.getQuestionAnswer().getqID());
-                sideBar.getPromptHistory().dltQuestion(currQ);
-                mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
-                currQ = null;
-                dltButton.setEnabled(false);
-                if (histClass.entries.size() == 0 ) {
-                    clearButton.setEnabled(false);
-                }
-            }
+                deleteClicked();
             }
         }
         );

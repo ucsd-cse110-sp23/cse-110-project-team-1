@@ -654,8 +654,8 @@ public class Tests {
         assertEquals(question + (end-1), panel.getQuestion());
         assertTrue(SayIt.getCurrQ() != null);
         app.deleteClicked();
-        assertEquals(null, panel.getAnswer());
-        assertEquals(null, panel.getQuestion());
+        assertEquals(panel.getPrefixA(), panel.getAnswerText());
+        assertEquals(panel.getPrefixQ(), panel.getQuestionText());
     }
 
     @Test 
