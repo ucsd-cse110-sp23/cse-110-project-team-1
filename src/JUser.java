@@ -3,14 +3,18 @@ import java.util.ArrayList;
 public class JUser {
     final String email;
     final String password;
-    boolean autoLogIn = false;
-    ArrayList<String> commands;
-    ArrayList<String> questions;
-    ArrayList<String> answers;
+    ArrayList<QuestionAnswer> promptHistory;
 
-    public JUser(String email, String password, boolean autoLogIn) {
+    public JUser(String email, String password) {
         this.email = email;
         this.password = password;
-        this.autoLogIn = autoLogIn;
+        promptHistory = new ArrayList<>();
+    }
+    
+    public void AddPrompt(QuestionAnswer prompt) {
+        promptHistory.add(prompt);
+    }
+    public void DeletePromptbyID(int ID) {
+        //TODO
     }
 }
