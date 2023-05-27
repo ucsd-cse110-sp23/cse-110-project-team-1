@@ -30,94 +30,94 @@ public class Tests {
     public void testQuestionAnswersetqID(){
         QuestionAnswer qa = new QuestionAnswer();
         int newqID = 12;
-        qa.setqID(newqID);
-        assertEquals(newqID, qa.getqID());
+        qa.qID =newqID;
+        assertEquals(newqID, qa.qID);
     }    
 
     @Test
     public void testQuestionAnswersetqIDChange(){
-        QuestionAnswer qa = new QuestionAnswer(1, "Whoa dude what's that?", "I know bro");
+        QuestionAnswer qa = new QuestionAnswer(1, "Question","a dude what's that?", "I know bro");
         int newqID = 12;
-        qa.setqID(newqID);
-        assertEquals(newqID, qa.getqID());
+        qa.qID =newqID;
+        assertEquals(newqID, qa.qID);
     }
 
     @Test
     public void testQuestionAnswersetQuestion(){
         QuestionAnswer qa = new QuestionAnswer();
         String newQuestion = "What is my new question?";
-        qa.setQuestion(newQuestion);
-        assertEquals(newQuestion, qa.getQuestion());
+        qa.question = newQuestion;
+        assertEquals(newQuestion, qa.question);
     }
 
     @Test
     public void testQuestionAnswersetQuestionChange(){
-        QuestionAnswer qa = new QuestionAnswer(1, "Whoa dude what's that?", "I know bro");
+        QuestionAnswer qa = new QuestionAnswer(1, "Question","Whoa dude what's that?", "I know bro");
         String newQuestion = "What is my new question?";
-        qa.setQuestion(newQuestion);
-        assertEquals(newQuestion, qa.getQuestion());
+        qa.question = newQuestion;
+        assertEquals(newQuestion, qa.question);
     }
 
     @Test
     public void testQuestionAnswersetAnswer(){
         QuestionAnswer qa = new QuestionAnswer();
         String newAnswer = "My answer is you";
-        qa.setAnswer(newAnswer);
-        assertEquals(newAnswer, qa.getAnswer());
+        qa.answer = newAnswer;
+        assertEquals(newAnswer, qa.answer);
     }
 
     @Test
-    public void testQuestionAnswersetAnswerChange(){
-        QuestionAnswer qa = new QuestionAnswer(1, "Whoa dude what's that?", "I know bro");
+    public void testQuestionAnswerupdateAnswer(){
+        QuestionAnswer qa = new QuestionAnswer(1, "Question", "Whoa dude what's that?", "I know bro");
         String newAnswer = "My answer is you";
-        qa.setAnswer(newAnswer);
-        assertEquals(newAnswer, qa.getAnswer());
+        qa.answer = newAnswer;
+        assertEquals(newAnswer, qa.answer);
     }
 
     //getters
     @Test
     public void testQuestionAnswergetID(){
         int id = 12;
-        QuestionAnswer qa = new QuestionAnswer(id, "Whoa dude what's that?", "I know bro");
-        assertEquals(id, qa.getqID());
+        QuestionAnswer qa = new QuestionAnswer(id, "Question", "Whoa dude what's that?", "I know bro");
+        assertEquals(id, qa.qID);
     }
 
     @Test
     public void testQuestionAnswergetIDChange(){
         int id = 12;
-        QuestionAnswer qa = new QuestionAnswer(id, "Whoa dude what's that?", "I know bro");
-        qa.setqID(id+1);
-        assertEquals(id+1, qa.getqID());
+        QuestionAnswer qa = new QuestionAnswer(id, "Question", "Whoa dude what's that?", "I know bro");
+        qa.qID= (id+1);
+        assertEquals(id+1, qa.qID);
     }
 
     @Test
     public void testQuestionAnswergetQuestion(){
         String question = "given a question what do I do?";
-        QuestionAnswer qa = new QuestionAnswer(0, question, "hi");
-        assertEquals(question, qa.getQuestion());
+        QuestionAnswer qa = new QuestionAnswer(0, "Question", question, "hi");
+        assertEquals(question, qa.question);
     }
 
     @Test
     public void testQuestionAnswergetQuestionChange(){
         String question = "given a question what do I do?";
-        QuestionAnswer qa = new QuestionAnswer(0, "For an old question" + question, "hi");
-        qa.setQuestion(question);
-        assertEquals(question, qa.getQuestion());
+        QuestionAnswer qa = new QuestionAnswer(0, "Question","For an old question" + question, "hi");
+        qa.question = (question);
+        assertEquals(question, qa.question);
     }
 
     @Test
-    public void testQuestionAnswergetAnswer(){
+    public void testQuestionAnswer(){
         String answer = "this is my answer";
-        QuestionAnswer qa = new QuestionAnswer(0, "hi", answer);
-        assertEquals(answer, qa.getAnswer());
+        QuestionAnswer qa = new QuestionAnswer(0, "Question","hi", answer);
+        assertEquals(answer, qa.answer);
     }
 
     @Test
     public void testQuestionAnswergetAnswerChange(){
         String answer = "this is my answer";
-        QuestionAnswer qa = new QuestionAnswer(0, "hi", "For an old answer, " + answer);
-        qa.setAnswer(answer);
-        assertEquals(answer, qa.getAnswer());
+        QuestionAnswer qa = new QuestionAnswer(0, "Question","hi", "For an old answer, " + answer);
+        qa.answer = (answer);
+        assertEquals(answer, qa.answer);
     }
 
     /**
@@ -127,7 +127,7 @@ public class Tests {
     public void testQAPanel(){
         String question = "good morn";
         String answer = "for an old";
-        QuestionAnswer qa = new QuestionAnswer(100, question, answer);
+        QuestionAnswer qa = new QuestionAnswer(100, "Question",question, answer);
         QAPanel tQAPanel = new QAPanel(qa);
         assertEquals(qa, tQAPanel.getQuestionAnswer());
         assertEquals(tQAPanel.getPrefixQ() + question, tQAPanel.getQuestionText());
@@ -147,7 +147,7 @@ public class Tests {
     public void testQAPanelnullQ(){
         String question = null;
         String answer = "for an old";
-        QuestionAnswer qa = new QuestionAnswer(100, question, answer);
+        QuestionAnswer qa = new QuestionAnswer(100, "Question",question, answer);
         QAPanel tQAPanel = new QAPanel(qa);
         assertEquals(qa, tQAPanel.getQuestionAnswer());
         assertEquals(tQAPanel.getPrefixQ(), tQAPanel.getQuestionText());
@@ -158,7 +158,7 @@ public class Tests {
     public void testQAPanelnullA(){
         String question = "good morn";
         String answer = null;
-        QuestionAnswer qa = new QuestionAnswer(100, question, answer);
+        QuestionAnswer qa = new QuestionAnswer(100,"Question", question, answer);
         QAPanel tQAPanel = new QAPanel(qa);
         assertEquals(qa, tQAPanel.getQuestionAnswer());
         assertEquals(tQAPanel.getPrefixQ() + question, tQAPanel.getQuestionText());
@@ -170,7 +170,7 @@ public class Tests {
         QuestionAnswer qa = new QuestionAnswer();
         QAPanel tQAPanel = new QAPanel(qa);
         String newQuestion = "Here is a new question?";
-        tQAPanel.createQuestion(newQuestion, 1);
+        tQAPanel.createQuestion("Question",newQuestion, 1);
         assertEquals(newQuestion, tQAPanel.getQuestion());
         assertNotEquals(qa, tQAPanel.getQuestionAnswer());
         assertEquals(tQAPanel.getPrefixQ() + newQuestion, tQAPanel.getQuestionText());
@@ -180,41 +180,41 @@ public class Tests {
     @Test
     public void testQAPanelchangeQuestion(){
         QuestionAnswer qa = new QuestionAnswer();
-        QuestionAnswer newQa = new QuestionAnswer(1, "good morning?", "good evening");
+        QuestionAnswer newQa = new QuestionAnswer(1, "Question","good morning?", "good evening");
         QAPanel tQAPanel = new QAPanel(qa);
         tQAPanel.changeQuestion(newQa);
         assertEquals(newQa, tQAPanel.getQuestionAnswer());
-        assertEquals(tQAPanel.getPrefixQ() + newQa.getQuestion(), tQAPanel.getQuestionText());
-        assertEquals(tQAPanel.getPrefixA() + newQa.getAnswer(), tQAPanel.getAnswerText());
+        assertEquals(tQAPanel.getPrefixQ() + newQa.question, tQAPanel.getQuestionText());
+        assertEquals(tQAPanel.getPrefixA() + newQa.answer, tQAPanel.getAnswerText());
     }
 
     @Test
     public void testQAPanelchangeAnswer(){
         String oldQuestion = "good morning?";
-        QuestionAnswer qa = new QuestionAnswer(1, oldQuestion, "good evening");
+        QuestionAnswer qa = new QuestionAnswer(1, "Question",oldQuestion, "good evening");
         QAPanel tQAPanel = new QAPanel(qa);
         String newAnswer = "not a good morning";
         tQAPanel.changeAnswer(newAnswer);
         assertEquals(qa, tQAPanel.getQuestionAnswer());
-        assertEquals(newAnswer, tQAPanel.getAnswer());
+        assertEquals(newAnswer, tQAPanel.answer);
         assertEquals(tQAPanel.getPrefixQ() + oldQuestion, tQAPanel.getQuestionText());
         assertEquals(tQAPanel.getPrefixA() + newAnswer, tQAPanel.getAnswerText());
     }
 
     @Test
     public void testQAPanelclearAnswer(){
-        QuestionAnswer qa = new QuestionAnswer(1, "good morning?", "good evening");
+        QuestionAnswer qa = new QuestionAnswer(1, "Question","good morning?", "good evening");
         QAPanel tQAPanel = new QAPanel(qa);
         tQAPanel.clearAnswer();
         assertEquals(qa, tQAPanel.getQuestionAnswer());
-        assertEquals(null, tQAPanel.getAnswer());
-        assertEquals(tQAPanel.getPrefixQ() + qa.getQuestion(), tQAPanel.getQuestionText());
+        assertEquals(null, tQAPanel.answer);
+        assertEquals(tQAPanel.getPrefixQ() + qa.question, tQAPanel.getQuestionText());
         assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
     }
 
     @Test
     public void testQAPanelclearDisplay(){
-        QuestionAnswer qa = new QuestionAnswer(1, "good morning?", "good evening");
+        QuestionAnswer qa = new QuestionAnswer(1, "Question","good morning?", "good evening");
         QAPanel tQAPanel = new QAPanel(qa);
         tQAPanel.clearDisplay();
         assertNotEquals(qa, tQAPanel.getQuestionAnswer());
@@ -225,10 +225,10 @@ public class Tests {
 
     @Test
     public void testQAPanelupdateDisplay(){
-        QuestionAnswer qa = new QuestionAnswer(1, "", "good evening");
+        QuestionAnswer qa = new QuestionAnswer(1,"Question", "", "good evening");
         QAPanel tQAPanel = new QAPanel(qa);
         String nAnswer = "changed answer";
-        tQAPanel.getQuestionAnswer().setAnswer(nAnswer);
+        tQAPanel.getQuestionAnswer().answer = (nAnswer);
         tQAPanel.updateDisplay();
         assertEquals(tQAPanel.getPrefixA() + nAnswer, tQAPanel.getAnswerText());
     }
@@ -296,7 +296,7 @@ public class Tests {
     public void testdisplayAskedQinBar(){
         PromptHistory ph = new PromptHistory();
         String question = "question?";
-        QuestionAnswer qa = new QuestionAnswer(1, question, "answer?");
+        QuestionAnswer qa = new QuestionAnswer(1, "Question",question, "answer?");
         ph.addQA(qa);
         Component listItem = ph.getHistory().getComponent(0);
         assertEquals(question, ((RecentQuestion) listItem).getText());
@@ -312,7 +312,7 @@ public class Tests {
     public void testdisplayAskedQConcat(){
         PromptHistory ph = new PromptHistory();
         String question = "long long long long long long long long long long question?";
-        QuestionAnswer qa = new QuestionAnswer(1, question, "answer?");
+        QuestionAnswer qa = new QuestionAnswer(1, "Question",question, "answer?");
         ph.addQA(qa);
         Component listItem = ph.getHistory().getComponent(0);
         assertEquals(question.substring(0, 20) + "...", ((RecentQuestion) listItem).getText());
@@ -328,9 +328,9 @@ public class Tests {
         PromptHistory ph = new PromptHistory();
         String question1 = "question1?";
         String question2 = "question2?";
-        QuestionAnswer qa1 = new QuestionAnswer(1, question1, "answer?");
+        QuestionAnswer qa1 = new QuestionAnswer(1, "Question",question1, "answer?");
         ph.addQA(qa1);
-        QuestionAnswer qa2 = new QuestionAnswer(2, question2, "answer?");
+        QuestionAnswer qa2 = new QuestionAnswer(2, "Question",question2, "answer?");
         ph.addQA(qa2);
         Component listItem2 = ph.getHistory().getComponent(0);
         assertEquals(question2, ((RecentQuestion) listItem2).getText());
@@ -576,7 +576,7 @@ public class Tests {
 
     @Test
     public void testSetQuestionID() {
-        QAPanel qapanel = new QAPanel(new QuestionAnswer(1, "question 1", "question 1 answer"));
+        QAPanel qapanel = new QAPanel(new QuestionAnswer(1, "Question","question 1", "question 1 answer"));
 
         qapanel.setQuestionID(2);
 
@@ -585,7 +585,7 @@ public class Tests {
 
     @Test
     public void testGetQuestionID() {
-        QAPanel qapanel = new QAPanel(new QuestionAnswer(1, "question 1", "question 1 answer"));
+        QAPanel qapanel = new QAPanel(new QuestionAnswer(1, "Question","question 1", "question 1 answer"));
 
         assertEquals(1, qapanel.getQuestionID());
     }
@@ -619,14 +619,14 @@ public class Tests {
         Component qa = ph.getHistory().getComponent(i++);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
-        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive.", app.getMainPanel().getQaPanel().getAnswer());
+        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive.", app.getMainPanel().getQaPanel().answer);
         qa = ph.getHistory().getComponent(i++);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
-        assertEquals("\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services.", app.getMainPanel().getQaPanel().getAnswer());
+        assertEquals("\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services.", app.getMainPanel().getQaPanel().answer);
         qa = ph.getHistory().getComponent(i++);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
         assertEquals("\n\nJapanese pop, or J-pop, is a musical genre that originated in Japan in the 1990s. It is widely known for its catchy, upbeat melodies, sophisticated production, and often over-the-top visual presentations. Common themes in J-pop include subject matter relating to love, romance, light themes and family. J-pop is often seen as a commercial, mainstream genre, though some artists explore more experimental or alternative themes in their music."
-        , app.getMainPanel().getQaPanel().getAnswer());
+        , app.getMainPanel().getQaPanel().answer);
         //includes 1 because of Jpanel for UI usage
         assertEquals(3+1, ph.getHistory().getComponents().length);
     }
@@ -650,7 +650,7 @@ public class Tests {
         PromptHistory ph = app.getSideBar().getPromptHistory();
         Component qa = ph.getHistory().getComponent(0);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
-        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(answer + (end-1), panel.answer);
         assertEquals(question + (end-1), panel.getQuestion());
         assertTrue(SayIt.getCurrQ() != null);
         app.deleteClicked();
@@ -688,7 +688,7 @@ public class Tests {
         app.showPromptHistQuestionOnQAPrompt(rq);
 
         //check it's the correct question/answer
-        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(answer + (end-1), panel.answer);
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
         assertTrue(SayIt.getCurrQ() != null);
@@ -737,7 +737,7 @@ public class Tests {
         app.showPromptHistQuestionOnQAPrompt(rq);
         
         
-        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(answer + (end-1), panel.answer);
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
         assertTrue(SayIt.getCurrQ() != null);
@@ -777,7 +777,7 @@ public class Tests {
         app.showPromptHistQuestionOnQAPrompt(rq);
         
         
-        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(answer + (end-1), panel.answer);
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
         assertTrue(SayIt.getCurrQ() != null);
@@ -817,7 +817,7 @@ public class Tests {
         app.showPromptHistQuestionOnQAPrompt(rq);
 
         //check it's the correct question/answer
-        assertEquals(answer + (end-1), panel.getAnswer());
+        assertEquals(answer + (end-1), panel.answer);
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
         assertTrue(SayIt.getCurrQ() != null);
