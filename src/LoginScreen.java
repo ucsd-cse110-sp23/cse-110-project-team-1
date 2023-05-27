@@ -96,8 +96,23 @@ public class LoginScreen extends JFrame {
 
     private void performLogin(String account, String password){
         // TODO: Implement login
-        return;
+        // boolean loginStatus = AccountSystem.login();
+        boolean loginStatus = true;
+        if(loginStatus){
+            // String filepath = AccountSystem.login()....
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    // TODO: the saveFile need to relates the account
+                    // Assumeming : the save file can be found in AccountSystem.login();
+                    // or do we find the path in MangoDB
+                    new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                }
+            });
+        }else{
+            JOptionPane.showMessageDialog(LoginScreen.this, "Wrong account number or password");
+        }
     }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
