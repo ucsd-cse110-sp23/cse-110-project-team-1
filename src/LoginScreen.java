@@ -30,6 +30,11 @@ public class LoginScreen extends JFrame {
         mainPanel.add(passwordLabel);
         mainPanel.add(passwordField);
 
+        // Auto Login checkbox
+        JLabel autoLoginLabel = new JLabel("Auto Login:");
+        autoLoginCheckbox = new JCheckBox("Enable Auto Login");
+        mainPanel.add(autoLoginLabel);
+        mainPanel.add(autoLoginCheckbox);
 
         // Add the panel to the frame
         add(mainPanel);
