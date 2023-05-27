@@ -3,48 +3,61 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class CreateScreen extends JFrame{
+public class CreateScreen extends JFrame {
     private JTextField accountTextField;
     private JPasswordField passwordField;
-    private JPasswordField comfirmField;
-    
-    AccountSystem as;
+    private JPasswordField confirmField;
+    private AccountSystem as;
 
-    public CreateScreen(AccountSystem as){
+    public CreateScreen(AccountSystem as) {
         this.as = as;
 
         setTitle("Create Account");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Terminates the program when the frame is closed
-        setSize(400, 300); // Window size
-        setLocationRelativeTo(null); // Center the window
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 300);
+        setLocationRelativeTo(null);
 
-        //Main Panel to hold all components
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(4, 2, 10, 10));
+        mainPanel.setLayout(new BorderLayout());
 
-        // Account field
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(4, 2, 10, 10));
+
         JLabel accountLabel = new JLabel("Account:");
         accountTextField = new JTextField();
-        mainPanel.add(accountLabel);
-        mainPanel.add(accountTextField);
+        centerPanel.add(accountLabel);
+        centerPanel.add(accountTextField);
 
-        // Password field
         JLabel passwordLabel = new JLabel("Password:");
         passwordField = new JPasswordField();
-        mainPanel.add(passwordLabel);
-        mainPanel.add(passwordField);
+        centerPanel.add(passwordLabel);
+        centerPanel.add(passwordField);
 
-        // comfirm field
-        JLabel comfirmLabel = new JLabel("Comfirm Password:");
-        comfirmField = new JPasswordField();
-        mainPanel.add(comfirmLabel);
-        mainPanel.add(comfirmField);
+        JLabel confirmLabel = new JLabel("Confirm Password:");
+        confirmField = new JPasswordField();
+        centerPanel.add(confirmLabel);
+        centerPanel.add(confirmField);
 
-        setVisible(true);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+
+        JButton createAccountButton = new JButton("Create Account");
+        createAccountButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Perform create account functionality here
+                // TODO: Implement create account functionality
+            }
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(createAccountButton);
+
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
         add(mainPanel);
+        setVisible(true);
     }
 
-    public void main(String[] args){
+    public static void main(String[] args) {
         new CreateScreen(new AccountSystem());
     }
 }
