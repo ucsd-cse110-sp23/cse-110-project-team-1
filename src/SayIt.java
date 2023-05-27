@@ -19,8 +19,8 @@ class QAPanel extends JPanel{
     
     QuestionAnswer qaPrompt;
     
-    JTextArea question;
-    JTextArea answer;
+    private JTextArea question;
+    private JTextArea answer;
     //int qID;
     String prefixQ = "Q: ";
     String prefixA = "A: ";

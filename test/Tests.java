@@ -196,7 +196,7 @@ public class Tests {
         String newAnswer = "not a good morning";
         tQAPanel.changeAnswer(newAnswer);
         assertEquals(qa, tQAPanel.getQuestionAnswer());
-        assertEquals(newAnswer, tQAPanel.answer);
+        assertEquals(newAnswer, tQAPanel.getAnswer());
         assertEquals(tQAPanel.getPrefixQ() + oldQuestion, tQAPanel.getQuestionText());
         assertEquals(tQAPanel.getPrefixA() + newAnswer, tQAPanel.getAnswerText());
     }
@@ -207,7 +207,7 @@ public class Tests {
         QAPanel tQAPanel = new QAPanel(qa);
         tQAPanel.clearAnswer();
         assertEquals(qa, tQAPanel.getQuestionAnswer());
-        assertEquals(null, tQAPanel.answer);
+        assertEquals(null, tQAPanel.getAnswer());
         assertEquals(tQAPanel.getPrefixQ() + qa.question, tQAPanel.getQuestionText());
         assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
     }
@@ -619,14 +619,14 @@ public class Tests {
         Component qa = ph.getHistory().getComponent(i++);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
-        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive.", app.getMainPanel().getQaPanel().answer);
+        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive.", app.getMainPanel().getQaPanel().getAnswer());
         qa = ph.getHistory().getComponent(i++);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
-        assertEquals("\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services.", app.getMainPanel().getQaPanel().answer);
+        assertEquals("\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services.", app.getMainPanel().getQaPanel().getAnswer());
         qa = ph.getHistory().getComponent(i++);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
         assertEquals("\n\nJapanese pop, or J-pop, is a musical genre that originated in Japan in the 1990s. It is widely known for its catchy, upbeat melodies, sophisticated production, and often over-the-top visual presentations. Common themes in J-pop include subject matter relating to love, romance, light themes and family. J-pop is often seen as a commercial, mainstream genre, though some artists explore more experimental or alternative themes in their music."
-        , app.getMainPanel().getQaPanel().answer);
+        , app.getMainPanel().getQaPanel().getAnswer());
         //includes 1 because of Jpanel for UI usage
         assertEquals(3+1, ph.getHistory().getComponents().length);
     }
@@ -650,7 +650,7 @@ public class Tests {
         PromptHistory ph = app.getSideBar().getPromptHistory();
         Component qa = ph.getHistory().getComponent(0);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
-        assertEquals(answer + (end-1), panel.answer);
+        assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         assertTrue(SayIt.getCurrQ() != null);
         app.deleteClicked();
@@ -688,7 +688,7 @@ public class Tests {
         app.showPromptHistQuestionOnQAPrompt(rq);
 
         //check it's the correct question/answer
-        assertEquals(answer + (end-1), panel.answer);
+        assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
         assertTrue(SayIt.getCurrQ() != null);
@@ -737,7 +737,7 @@ public class Tests {
         app.showPromptHistQuestionOnQAPrompt(rq);
         
         
-        assertEquals(answer + (end-1), panel.answer);
+        assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
         assertTrue(SayIt.getCurrQ() != null);
@@ -777,7 +777,7 @@ public class Tests {
         app.showPromptHistQuestionOnQAPrompt(rq);
         
         
-        assertEquals(answer + (end-1), panel.answer);
+        assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
         assertTrue(SayIt.getCurrQ() != null);
@@ -817,7 +817,7 @@ public class Tests {
         app.showPromptHistQuestionOnQAPrompt(rq);
 
         //check it's the correct question/answer
-        assertEquals(answer + (end-1), panel.answer);
+        assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
         assertTrue(SayIt.getCurrQ() != null);
