@@ -2,6 +2,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 
+import java.net.*;
+
+
 // import javax.management.Query;
 // import javax.sound.sampled.*;
 import javax.swing.*;
@@ -480,6 +483,7 @@ class SideBar extends JPanel{
 
 // the main app
 public class SayIt extends JFrame{
+    public final String URL = "http://localhost:8100/sayit";
 
     private MainPanel mainPanel;
     private JButton recButton;
