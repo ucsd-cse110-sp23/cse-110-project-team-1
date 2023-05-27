@@ -88,14 +88,11 @@ public class LoginScreen extends JFrame {
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Perform create account functionality here
-                // TODO: Implement create account functionality
+                    new CreateScreen(as);
             }
         });
         mainPanel.add(createAccountButton);
 
-
-        
         setVisible(true);
 
 
