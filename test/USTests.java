@@ -612,18 +612,18 @@ public class USTests {
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
         //get the 2nd Question ID
-        int question2ID = ((RecentQuestion)qa).getQuestionAnswer().getqID();
+        int question2ID = ((RecentQuestion)qa).getQuestionAnswer().qID;
 
         qa = ph.getHistory().getComponent(i++);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
         //get the 1st question ID
-        int question1ID = ((RecentQuestion)qa).getQuestionAnswer().getqID();
+        int question1ID = ((RecentQuestion)qa).getQuestionAnswer().qID;
 
         //delete the currentQuestion
         app.deleteClicked();
 
-        assertEquals(question1ID, ((RecentQuestion)qa).getQuestionAnswer().getqID());
+        assertEquals(question1ID, ((RecentQuestion)qa).getQuestionAnswer().qID);
     }
 
         /*
