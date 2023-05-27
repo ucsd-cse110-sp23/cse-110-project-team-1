@@ -33,6 +33,16 @@ public class LoginScreen extends JFrame {
         // Auto Login checkbox
         JLabel autoLoginLabel = new JLabel("Auto Login:");
         autoLoginCheckbox = new JCheckBox("Enable Auto Login");
+        // Add a listener to the checkbox to display its state
+        autoLoginCheckbox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (autoLoginCheckbox.isSelected()) {
+                    autoLoginCheckbox.setText("Auto Login Enabled");
+                } else {
+                    autoLoginCheckbox.setText("Auto Login Disabled");
+                }
+            }
+        });
         mainPanel.add(autoLoginLabel);
         mainPanel.add(autoLoginCheckbox);
 
@@ -53,15 +63,14 @@ public class LoginScreen extends JFrame {
                      if(autoLoginCheckbox.isSelected()){
                          storeAccount(accountTextField.getText(),new String(passwordField.getPassword()));
                      }
- 
                      performLogin(account,password);
- 
                  }
              }
          });
          mainPanel.add(loginButton);
 
-          // Create Account button
+
+        // Create Account button
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -69,23 +78,10 @@ public class LoginScreen extends JFrame {
                 // TODO: Implement create account functionality
             }
         });
-
-        mainPanel.add(loginButton);
         mainPanel.add(createAccountButton);
 
-        // Add the panel to the frame
-        add(mainPanel);
 
-        // Add a listener to the checkbox to display its state
-        autoLoginCheckbox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (autoLoginCheckbox.isSelected()) {
-                    autoLoginCheckbox.setText("Auto Login Enabled");
-                } else {
-                    autoLoginCheckbox.setText("Auto Login Disabled");
-                }
-            }
-        });
+        
         setVisible(true);
 
 
