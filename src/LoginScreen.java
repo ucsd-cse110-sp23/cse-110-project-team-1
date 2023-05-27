@@ -24,6 +24,11 @@ public class LoginScreen extends JFrame {
         mainPanel.add(accountLabel);
         mainPanel.add(accountTextField);
 
+        // Password field
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordField = new JPasswordField();
+        mainPanel.add(passwordLabel);
+        mainPanel.add(passwordField);
 
 
         // Add the panel to the frame
