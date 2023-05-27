@@ -106,11 +106,20 @@ public class LoginScreen extends JFrame {
                     // Assumeming : the save file can be found in AccountSystem.login();
                     // or do we find the path in MangoDB
                     new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                    closeLoginScreen();
                 }
             });
         }else{
             JOptionPane.showMessageDialog(LoginScreen.this, "Wrong account number or password");
         }
+    }
+
+    private void closeLoginScreen() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                dispose(); // Close the LoginScreen frame
+            }
+        });
     }
 
     public static void main(String[] args) {
