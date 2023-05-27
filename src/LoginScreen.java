@@ -36,10 +36,46 @@ public class LoginScreen extends JFrame {
         mainPanel.add(autoLoginLabel);
         mainPanel.add(autoLoginCheckbox);
 
+         // Log In button
+         JButton loginButton = new JButton("Log In");
+         loginButton.addActionListener(new ActionListener() {
+             public void actionPerformed(ActionEvent e) {
+                 String account = accountTextField.getText();
+                 String password = new String(passwordField.getPassword());
+ 
+                 // Check Account field & Passwordfield
+                 if (account.isEmpty()) {
+                     JOptionPane.showMessageDialog(LoginScreen.this, "Please input an account number");
+                 } else if (password.isEmpty()) {
+                     JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
+                 } else {
+                     // Account and password are inputted, perform login functionality here
+                     if(autoLoginCheckbox.isSelected()){
+                         storeAccount(accountTextField.getText(),new String(passwordField.getPassword()));
+                     }
+ 
+                     performLogin(account,password);
+ 
+                 }
+             }
+         });
+         mainPanel.add(loginButton);
+
+
+
         // Add the panel to the frame
         add(mainPanel);
     }
 
+    private void storeAccount(String account, String password) {
+        // TODO: Implement storage of login account
+        System.out.println("Login account stored: " + account + " / " + password);
+    }
+
+    private void performLogin(String account, String password){
+        // TODO: Implement login
+        return;
+    }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
