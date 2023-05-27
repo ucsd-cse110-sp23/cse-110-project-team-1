@@ -61,6 +61,32 @@ public class LoginScreen extends JFrame {
          });
          mainPanel.add(loginButton);
 
+          // Create Account button
+        JButton createAccountButton = new JButton("Create Account");
+        createAccountButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Perform create account functionality here
+                // TODO: Implement create account functionality
+            }
+        });
+
+        mainPanel.add(loginButton);
+        mainPanel.add(createAccountButton);
+
+        // Add the panel to the frame
+        add(mainPanel);
+
+        // Add a listener to the checkbox to display its state
+        autoLoginCheckbox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (autoLoginCheckbox.isSelected()) {
+                    autoLoginCheckbox.setText("Auto Login Enabled");
+                } else {
+                    autoLoginCheckbox.setText("Auto Login Disabled");
+                }
+            }
+        });
+        setVisible(true);
 
 
         // Add the panel to the frame
