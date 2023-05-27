@@ -7,8 +7,18 @@ public class LoginScreen extends JFrame {
     private JTextField accountTextField;
     private JPasswordField passwordField;
     private JCheckBox autoLoginCheckbox;
+    //Return messages
+    public static final String CREATE_SUCCESS = "Account created successfully";
+    public static final String LOGIN_SUCCESS = "Login successful";
+    public static final String EMAIL_TAKEN = "This email has been taken";
+    public static final String EMAIL_NOT_FOUND = "This email was not found";
+    public static final String WRONG_PASSWORD = "Wrong password";
+   
+    AccountSystem as;
 
-    public LoginScreen() {
+    public LoginScreen(AccountSystem as) {
+        this.as = as;
+
         setTitle("Login Screen");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Terminates the program when the frame is closed
         setSize(400, 300); // Window size
@@ -59,11 +69,15 @@ public class LoginScreen extends JFrame {
                  } else if (password.isEmpty()) {
                      JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
                  } else {
+                    boolean autoLogIn;
                      // Account and password are inputted, perform login functionality here
                      if(autoLoginCheckbox.isSelected()){
-                         storeAccount(accountTextField.getText(),new String(passwordField.getPassword()));
+                        autoLogIn = true;
+                         System.out.println("Login account stored: " + account + " / " + password);
+                     }else{
+                        autoLogIn = false;
                      }
-                     performLogin(account,password);
+                     performLogin(account,password,autoLogIn);
                  }
              }
          });
@@ -89,44 +103,34 @@ public class LoginScreen extends JFrame {
         add(mainPanel);
     }
 
-    private void storeAccount(String account, String password) {
-        // TODO: Implement storage of login account
-        System.out.println("Login account stored: " + account + " / " + password);
-    }
-
-    private void performLogin(String account, String password){
-        // TODO: Implement login
-        // boolean loginStatus = AccountSystem.login();
-        boolean loginStatus = true;
-        if(loginStatus){
-            // String filepath = AccountSystem.login()....
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    // TODO: the saveFile need to relates the account
-                    // Assumeming : the save file can be found in AccountSystem.login();
-                    // or do we find the path in MangoDB
-                    new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
-                    closeLoginScreen();
+    private void performLogin(String account, String password,  boolean autoLogIn){
+        Thread t = new Thread(
+            new Runnable(){
+                @Override
+                public void run(){
+                    String loginStatus = as.loginAccount(account, password, autoLogIn);
+                    if(loginStatus == LOGIN_SUCCESS){
+                        // String filepath = AccountSystem.login()....
+                        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                        closeLoginScreen();
+                    }else{
+                        JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
+                    }
                 }
-            });
-        }else{
-            JOptionPane.showMessageDialog(LoginScreen.this, "Wrong account number or password");
-        }
+            }
+        );
+        t.start();
     }
 
     private void closeLoginScreen() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                dispose(); // Close the LoginScreen frame
-            }
-        });
+        dispose(); // Close the LoginScreen frame
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new LoginScreen();
-            }
-        });
+        //SwingUtilities.invokeLater(new Runnable() {
+            //public void run() {
+                new LoginScreen(new AccountSystem());
+            //}
+        //});
     }
 }
