@@ -3,6 +3,9 @@ import java.util.ArrayList;
 
 public class Parser {
     public final String COMMAND_NOT_FOUND = "Error: Command not found";
+    public final String QUESTION = "Question";
+    public final String DELETE = "Delete";
+    public final String CLEAR_ALL = "Clear All";
     String transcription;
     String command;
 
@@ -19,14 +22,14 @@ public class Parser {
         String[] filteredString = transcription.replaceAll("\\p{P}", "").toLowerCase().split("\\s+");
         if (filteredString.length > 0) {
             if (filteredString[0].equals("question")) {
-                command = "Question";
+                command = QUESTION;
             } else if (filteredString[0].equals("delete")) {
-                command = "Delete";
+                command = DELETE;
             }
         } 
         if (filteredString.length > 2) {
             if (filteredString[0].equals("clear") && filteredString[1].equals("all")) {
-                command = "Clear All";
+                command = CLEAR_ALL;
                 // How to make it do clear clicked? Send a specific code through or add 
                 //return "";
             } // keep adding more commands next iteration (email stuff)
@@ -39,16 +42,16 @@ public class Parser {
         if (command == null) {
             return COMMAND_NOT_FOUND;
         }
-        if (command.equals("Question")) {
+        if (command.equals(QUESTION)) {
             String[] noCommandPrompt = transcription.split("\\s+");
             int firstWordLength = noCommandPrompt[0].length() + 1;
 
             return transcription.substring(firstWordLength);
         }
-        return "";
+        return null;
     }
     public static void main(String[] args) {
-        String testPrompt = "Delete What is the size?";
+        String testPrompt = "dElete What is the size?";
         Parser parsing = new Parser(testPrompt);
         parsing.Parse();
 
