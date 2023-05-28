@@ -10,7 +10,7 @@ import org.javatuples.Triplet;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
-public class History {
+public class AccountMediator {
     public final String QUESTION_FIELD = "Question";
     public String savePath = "saveFiles/history.json";
     public final String ANSWER_FIELD = "Answer";

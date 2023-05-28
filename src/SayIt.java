@@ -292,7 +292,7 @@ class PromptHistory extends JPanel{
     JLabel title;
     JPanel history;
     JScrollPane histPane;
-    History histClass;
+    AccountMediator histClass;
 
     PromptHistory(){
         // history = new JList<String>(getHistory());
@@ -431,7 +431,7 @@ public class SayIt extends JFrame{
     // testing purpose
     //int i;
 
-    History histClass;
+    AccountMediator histClass;
 
     /**
      * @return panel housing the record button and 
@@ -479,7 +479,7 @@ public class SayIt extends JFrame{
         this.chatGPT = chatGPT;
         this.whisper = whisper;
         this.recorder = recorder;
-        histClass = new History();
+        histClass = new AccountMediator();
 
         sideBar = new SideBar();
         c.fill = GridBagConstraints.BOTH;
@@ -610,7 +610,7 @@ public class SayIt extends JFrame{
         }
     }
 
-    public History getHistClass(){
+    public AccountMediator getHistClass(){
         return histClass;
     }
 

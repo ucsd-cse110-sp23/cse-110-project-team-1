@@ -115,7 +115,7 @@ public class AccountSystem {
             for (Document d: prompts) {
                 System.out.println(d.toJson());
                 QuestionAnswer qa = new QuestionAnswer((int)d.get(QID), (String)d.get(COM_STRING), (String)d.get(QUE_STRING), (String)d.get(ANS_STRING));
-                currentUser.AddPrompt(qa);
+                currentUser.addPrompt(qa);
             }
             
             return LOGIN_SUCCESS;
@@ -139,7 +139,7 @@ public class AccountSystem {
             MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
 
             ArrayList<Document> prompts = new ArrayList<Document>();
-            for (QuestionAnswer qa: currentUser.promptHistory) {
+            for (QuestionAnswer qa: currentUser.getPromptHistory()) {
                 Document newEntry = new Document(QID, qa.qID);
                 newEntry.append(COM_STRING, qa.command);
                 newEntry.append(QUE_STRING, qa.question);
@@ -215,7 +215,7 @@ public class AccountSystem {
         AccountSystem system = new AccountSystem();
         system.createAccount("Test", "TestPassword", false);
         system.loginAccount("Test", "TestPassword", false);
-        system.currentUser.promptHistory.add(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
+        system.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
         system.updateAccount();
     }
 }

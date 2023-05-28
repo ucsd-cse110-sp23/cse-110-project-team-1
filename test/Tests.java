@@ -403,7 +403,7 @@ public class Tests {
      */
     @Test
     public void testInitializeNoFileFound() {
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/tempHistoryNoFile.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -418,7 +418,7 @@ public class Tests {
      */
     @Test
     public void testInitializeFileFound() {
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/historyTestingSave.json";
         File save = new File(filePath);
         assertTrue(save.exists());
@@ -450,7 +450,7 @@ public class Tests {
 
     @Test
     public void testAddEntry() {
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/tempHistory.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -471,7 +471,7 @@ public class Tests {
     }
     @Test
     public void testRemoveEntriesBackwards(){
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/tempHistoryRemoveBackwards.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -506,7 +506,7 @@ public class Tests {
 
     @Test
     public void testRemoveEntryForwards(){
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/tempHistoryRemoveForward.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -543,7 +543,7 @@ public class Tests {
 
     @Test
     public void testHistoryClear(){
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/tempHistoryRemove.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -632,7 +632,7 @@ public class Tests {
     }
     @Test 
     public void testDeleteQAFromMainUI() {
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/testDelQAFromMainUI.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -661,7 +661,7 @@ public class Tests {
     @Test 
     public void testDeleteQAFromSideBar() {
         //intialize file
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/testDeleteQAFromSideBar.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -710,7 +710,7 @@ public class Tests {
     @Test 
     public void testDeleteQAwHist() {
         //intialize file
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/testDeleteQAwHist.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -750,7 +750,7 @@ public class Tests {
     @Test 
     public void testClearQAwHist() {
         //intialize file
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/testClearQAwHist.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -790,7 +790,7 @@ public class Tests {
     @Test 
     public void testClearQAFromSideBar() {
         //intialize file
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/testClearQAFromSideBar.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
