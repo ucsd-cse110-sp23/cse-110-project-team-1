@@ -26,9 +26,7 @@ public class App {
                 }
 
                 // Check if auto-login is enabled
-                boolean autoLoginEnabled = checkAutoLoginStatus(as);
-
-                if (autoLoginEnabled) {
+                if (checkAutoLoginStatus(as)) {
                     // Open SayIt screen directly
                     openSayItScreen();
                 } else {

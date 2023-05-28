@@ -26,8 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
 
-import java.io.FileWriter;
-
 public class AccountSystem {
 
     public JUser currentUser;

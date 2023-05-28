@@ -55,7 +55,6 @@ public class handler implements HttpHandler {
         JSONObject requestData = new JSONObject(postData);
         String postType = requestData.getString("postType");
 
-
         if (postType.equals(LOGINTYPE)) {
             String email = requestData.getString("email");
             String password = requestData.getString("password");
