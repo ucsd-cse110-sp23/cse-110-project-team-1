@@ -1,27 +1,32 @@
-import com.sun.net.httpserver.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
     public static final String CREATETYPE = "CREATE";
 
     AccountSystem as;
+
     public handler(AccountSystem as) {
         this.as = as;
     }
 
-    // Handle login and create account requests
-    // logic: LOGIN
-    // Create account: CREATEACCOUNT
+    @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String response = "Request Received";
         String method = httpExchange.getRequestMethod();
 
         try {
-            if (method.equals("POST")) {             
+            if (method.equals("POST")) {
                 response = handlePost(httpExchange);
             } else {
                 throw new Exception("Not Valid Request Method");
@@ -42,43 +47,36 @@ public class handler implements HttpHandler {
     private String handlePost(HttpExchange httpExchange) throws IOException {
         String response = "handlePost Received";
 
-        InputStream inStream = httpExchange.getRequestBody();  
-        Scanner scanner = new Scanner(inStream);
-        String postData = scanner.nextLine();
-        scanner.close();
+        InputStream inStream = httpExchange.getRequestBody();
+        String postData = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining());
 
-        String postType = postData.substring(0, postData.indexOf(","));
-        String remainingData = postData.substring(postData.indexOf(",") + 1);
+        JSONObject requestData = new JSONObject(postData);
+        String postType = requestData.getString("postType");
+
 
         if (postType.equals(LOGINTYPE)) {
-            response = logInHandler(remainingData);
+            String email = requestData.getString("email");
+            String password = requestData.getString("password");
+            boolean autoLogIn = requestData.getBoolean("autoLogIn");
+            response = logInHandler(email, password, autoLogIn);
         } else if (postType.equals(CREATETYPE)) {
-            response = createHandler(remainingData);
+            String email = requestData.getString("email");
+            String password = requestData.getString("password");
+            response = createHandler(email, password);
         } else {
             throw new IOException("Unsupported postType: " + postType);
         }
+
         return response;
     }
 
-    private String logInHandler(String remainingData) {
-        String email = remainingData.substring(0, remainingData.indexOf(","));
-        remainingData = remainingData.substring(remainingData.indexOf(",") + 1);
-
-        String password = remainingData.substring(0, remainingData.indexOf(","));
-        String autoLogInStr = remainingData.substring(remainingData.indexOf(",") + 1);
-
-        boolean autoLogIn = Boolean.parseBoolean(autoLogInStr);
+    private String logInHandler(String email, String password, boolean autoLogIn) {
         return as.loginAccount(email, password, autoLogIn);
     }
 
-    private String createHandler(String remainingData) {
-        String email = remainingData.substring(0, remainingData.indexOf(","));
-        remainingData = remainingData.substring(remainingData.indexOf(",") + 1);
-
-        String password = remainingData.substring(0, remainingData.indexOf(","));
-        String comfirmField = remainingData.substring(remainingData.indexOf(",") + 1);
-
-        boolean comfirmPass = Boolean.parseBoolean(comfirmField);
-        return as.createAccount(email, password, comfirmPass);
+    private String createHandler(String email, String password) {
+        return as.createAccount(email, password, false);
     }
 }

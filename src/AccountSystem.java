@@ -112,7 +112,7 @@ public class AccountSystem {
             if (!pass.equals(password)) {
                 return WRONG_PASSWORD;
             }
-            
+
             if (autoLogIn) {
                 createAutoLogIn(email, password, "null");
             }
@@ -124,22 +124,7 @@ public class AccountSystem {
                 System.out.println(d.toJson());
                 QuestionAnswer qa = new QuestionAnswer((int)d.get(QID), (String)d.get(COM_STRING), (String)d.get(QUE_STRING), (String)d.get(ANS_STRING));
                 currentUser.addPrompt(qa);
-                
-                JSONObject newEntry = new JSONObject();
-                //newEntry.put(QUESTION_FIELD, (String)d.get(COM_STRING));
-                newEntry.put(ANSWER_FIELD, (String)d.get(QUE_STRING));
-                newEntry.put(ANSWER_FIELD, (String)d.get(ANS_STRING));
-                saveBody.put((Integer)d.get(QID),newEntry);
             }
-
-            //overwrite file
-            try (FileWriter fileWriter = new FileWriter(savePath, false)) {
-                // Write the new JSON information to the file
-                fileWriter.write(saveBody.toString());  // or jsonArray.toString() for an array
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            
             return LOGIN_SUCCESS;
         }
     }

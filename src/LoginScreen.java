@@ -3,18 +3,23 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.awt.event.*;
 import java.io.*;
+
+import org.json.JSONException;
+import org.json.simple.JSONObject;
 
 
 public class LoginScreen extends JFrame {
     public final String URL = "http://localhost:8101/";
 
-    private JTextField accountTextField;
+    private JTextField emailTextField;
     private JPasswordField passwordField;
     private JCheckBox autoLoginCheckbox;
     //Return messages
-    public static final String CREATE_SUCCESS = "Account created successfully";
+    public static final String CREATE_SUCCESS = "Email created successfully";
     public static final String LOGIN_SUCCESS = "Login successful";
     public static final String EMAIL_TAKEN = "This email has been taken";
     public static final String EMAIL_NOT_FOUND = "This email was not found";
@@ -31,11 +36,11 @@ public class LoginScreen extends JFrame {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(4, 2, 10, 10));
 
-        // Account field
-        JLabel accountLabel = new JLabel("Account:");
-        accountTextField = new JTextField();
-        mainPanel.add(accountLabel);
-        mainPanel.add(accountTextField);
+        // Email field
+        JLabel emailLabel = new JLabel("Email:");
+        emailTextField = new JTextField();
+        mainPanel.add(emailLabel);
+        mainPanel.add(emailTextField);
 
         // Password field
         JLabel passwordLabel = new JLabel("Password:");
@@ -63,31 +68,31 @@ public class LoginScreen extends JFrame {
         JButton loginButton = new JButton("Log In");
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String account = accountTextField.getText();
+                String email = emailTextField.getText();
                 String password = new String(passwordField.getPassword());
 
-                // Check Account field & Passwordfield
-                if (account.isEmpty()) {
-                    JOptionPane.showMessageDialog(LoginScreen.this, "Please input an account number");
+                // Check Email field & Passwordfield
+                if (email.isEmpty()) {
+                    JOptionPane.showMessageDialog(LoginScreen.this, "Please input an email number");
                 } else if (password.isEmpty()) {
                     JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
                 } else {
                     boolean autoLogIn;
-                    // Account and password are inputted, perform login functionality here
+                    // Email and password are inputted, perform login functionality here
                     if(autoLoginCheckbox.isSelected()){
                         autoLogIn = true;
-                        System.out.println("Login account stored: " + account + " / " + password);
+                        System.out.println("Login email stored: " + email + " / " + password);
                     }else{
                         autoLogIn = false;
                     }
-                    performLogin(account,password,autoLogIn);
+                    performLogin(email,password,autoLogIn);
                 }
             }
         });
         mainPanel.add(loginButton);
 
 
-        // Create Account button
+        // Create Email button
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -105,49 +110,61 @@ public class LoginScreen extends JFrame {
 
     // send login request to server
 
-    private void performLogin(String account, String password, boolean autoLogIn) {
-        Thread t = new Thread(() -> {
-            try {
-                // Set request body with arguments
-                String postData =
-                    LOGINTYPE + "," +
-                    account + "," +
-                    password + "," +
-                    autoLogIn;
-    
-                // Send the login request to the server
-                URL url = new URL(URL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setDoOutput(true);
+    private void performLogin(String email, String password, boolean autoLogIn) {
+    Thread t = new Thread(() -> {
+        try {
+            // Set request body with arguments
+            HashMap<String,Object> requestData = new HashMap<String,Object>();            
+            requestData.put("postType", LOGINTYPE);
+            requestData.put("email", email);
+            requestData.put("password", password);
+            requestData.put("autoLogIn", autoLogIn);
 
-                //send the request
-                OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
-                out.write(postData);
-                out.flush();
-                out.close();
+            JSONObject requestDataJson = new JSONObject(requestData);
+            // Send the login request to the server
+            URL url = new URL(URL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
 
-                // Receive the response from the server
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String loginStatus = in.readLine();
-                in.close();
-        
-                // Check if login successffuly
-                if (loginStatus.equals(LOGIN_SUCCESS)) {
-                    // String filepath = AccountSystem.login()....
-                    new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
-                    closeLoginScreen();
-                } else {
-                    JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+            //send the request
+            try (OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream())) {
+                out.write(requestDataJson.toString());
             }
-        });
-        
-        t.start();
-    }
+
+            // Receive the response from the server
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                String loginStatus = in.readLine();
+
+                // Check if login was successful
+                if (loginStatus.equals(LOGIN_SUCCESS)) {
+                    // Perform further actions upon successful login
+                    SwingUtilities.invokeLater(() -> {
+                        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                        closeLoginScreen();
+                    });
+                } else {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
+                    });
+                }
+            }
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Malformed URL: " + ex.getMessage());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "I/O Error: " + ex.getMessage());
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "JSON Error: " + ex.getMessage());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+    });
+    t.start();
+}
     
    // private 
 
