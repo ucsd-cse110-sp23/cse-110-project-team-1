@@ -116,8 +116,7 @@ public class AccountSystem {
             if (autoLogIn) {
                 createAutoLogIn(email, password, "null");
             }
-
-            JSONObject saveBody = new JSONObject();
+            
             currentUser = new JUser(email, password);
             List<Document> prompts = (List<Document>)account.get(PROMPT_STRING);
             for (Document d: prompts) {
