@@ -2,12 +2,17 @@ import com.sun.net.httpserver.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import javax.swing.*;
 
 
 public class LoginRequestHandler implements HttpHandler {
+    public static final String LOGIN_SUCCESS = "Login successful";
+    AccountSystem as;
+    LoginScreen ls;
 
-    public LoginRequestHandler() {
-    
+    public LoginRequestHandler(AccountSystem as, LoginScreen ls) {
+        this.as = as;
+        this.ls = ls;
     }
 
     // Handle login and create account requests
@@ -16,13 +21,12 @@ public class LoginRequestHandler implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         String response = "Request Received";
         String method = httpExchange.getRequestMethod();
+        System.out.print(method);
 
         // Log in and create account
         try {
-            if (method.equals("LOGIN")) {
+            if (method.equals("GET")) {
                 response = handleLogIn(httpExchange);
-            } else if (method.equals("CREATEACCOUNT")) {
-                response = handleCreateAccount(httpExchange);
             } else {
                 throw new Exception("Not Valid Request Method");
             }
@@ -44,10 +48,27 @@ public class LoginRequestHandler implements HttpHandler {
         URI uri = httpExchange.getRequestURI();
         String query = uri.getRawQuery();
         System.out.println("Log in request received");
+        System.out.println("the query is: " + query);
     
         // TODO: Retrieve data from mongodb to verify user's information
         if (query != null) {
-          
+            String account = query.split(",")[0];
+            account = account.substring(query.indexOf("=") + 1);
+            System.out.println("account: " + account);
+            String password = query.split(",")[1];
+            System.out.println("password: " + password);
+            boolean autoLogIn = Boolean.parseBoolean(query.split(",")[2]);
+            System.out.println("autoLogIn: " + autoLogIn);
+
+            String loginStatus = as.loginAccount(account, password, autoLogIn);
+
+            if(loginStatus == LOGIN_SUCCESS){
+                // String filepath = AccountSystem.login()....
+                new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                ls.dispose();;
+            }else{
+                JOptionPane.showMessageDialog(ls, loginStatus);
+            }
         }
         
         return response;

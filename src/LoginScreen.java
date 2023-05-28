@@ -6,8 +6,16 @@ import java.net.*;
 import java.awt.event.*;
 import java.io.*;
 
+import com.sun.net.httpserver.*;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.*;
+
 public class LoginScreen extends JFrame {
-    public final String URL = "http://localhost:8000/";
+    public final String URL = "http://localhost:8100/";
 
     private JTextField accountTextField;
     private JPasswordField passwordField;
@@ -18,6 +26,10 @@ public class LoginScreen extends JFrame {
     public static final String EMAIL_TAKEN = "This email has been taken";
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
+
+    // initialize server port and hostname
+    // private static final int SERVER_PORT = 8100;
+    // private static final String SERVER_HOSTNAME = "localhost";
    
     AccountSystem as;
 
@@ -110,39 +122,55 @@ public class LoginScreen extends JFrame {
             new Runnable(){
                 @Override
                 public void run(){
-                    String loginStatus = as.loginAccount(account, password, autoLogIn);
+                    // String loginStatus = as.loginAccount(account, password, autoLogIn);
                     // Send the login request to the server
                     try {
-                        URL url = new URL(URL); 
+                        String query = account + "," + password + "," + autoLogIn;
+                        URL url = new URL(URL + "login/" + "?=" + query); 
                         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                        conn.setRequestMethod("LOGIN");
-                        conn.setDoOutput(true);
-                        OutputStreamWriter out = new OutputStreamWriter(
-                          conn.getOutputStream()
-                        );
-                        // send data to the server
-                        out.write(account + "," + password + "," + autoLogIn);
-                        out.flush();
-                        out.close();
-                        // receive the response from the server
+                        conn.setRequestMethod("GET");
                         BufferedReader in = new BufferedReader(
-                          new InputStreamReader(conn.getInputStream())
+                            new InputStreamReader(conn.getInputStream())
                         );
                         String response = in.readLine();
                         in.close();
-                        JOptionPane.showMessageDialog(null, response);
+                        System.out.println("response from server: " + response);
+                        // JOptionPane.showMessageDialog(null, response);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
                     }
+                    // new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                    //     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    //     conn.setRequestMethod("GET");
+                    //     System.out.println("Sending GET request to URL: " + URL);
+                    //     conn.setDoOutput(true);
+                    //     OutputStreamWriter out = new OutputStreamWriter(
+                    //       conn.getOutputStream()
+                    //     );
+                    //     // send data to the server
+                    //     out.write(account + "," + "password" + "," + autoLogIn);
+                    //     out.flush();
+                    //     out.close();
+                    //     // receive the response from the server
+                    //     BufferedReader in = new BufferedReader(
+                    //       new InputStreamReader(conn.getInputStream())
+                    //     );
+                    //     String response = in.readLine();
+                    //     in.close();
+                    //     JOptionPane.showMessageDialog(null, response);
+                    // } catch (Exception ex) {
+                    //     ex.printStackTrace();
+                    //     JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                    // }
 
-                    if(loginStatus == LOGIN_SUCCESS){
-                        // String filepath = AccountSystem.login()....
-                        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
-                        closeLoginScreen();
-                    }else{
-                        JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
-                    }
+                    // if(loginStatus == LOGIN_SUCCESS){
+                    //     // String filepath = AccountSystem.login()....
+                    //     new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                    //     closeLoginScreen();
+                    // }else{
+                    //     JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
+                    // }
                 }
             }
         );
@@ -153,11 +181,31 @@ public class LoginScreen extends JFrame {
         dispose(); // Close the LoginScreen frame
     }
 
-    public static void main(String[] args) {
-        //SwingUtilities.invokeLater(new Runnable() {
-            //public void run() {
-                new LoginScreen(new AccountSystem());
-            //}
-        //});
+    public static void main(String[] args) throws IOException {
+        int SERVER_PORT = 8100;
+        String SERVER_HOSTNAME = "localhost";
+        // create a thread pool to handle requests
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+
+        // create a server
+        HttpServer server = HttpServer.create(
+        new InetSocketAddress(SERVER_HOSTNAME, SERVER_PORT),
+        0
+        );
+
+        AccountSystem as = new AccountSystem();
+        LoginScreen loginScreen = new LoginScreen(as);
+        LoginRequestHandler lrh = new LoginRequestHandler(as, loginScreen);
+
+        // set the context
+        server.createContext("/login", lrh);
+        server.createContext("/sayit", new AppRequestHandler());
+        // set the executor
+        server.setExecutor(threadPoolExecutor);
+        // start the server
+        server.start();
+
+
+        System.out.println("Server started on port " + SERVER_PORT);
     }
 }
