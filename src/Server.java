@@ -12,7 +12,7 @@ public class Server {
     private static final int SERVER_PORT = 8100;
     private static final String SERVER_HOSTNAME = "localhost";
 
-   Server() throws IOException{
+    public static void main(String[] args) throws IOException {
         // create a thread pool to handle requests
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
 
@@ -31,11 +31,8 @@ public class Server {
         // start the server
         server.start();
 
-
         System.out.println("Server started on port " + SERVER_PORT);
-   }
-    public static void main(String[] args) throws IOException {
-        new Server();
+        server.stop(0);
     }
 }
    
