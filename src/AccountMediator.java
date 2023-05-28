@@ -10,7 +10,7 @@ import org.javatuples.Triplet;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
-public class History {
+public class AccountMediator {
     public final String QUESTION_FIELD = "Question";
     public String savePath = "saveFiles/history.json";
     public final String ANSWER_FIELD = "Answer";
@@ -173,21 +173,5 @@ public class History {
             ex.printStackTrace();
             System.out.println("Wrong file path");
         } 
-    }
-
-    /*Testing purposes*/
-    public void main(String[] args) {
-        this.initial(null);
-        this.clear();
-        this.addEntry("What is java UI?", "Idk figure it out bro.");
-        this.addEntry("Hi", "bye");
-        this.addEntry("this should be prompt 3", "Okay prompt 3");
-        this.removeEntry(0);
-        this.removeEntry(0);
-        this.removeEntry(0);
-        this.addEntry("What is java UI?", "Idk figure it out bro.");
-        this.addEntry("Hi", "bye");
-        this.removeEntry(1);
-        this.removeEntry(5);
     }
 }

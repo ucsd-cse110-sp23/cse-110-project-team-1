@@ -246,7 +246,7 @@ public class USTests {
      */
     @Test
     public void US3S1Test(){
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         history.initial(null);
         history.clear();
         boolean test = false;
@@ -292,7 +292,7 @@ public class USTests {
      */
     @Test 
     public void US3S2Test() {
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         history.initial(null);
         history.clear();
         String question = "What is Java Ui?";
@@ -444,7 +444,7 @@ public class USTests {
         String answer1 = "Java UI is Java UI";
         String question2 = "What's up?";
         String answer2 = "Second Question Answer";
-        History h = new History();
+        AccountMediator h = new AccountMediator();
         h.initial(filePath);
         h.addEntry(question1, answer1);
         h.addEntry(question2, answer2);
@@ -521,7 +521,7 @@ public class USTests {
 
         RecentQuestion rq = app.changeRecording();
 
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
         int numEntries = entries.size();
         //when the user clicks the delete button
@@ -558,7 +558,7 @@ public class USTests {
      */
     @Test
     public void US7S2Test(){
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/us7s2.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -585,7 +585,7 @@ public class USTests {
      */
     @Test
     public void US7S3Test(){
-        History history = new History();
+        AccountMediator history = new AccountMediator();
         String filePath = "saveFiles/testingFiles/us7s3.json";
         File tempHistory = new File(filePath);
         if (tempHistory.exists()) {
@@ -612,18 +612,18 @@ public class USTests {
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
         //get the 2nd Question ID
-        int question2ID = ((RecentQuestion)qa).getQuestionAnswer().getqID();
+        int question2ID = ((RecentQuestion)qa).getQuestionAnswer().qID;
 
         qa = ph.getHistory().getComponent(i++);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
 
         //get the 1st question ID
-        int question1ID = ((RecentQuestion)qa).getQuestionAnswer().getqID();
+        int question1ID = ((RecentQuestion)qa).getQuestionAnswer().qID;
 
         //delete the currentQuestion
         app.deleteClicked();
 
-        assertEquals(question1ID, ((RecentQuestion)qa).getQuestionAnswer().getqID());
+        assertEquals(question1ID, ((RecentQuestion)qa).getQuestionAnswer().qID);
     }
 
         /*
