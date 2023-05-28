@@ -183,7 +183,7 @@ class MainPanel extends JPanel{
     JButton recButton;
     JButton dltButton;
     boolean isRec = false;
-    String startBlurb = "New Question";
+    String startBlurb = "Start Recording";
     String stopBlurb = "Stop Recording";
     String deletBlurd = "Delete";
 
@@ -211,7 +211,7 @@ class MainPanel extends JPanel{
         this.add(recButton, BorderLayout.SOUTH);
 
         dltButton = new JButton(deletBlurd);
-        this.add(dltButton, BorderLayout.EAST);
+        // this.add(dltButton, BorderLayout.EAST);
     }
 
     public String getRecStartBlurb(){ return startBlurb;}
@@ -391,7 +391,7 @@ class SideBar extends JPanel{
         promptHistory.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         clearButton = new JButton("Clear All");
-        this.add(clearButton, BorderLayout.SOUTH);
+        // this.add(clearButton, BorderLayout.SOUTH);
         clearButton.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
