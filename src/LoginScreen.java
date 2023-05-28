@@ -6,11 +6,9 @@ import java.net.*;
 import java.awt.event.*;
 import java.io.*;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 public class LoginScreen extends JFrame {
-    public final String URL = "http://localhost:8000/";
+    public final String URL = "http://localhost:8101/";
 
     private JTextField accountTextField;
     private JPasswordField passwordField;
@@ -78,13 +76,13 @@ public class LoginScreen extends JFrame {
                 } else if (password.isEmpty()) {
                     JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
                 } else {
-                boolean autoLogIn;
+                    boolean autoLogIn;
                     // Account and password are inputted, perform login functionality here
                     if(autoLoginCheckbox.isSelected()){
-                    autoLogIn = true;
+                        autoLogIn = true;
                         System.out.println("Login account stored: " + account + " / " + password);
                     }else{
-                    autoLogIn = false;
+                        autoLogIn = false;
                     }
                     performLogin(account,password,autoLogIn);
                 }
@@ -126,7 +124,7 @@ public class LoginScreen extends JFrame {
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setDoOutput(true);
-                
+
                 //send the request
                 OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
                 out.write(postData);
