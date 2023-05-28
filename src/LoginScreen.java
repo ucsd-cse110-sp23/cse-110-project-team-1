@@ -56,31 +56,31 @@ public class LoginScreen extends JFrame {
         mainPanel.add(autoLoginLabel);
         mainPanel.add(autoLoginCheckbox);
 
-         // Log In button
-         JButton loginButton = new JButton("Log In");
-         loginButton.addActionListener(new ActionListener() {
-             public void actionPerformed(ActionEvent e) {
-                 String account = accountTextField.getText();
-                 String password = new String(passwordField.getPassword());
- 
-                 // Check Account field & Passwordfield
-                 if (account.isEmpty()) {
-                     JOptionPane.showMessageDialog(LoginScreen.this, "Please input an account number");
-                 } else if (password.isEmpty()) {
-                     JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
-                 } else {
-                    boolean autoLogIn;
-                     // Account and password are inputted, perform login functionality here
-                     if(autoLoginCheckbox.isSelected()){
-                        autoLogIn = true;
-                         System.out.println("Login account stored: " + account + " / " + password);
-                     }else{
-                        autoLogIn = false;
-                     }
-                     performLogin(account,password,autoLogIn);
-                 }
-             }
-         });
+        // Log In button
+        JButton loginButton = new JButton("Log In");
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String account = accountTextField.getText();
+                String password = new String(passwordField.getPassword());
+
+                // Check Account field & Passwordfield
+                if (account.isEmpty()) {
+                    JOptionPane.showMessageDialog(LoginScreen.this, "Please input an account number");
+                } else if (password.isEmpty()) {
+                    JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
+                } else {
+                boolean autoLogIn;
+                    // Account and password are inputted, perform login functionality here
+                    if(autoLoginCheckbox.isSelected()){
+                    autoLogIn = true;
+                        System.out.println("Login account stored: " + account + " / " + password);
+                    }else{
+                    autoLogIn = false;
+                    }
+                    performLogin(account,password,autoLogIn);
+                }
+            }
+        });
          mainPanel.add(loginButton);
 
 
