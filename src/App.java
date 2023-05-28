@@ -21,7 +21,6 @@ public class App {
                 try {
                     new Server(as);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
@@ -38,7 +37,7 @@ public class App {
     }
 
     private static boolean checkAutoLoginStatus(AccountSystem as) {
-        String loginStatus = as.checkAutoLogIN("null");
+        String loginStatus = as.checkAutoLogIN(null);
         if(loginStatus == LOGIN_SUCCESS){
             return true;
         }

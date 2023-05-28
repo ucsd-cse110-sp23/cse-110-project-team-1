@@ -112,7 +112,7 @@ public class AccountSystem {
             }
 
             if (autoLogIn) {
-                createAutoLogIn(email, password, "null");
+                createAutoLogIn(email, password, null);
             }
             
             currentUser = new JUser(email, password);
@@ -166,8 +166,11 @@ public class AccountSystem {
             savePath = filepath;
         }
         File save = new File(savePath);
+        File parentDir = save.getParentFile();
+        if (parentDir != null) {
+            parentDir.mkdirs();
+        }
         try {
-            save.getParentFile().mkdirs(); 
             save.createNewFile();
         } catch (IOException io) {
             io.printStackTrace();
