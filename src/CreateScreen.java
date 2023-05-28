@@ -89,7 +89,6 @@ public class CreateScreen extends JFrame {
                     //Testing: String createStatus = CREATE_SUCCESS;
                     if (createStatus == CREATE_SUCCESS) {
                         //open LoginScreen again & close create screen
-                        new LoginScreen(as);
                         closeCreateScreen();
                     }else{
                         JOptionPane.showMessageDialog(CreateScreen.this, "Failed to create account");
