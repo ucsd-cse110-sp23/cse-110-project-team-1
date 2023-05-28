@@ -20,41 +20,40 @@ public class Parser {
      */
     public void Parse() {
         String[] filteredString = transcription.replaceAll("\\p{P}", "").toLowerCase().split("\\s+");
-        if (filteredString.length > 0) {
+        if (filteredString.length >= 1) {
             if (filteredString[0].equals("question")) {
                 command = QUESTION;
             } else if (filteredString[0].equals("delete")) {
                 command = DELETE;
             }
         } 
-        if (filteredString.length > 2) {
+        if (filteredString.length >= 2) {
             if (filteredString[0].equals("clear") && filteredString[1].equals("all")) {
                 command = CLEAR_ALL;
-                // How to make it do clear clicked? Send a specific code through or add 
-                //return "";
             } // keep adding more commands next iteration (email stuff)
         }
         
     }
 
     // Before sending to ChatGPT, check if getPrompt.equals(COMMAND_NOT_FOUND) and don't send it
+    // Returns null if the command is either delete or clear all since don't need to sent to ChatGPT
     public String getPrompt() {
-        if (command == null) {
-            return COMMAND_NOT_FOUND;
-        }
+        String prompt;
         if (command.equals(QUESTION)) {
             String[] noCommandPrompt = transcription.split("\\s+");
             int firstWordLength = noCommandPrompt[0].length() + 1;
-
-            return transcription.substring(firstWordLength);
+            prompt = transcription.substring(firstWordLength);
+            System.out.println(prompt);
+            return prompt;
         }
         return null;
     }
     public static void main(String[] args) {
-        String testPrompt = "dElete What is the size?";
+        String testPrompt = "Delete the question.";
         Parser parsing = new Parser(testPrompt);
         parsing.Parse();
 
+        System.out.println(parsing.command);
         System.out.println(parsing.getPrompt());
     }
 }
