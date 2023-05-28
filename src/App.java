@@ -16,20 +16,22 @@ public class App {
             public void run() {
                 AccountSystem as = new AccountSystem();
 
+                // open server
+                try {
+                    new Server();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
                 // Check if auto-login is enabled
                 boolean autoLoginEnabled = checkAutoLoginStatus(as);
 
                 if (autoLoginEnabled) {
                     // Open SayIt screen directly
-                    openSayItScreen();
+                    openSayItScreen(as);
                 } else {
-                    // Open LoginScreen
-                    try {
-                        new Server();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    // LoginScreen
                     openLoginScreen(as);
                 }
             }
@@ -52,7 +54,7 @@ public class App {
         });
     }
 
-    private static void openSayItScreen() {
+    private static void openSayItScreen(AccountSystem as) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);

@@ -56,7 +56,6 @@ public class handler implements HttpHandler {
     }
 
     private String logInHandler(String remainingData) {
-        System.out.println("Look good rn");
         String email = remainingData.substring(0, remainingData.indexOf(","));
         remainingData = remainingData.substring(remainingData.indexOf(",") + 1);
 

@@ -155,6 +155,7 @@ public class LoginScreen extends JFrame {
         t.start();
     }
     
+   // private 
 
     private void closeLoginScreen() {
         dispose(); // Close the LoginScreen frame
