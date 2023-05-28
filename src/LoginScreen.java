@@ -6,6 +6,9 @@ import java.net.*;
 import java.awt.event.*;
 import java.io.*;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 public class LoginScreen extends JFrame {
     public final String URL = "http://localhost:8000/";
 
@@ -18,6 +21,7 @@ public class LoginScreen extends JFrame {
     public static final String EMAIL_TAKEN = "This email has been taken";
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
+    public static final String LOGINTYPE = "LOGIN";
    
     AccountSystem as;
 
@@ -105,49 +109,54 @@ public class LoginScreen extends JFrame {
         add(mainPanel);
     }
 
-    private void performLogin(String account, String password,  boolean autoLogIn){
-        Thread t = new Thread(
-            new Runnable(){
-                @Override
-                public void run(){
-                    String loginStatus = as.loginAccount(account, password, autoLogIn);
-                    // Send the login request to the server
-                    try {
-                        URL url = new URL(URL); 
-                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                        conn.setRequestMethod("LOGIN");
-                        conn.setDoOutput(true);
-                        OutputStreamWriter out = new OutputStreamWriter(
-                          conn.getOutputStream()
-                        );
-                        // send data to the server
-                        out.write(account + "," + password + "," + autoLogIn);
-                        out.flush();
-                        out.close();
-                        // receive the response from the server
-                        BufferedReader in = new BufferedReader(
-                          new InputStreamReader(conn.getInputStream())
-                        );
-                        String response = in.readLine();
-                        in.close();
-                        JOptionPane.showMessageDialog(null, response);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
-                    }
+    // send login request to server
 
-                    if(loginStatus == LOGIN_SUCCESS){
-                        // String filepath = AccountSystem.login()....
-                        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
-                        closeLoginScreen();
-                    }else{
-                        JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
-                    }
+    private void performLogin(String account, String password, boolean autoLogIn) {
+        Thread t = new Thread(() -> {
+            try {
+                // Set request body with arguments
+                String postData =
+                    LOGINTYPE + "," +
+                    account + "," +
+                    password + "," +
+                    autoLogIn;
+    
+                // Send the login request to the server
+                URL url = new URL(URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                
+                //send the request
+                OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
+                out.write(postData);
+                out.flush();
+                out.close();
+
+                // Receive the response from the server
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String loginStatus = in.readLine();
+                in.close();
+    
+                JOptionPane.showMessageDialog(null, loginStatus);
+    
+                // Check is login successffuly
+                if (loginStatus.equals(LOGIN_SUCCESS)) {
+                    // String filepath = AccountSystem.login()....
+                    new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                    closeLoginScreen();
+                } else {
+                    JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
             }
-        );
+        });
+        
         t.start();
     }
+    
 
     private void closeLoginScreen() {
         dispose(); // Close the LoginScreen frame

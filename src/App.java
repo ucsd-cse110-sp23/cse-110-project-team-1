@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 import javax.swing.*;
 
 public class App {
@@ -7,6 +9,7 @@ public class App {
     public static final String EMAIL_TAKEN = "This email has been taken";
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
+    Server server;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -21,6 +24,12 @@ public class App {
                     openSayItScreen();
                 } else {
                     // Open LoginScreen
+                    try {
+                        new Server();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                     openLoginScreen(as);
                 }
             }

@@ -6,5 +6,5 @@
         "SayItAssistant/lib/junit-platform-console-standalone-1.9.3.jar",
         "SayItAssistant/lib/javatuples-1.2.jar"
     ],
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
