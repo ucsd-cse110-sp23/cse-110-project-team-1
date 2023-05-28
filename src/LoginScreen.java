@@ -135,9 +135,7 @@ public class LoginScreen extends JFrame {
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String loginStatus = in.readLine();
                 in.close();
-    
-                JOptionPane.showMessageDialog(null, loginStatus);
-    
+        
                 // Check is login successffuly
                 if (loginStatus.equals(LOGIN_SUCCESS)) {
                     // String filepath = AccountSystem.login()....
