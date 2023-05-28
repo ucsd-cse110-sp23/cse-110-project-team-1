@@ -9,86 +9,18 @@ import javax.swing.*;
 
 import org.javatuples.Triplet;
 
-class QuestionAnswer{
-    private int qID;
-
-    private String question;
-    private String answer;
-
-    /**
-     * Creates a default question, answer, and qID tuple with null question, null answer, and null qID of -1
-     */
-    QuestionAnswer(){
-        qID = -1;
-        question = null;
-        answer = null;
-    }
-
-    /**
-     * Create new question, answer, qID tuple
-     * @param qID -1 is the null qID
-     * @param question set to null for no question
-     * @param answer set to null for no answer
-     */
-    QuestionAnswer(int qID, String question, String answer){
-        this.qID = qID;
-        this.question = question;
-        this.answer = answer;
-    }
-
-    /**
-     * sets qID for the question, answer, qID tuple
-     * @param qID -1 is the null/no qID
-     */
-    public void setqID(int qID) {
-        this.qID = qID;
-    }
-
-    /**
-     * sets question for question, answer, qID tuple
-     * @param question set to null for no question
-     */
-    public void setQuestion(String question) {
-        this.question = question;
-    }
-
-    /**
-     * sets answer for the question, answer, qID tuple
-     * @param answer set to null for no answer
-     */
-    public void setAnswer(String answer) {
-        this.answer = answer;
-    }
-
-    /**
-     * @return -1 is null/no qID
-     */
-    public int getqID() {
-        return qID;
-    }
-
-    /** 
-     * @return String of the question asked
-     */
-    public String getQuestion() {
-        return question;
-    }
-
-    /**
-     * @return String of the answer to the question
-     */
-    public String getAnswer() {
-        return answer;
-    }    
-}
 
 class QAPanel extends JPanel{
+    private final String EMPTY_QUESTION = null;
+    private final String EMPTY_COMMAND = null;
+    private final int EMPTY_ID = -1;
+
     Color green = new Color(188, 226, 158);
     
     QuestionAnswer qaPrompt;
     
-    JTextArea question;
-    JTextArea answer;
+    private JTextArea question;
+    private JTextArea answer;
     //int qID;
     String prefixQ = "Q: ";
     String prefixA = "A: ";
@@ -124,21 +56,21 @@ class QAPanel extends JPanel{
     }
 
     public int getQuestionID(){
-        return qaPrompt.getqID();
+        return qaPrompt.qID;
     }
 
     public String getQuestion(){
-        return qaPrompt.getQuestion();
+        return qaPrompt.question;
     }
 
     public String getAnswer(){
-        return qaPrompt.getAnswer();
+        return qaPrompt.answer;
     }
 
 
     public void setQuestionID(int id) {
         //qID = id;
-        qaPrompt.setqID(id);
+        qaPrompt.qID = id;
     }
 
     /**
@@ -146,8 +78,8 @@ class QAPanel extends JPanel{
      * @param newQuestion question to be stored
      * @param questionID id of questionAnswer (put -1 if no question)
      */
-     public void createQuestion(String newQuestion, int questionID){
-        qaPrompt = new QuestionAnswer(questionID, newQuestion, "");
+     public void createQuestion(String command, String newQuestion, int questionID){
+        qaPrompt = new QuestionAnswer(questionID, command,newQuestion, "");
         //qID = questionID;
         clearAnswer();
 
@@ -172,9 +104,9 @@ class QAPanel extends JPanel{
     public void changeAnswer(String newAnswer){
         //stop gap, might change
         if (qaPrompt == null){
-            createQuestion(null, -1);
+            createQuestion(EMPTY_COMMAND, EMPTY_QUESTION, EMPTY_ID);
         }
-        qaPrompt.setAnswer(newAnswer);
+        qaPrompt.answer = newAnswer;
         // answer.setText(prefixA + newAnswer);
         
         updateDisplay();
@@ -337,16 +269,17 @@ class MainPanel extends JPanel{
 }
 
 class RecentQuestion extends JButton{
+
     QuestionAnswer questionAnswer;
     int maxCharLimit = 20;
     RecentQuestion(QuestionAnswer qa){
         questionAnswer = qa;
-        if (qa.getQuestion().length() > maxCharLimit){
-            this.setText(qa.getQuestion().substring(0, maxCharLimit) + "...");
-        } else if (qa.getQuestion().length() <= 0) {
+        if (qa.question.length() > maxCharLimit){
+            this.setText(qa.question.substring(0, maxCharLimit) + "...");
+        } else if (qa.question.length() <= 0) {
             this.setText(" ");//to avoid the button from being too thin
         } else {
-            this.setText(qa.getQuestion());
+            this.setText(qa.question);
         }
     }
 
@@ -359,7 +292,7 @@ class PromptHistory extends JPanel{
     JLabel title;
     JPanel history;
     JScrollPane histPane;
-    History histClass;
+    AccountMediator histClass;
 
     PromptHistory(){
         // history = new JList<String>(getHistory());
@@ -498,7 +431,7 @@ public class SayIt extends JFrame{
     // testing purpose
     //int i;
 
-    History histClass;
+    AccountMediator histClass;
 
     /**
      * @return panel housing the record button and 
@@ -546,7 +479,7 @@ public class SayIt extends JFrame{
         this.chatGPT = chatGPT;
         this.whisper = whisper;
         this.recorder = recorder;
-        histClass = new History();
+        histClass = new AccountMediator();
 
         sideBar = new SideBar();
         c.fill = GridBagConstraints.BOTH;
@@ -558,8 +491,9 @@ public class SayIt extends JFrame{
         // sideBar.promptHistory.loadHist(saveFile);
 
         // Load history and add listener
+        //TODO fix HISTORY and Command
         for (Triplet<Integer,String,String> entry : histClass.initial(saveFile)) {
-            RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), entry.getValue1(), entry.getValue2()));
+            RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), null,entry.getValue1(), entry.getValue2()));
             addListenerToRecentQ(recentQ);
         }
 
@@ -593,7 +527,7 @@ public class SayIt extends JFrame{
             new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    System.out.println(recentQ.getQuestionAnswer().getQuestion());
+                    System.out.println(recentQ.getQuestionAnswer().question);
                     showPromptHistQuestionOnQAPrompt(recentQ);
                 }
             }
@@ -608,7 +542,7 @@ public class SayIt extends JFrame{
         try {
             question = whisper.transcription(null);
             // question = "test " + i;
-            qaPanel.createQuestion(question,0);
+            qaPanel.createQuestion(null,question,0); //TODO accept/pase command
             answer = chatGPT.run(question);
             // answer = "test answer " + i;
             // i++;
@@ -676,7 +610,7 @@ public class SayIt extends JFrame{
         }
     }
 
-    public History getHistClass(){
+    public AccountMediator getHistClass(){
         return histClass;
     }
 
@@ -690,7 +624,7 @@ public class SayIt extends JFrame{
 
     public void deleteClicked(){
         if(currQ != null){
-            histClass.removeEntry(currQ.getQuestionAnswer().getqID());
+            histClass.removeEntry(currQ.getQuestionAnswer().qID);
             sideBar.getPromptHistory().dltQuestion(currQ);
             mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
             currQ = null;
