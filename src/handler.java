@@ -6,9 +6,11 @@ import java.util.*;
 
 public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
+    public static final String CREATETYPE = "CREATE";
 
-    public handler() {
-
+    AccountSystem as;
+    public handler(AccountSystem as) {
+        this.as = as;
     }
 
     // Handle login and create account requests
@@ -48,10 +50,13 @@ public class handler implements HttpHandler {
         String postType = postData.substring(0, postData.indexOf(","));
         String remainingData = postData.substring(postData.indexOf(",") + 1);
 
-        if(postType.equals(LOGINTYPE)){
+        if (postType.equals(LOGINTYPE)) {
             response = logInHandler(remainingData);
+        } else if (postType.equals(CREATETYPE)) {
+            response = createHandler(remainingData);
+        } else {
+            throw new IOException("Unsupported postType: " + postType);
         }
-
         return response;
     }
 
@@ -63,8 +68,17 @@ public class handler implements HttpHandler {
         String autoLogInStr = remainingData.substring(remainingData.indexOf(",") + 1);
 
         boolean autoLogIn = Boolean.parseBoolean(autoLogInStr);
-
-        AccountSystem as = new AccountSystem();
         return as.loginAccount(email, password, autoLogIn);
+    }
+
+    private String createHandler(String remainingData) {
+        String email = remainingData.substring(0, remainingData.indexOf(","));
+        remainingData = remainingData.substring(remainingData.indexOf(",") + 1);
+
+        String password = remainingData.substring(0, remainingData.indexOf(","));
+        String comfirmField = remainingData.substring(remainingData.indexOf(",") + 1);
+
+        boolean comfirmPass = Boolean.parseBoolean(comfirmField);
+        return as.createAccount(email, password, comfirmPass);
     }
 }

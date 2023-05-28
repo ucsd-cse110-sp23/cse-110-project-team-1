@@ -21,11 +21,7 @@ public class LoginScreen extends JFrame {
     public static final String WRONG_PASSWORD = "Wrong password";
     public static final String LOGINTYPE = "LOGIN";
    
-    AccountSystem as;
-
-    public LoginScreen(AccountSystem as) {
-        this.as = as;
-
+    public LoginScreen() {
         setTitle("Login Screen");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Terminates the program when the frame is closed
         setSize(400, 300); // Window size
@@ -95,7 +91,7 @@ public class LoginScreen extends JFrame {
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                    new CreateScreen(as);
+                    new CreateScreen();
             }
         });
         mainPanel.add(createAccountButton);
@@ -136,7 +132,7 @@ public class LoginScreen extends JFrame {
                 String loginStatus = in.readLine();
                 in.close();
         
-                // Check is login successffuly
+                // Check if login successffuly
                 if (loginStatus.equals(LOGIN_SUCCESS)) {
                     // String filepath = AccountSystem.login()....
                     new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
@@ -162,7 +158,7 @@ public class LoginScreen extends JFrame {
     public static void main(String[] args) {
         //SwingUtilities.invokeLater(new Runnable() {
             //public void run() {
-                new LoginScreen(new AccountSystem());
+                new LoginScreen();
             //}
         //});
     }

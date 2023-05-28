@@ -15,10 +15,8 @@ public class CreateScreen extends JFrame {
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
 
-    private AccountSystem as;
 
-    public CreateScreen(AccountSystem as) {
-        this.as = as;
+    public CreateScreen() {
 
         setTitle("Create Account");
         setSize(400, 300);
@@ -89,7 +87,7 @@ public class CreateScreen extends JFrame {
                     //Testing: String createStatus = CREATE_SUCCESS;
                     if (createStatus == CREATE_SUCCESS) {
                         //open LoginScreen again & close create screen
-                        new LoginScreen(as);
+                        new LoginScreen();
                         closeCreateScreen();
                     }else{
                         JOptionPane.showMessageDialog(CreateScreen.this, "Failed to create account");
@@ -105,6 +103,6 @@ public class CreateScreen extends JFrame {
     }
 
     public static void main(String[] args) {
-        new CreateScreen(new AccountSystem());
+        new CreateScreen();
     }
 }

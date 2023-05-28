@@ -6,6 +6,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.json.JsonObject;
 import org.bson.types.ObjectId;
 
 import static com.mongodb.client.model.Filters.*;
@@ -25,11 +26,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
 
+import java.io.FileWriter;
+
 public class AccountSystem {
 
     public JUser currentUser;
     private final String uri = "mongodb+srv://sjgoh:adObuNGxznemoldt@cluster0.0yck06r.mongodb.net/?retryWrites=true&w=majority";
     public String savePath = "saveFiles/AutoLoginIn.json";
+    public final String QUESTION_FIELD = "Question";
+    public final String ANSWER_FIELD = "Answer";
     //Field Strings
     public static final String EMAIL = "Email";
     public static final String PASS = "Password";
@@ -38,6 +43,7 @@ public class AccountSystem {
     public static final String COM_STRING = "Commands";
     public static final String QUE_STRING = "Questions";
     public static final String ANS_STRING = "Answers";
+    
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
     public static final String LOGIN_SUCCESS = "Login successful";
@@ -92,9 +98,6 @@ public class AccountSystem {
      */
     @SuppressWarnings("unchecked")
     public String loginAccount(String email, String password, boolean autoLogIn) {
-        if (autoLogIn) {
-            createAutoLogIn(email, password, "null");
-        }
         try (MongoClient mongoClient = MongoClients.create(uri)) {
 
 
@@ -109,13 +112,32 @@ public class AccountSystem {
             if (!pass.equals(password)) {
                 return WRONG_PASSWORD;
             }
+            
+            if (autoLogIn) {
+                createAutoLogIn(email, password, "null");
+            }
 
+            JSONObject saveBody = new JSONObject();
             currentUser = new JUser(email, password);
             List<Document> prompts = (List<Document>)account.get(PROMPT_STRING);
             for (Document d: prompts) {
                 System.out.println(d.toJson());
                 QuestionAnswer qa = new QuestionAnswer((int)d.get(QID), (String)d.get(COM_STRING), (String)d.get(QUE_STRING), (String)d.get(ANS_STRING));
                 currentUser.addPrompt(qa);
+                
+                JSONObject newEntry = new JSONObject();
+                //newEntry.put(QUESTION_FIELD, (String)d.get(COM_STRING));
+                newEntry.put(ANSWER_FIELD, (String)d.get(QUE_STRING));
+                newEntry.put(ANSWER_FIELD, (String)d.get(ANS_STRING));
+                saveBody.put((Integer)d.get(QID),newEntry);
+            }
+
+            //overwrite file
+            try (FileWriter fileWriter = new FileWriter(savePath, false)) {
+                // Write the new JSON information to the file
+                fileWriter.write(saveBody.toString());  // or jsonArray.toString() for an array
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             
             return LOGIN_SUCCESS;

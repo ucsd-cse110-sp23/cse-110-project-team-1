@@ -10,6 +10,7 @@ public class App {
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
     Server server;
+    AccountSystem as;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -18,7 +19,7 @@ public class App {
 
                 // open server
                 try {
-                    new Server();
+                    new Server(as);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -29,10 +30,10 @@ public class App {
 
                 if (autoLoginEnabled) {
                     // Open SayIt screen directly
-                    openSayItScreen(as);
+                    openSayItScreen();
                 } else {
                     // LoginScreen
-                    openLoginScreen(as);
+                    openLoginScreen();
                 }
             }
         });
@@ -46,15 +47,15 @@ public class App {
         return false;
     }
 
-    private static void openLoginScreen(AccountSystem as) {
+    private static void openLoginScreen() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new LoginScreen(as);
+                new LoginScreen();
             }
         });
     }
 
-    private static void openSayItScreen(AccountSystem as) {
+    private static void openSayItScreen() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);

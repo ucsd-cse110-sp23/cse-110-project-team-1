@@ -11,8 +11,9 @@ public class Server {
     // initialize server port and hostname
     private static final int SERVER_PORT = 8101;
     private static final String SERVER_HOSTNAME = "localhost";
-
-    Server() throws IOException{
+    AccountSystem as;
+    Server(AccountSystem as) throws IOException{
+        this.as = as;
         // create a thread pool to handle requests
         ThreadPoolExecutor threadPoolExecutor = 
             (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
@@ -24,7 +25,7 @@ public class Server {
         );
 
         // set the context
-        server.createContext("/", new handler());
+        server.createContext("/", new handler(as));
         // server.createContext("/", new MyHandler(data));
         //server.createContext("/sayit", new AppRequestHandler());
         // set the executor
