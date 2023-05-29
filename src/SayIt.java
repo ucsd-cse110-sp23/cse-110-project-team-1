@@ -468,7 +468,7 @@ public class SayIt extends JFrame{
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
         setSize(600, 600); //400, 600
-        setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        //setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setUndecorated(false);
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
