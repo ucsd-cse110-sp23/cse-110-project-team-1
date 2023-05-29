@@ -6,7 +6,6 @@ import com.mongodb.client.result.UpdateResult;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.bson.json.JsonObject;
 import org.bson.types.ObjectId;
 
 import static com.mongodb.client.model.Filters.*;
@@ -113,6 +112,7 @@ public class AccountSystem {
 
             if (autoLogIn) {
                 createAutoLogIn(email, password, null);
+                System.out.println("AotoLogin created: email = " + email);
             }
             
             currentUser = new JUser(email, password);
@@ -122,6 +122,7 @@ public class AccountSystem {
                 QuestionAnswer qa = new QuestionAnswer((int)d.get(QID), (String)d.get(COM_STRING), (String)d.get(QUE_STRING), (String)d.get(ANS_STRING));
                 currentUser.addPrompt(qa);
             }
+            System.out.println(LOGIN_SUCCESS + ": email = " + email);
             return LOGIN_SUCCESS;
         }
     }

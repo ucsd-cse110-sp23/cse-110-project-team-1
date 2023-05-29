@@ -44,6 +44,11 @@ public class handler implements HttpHandler {
         outStream.close();
     }
 
+    /**
+     * handles all POST request to server(login, createAccount, maybe newProblem, new prompt)
+     * @param httpExchange -the request receieved
+     * @return -the response get from the server
+     */
     private String handlePost(HttpExchange httpExchange) throws IOException {
         String response = "handlePost Received";
 
@@ -71,10 +76,23 @@ public class handler implements HttpHandler {
         return response;
     }
 
+    /**
+     * handles login request. This calls the method from AccountSystem and tries to login a account
+     * @param email -the email tries to log in
+     * @param password -the password of the email
+     * @param autoLogIn -determ whether to make this app autoLogin for this account 
+     * @return the login status
+     */
     private String logInHandler(String email, String password, boolean autoLogIn) {
         return as.loginAccount(email, password, autoLogIn);
     }
 
+    /**
+     * handle create request. This calls the method from AccountSystem and tries to create a account
+     * @param email -the email tries to create
+     * @param password -sets the password for new account
+     * @return the create status
+     */
     private String createHandler(String email, String password) {
         return as.createAccount(email, password, false);
     }

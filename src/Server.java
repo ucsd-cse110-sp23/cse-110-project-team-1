@@ -24,7 +24,6 @@ public class Server {
 
         // set the context
         server.createContext("/", new handler(as));
-        // server.createContext("/", new MyHandler(data));
         //server.createContext("/sayit", new AppRequestHandler());
         // set the executor
         server.setExecutor(threadPoolExecutor);
@@ -35,7 +34,8 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
-        
+        //testing purpose
+        new Server(new AccountSystem());
     }
 }
    

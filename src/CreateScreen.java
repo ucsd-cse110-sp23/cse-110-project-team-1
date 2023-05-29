@@ -77,7 +77,7 @@ public class CreateScreen extends JFrame {
                     JOptionPane.showMessageDialog(CreateScreen.this, "Password and confirm password do not match");
                 } else {
                     // Create an email in another thread by call helpler method
-                    performCreate(email, password,false);
+                    performCreate(email, password);
                 }
             }
         });
@@ -91,7 +91,13 @@ public class CreateScreen extends JFrame {
         setVisible(true);
     }
 
-    private void performCreate(String email, String password, boolean autoLogIn) {
+    /** sends a create request to server; autoLogIn should always be false
+     *  this method used to send create request to the server
+     * @param email -the email sends to the server
+     * @param password -the password of that email
+     * 
+    */ 
+    private void performCreate(String email, String password) {
         Thread t = new Thread(() -> {
             try {
                 // Set request body with arguments
