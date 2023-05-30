@@ -21,7 +21,7 @@ public class CreateScreen extends JFrame {
     private JPasswordField confirmField;
 
     public static final String CREATETYPE = "CREATE";
-    public final String URL = "http://192.168.1.143:8101/";
+    public final String URL = "http://localhost:8101/";
 
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";

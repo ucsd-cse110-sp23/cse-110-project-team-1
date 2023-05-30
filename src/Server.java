@@ -5,11 +5,10 @@ import java.util.concurrent.*;
 
 public class Server {
     private static final int SERVER_PORT = 8101;
-    private static final String SERVER_HOSTNAME = "192.168.1.198";
+    private static final String SERVER_HOSTNAME = "localhost";
 
     public Server() {
     }
-
     public void startServer() throws IOException {
         // create a thread pool to handle requests
         ThreadPoolExecutor threadPoolExecutor =
