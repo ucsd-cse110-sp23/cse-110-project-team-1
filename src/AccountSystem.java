@@ -219,6 +219,9 @@ public class AccountSystem {
         return null;
     }
 
+    /*
+     * To Clear the AccountSystem by reset currentUser to null()
+     */
     public static void clear(){
         currentUser = null;
         return;
