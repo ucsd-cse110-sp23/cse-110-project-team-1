@@ -10,10 +10,19 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+/**
+ * This class has the handler method that handles requests received by server at 
+ * context "/"
+ */   
 public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
     public static final String CREATETYPE = "CREATE";
 
+    /**
+     * This method handles POST and GET request received by server.
+     * The POST received should have indicated whether this is a login request or 
+     * create request in the field "postType" in the httpExchange request body
+     */
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String response = "Request Received";

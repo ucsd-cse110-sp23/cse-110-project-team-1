@@ -107,7 +107,7 @@ public class CreateScreen extends JFrame {
                 requestData.put("password", password);
     
                 JSONObject requestDataJson = new JSONObject(requestData);
-                // Send the login request to the server
+                // Send the create request to the server
                 URL url = new URL(URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
