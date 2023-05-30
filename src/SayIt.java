@@ -471,6 +471,8 @@ public class SayIt extends JFrame{
         //setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setUndecorated(false);
         setLayout(new GridBagLayout());
+        setLocationRelativeTo(null); // Center the window
+
         GridBagConstraints c = new GridBagConstraints();
         if (shouldFill) {
                         //natural height, maximum width
