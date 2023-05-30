@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
 
 
 public class LoginScreen extends JFrame {
-    public final String URL = "http://localhost:8101/";
+    public final String URL = "http://192.168.1.143:8101/";
 
     private JTextField emailTextField;
     private JPasswordField passwordField;
