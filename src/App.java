@@ -2,6 +2,9 @@ import java.io.IOException;
 
 import javax.swing.*;
 
+/**
+ * !! Open the server before running this Program
+ */
 public class App {
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
@@ -13,7 +16,7 @@ public class App {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                
+
                 // Check if auto-login is enabled
                 if (checkAutoLoginStatus()) {
                     // Open SayIt screen directly

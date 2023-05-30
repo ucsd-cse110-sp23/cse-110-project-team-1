@@ -133,7 +133,7 @@ public class AccountSystem {
      * This means please call either createAccount or loginAccount before this method
      * @ensures currentUser prompts are updated in the database
     */
-    public void updateAccount() {
+    public static void updateAccount() {
         if (currentUser == null) {
             return;
         }
@@ -218,12 +218,18 @@ public class AccountSystem {
         }
         return null;
     }
-    
+
+    public static void clear(){
+        currentUser = null;
+        return;
+    }
+
     public static void main(String[] args) {
-        AccountSystem system = new AccountSystem();
-        system.createAccount("Test", "TestPassword", false);
-        system.loginAccount("Test", "TestPassword", false);
-        system.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
-        system.updateAccount();
+        AccountSystem.createAccount("Test", "TestPassword", false);
+        AccountSystem.loginAccount("Test", "TestPassword", false);
+        AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
+        AccountSystem.updateAccount();
+        AccountSystem.clear();
+        System.out.println(AccountSystem.currentUser);
     }
 }
