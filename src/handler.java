@@ -28,7 +28,11 @@ public class handler implements HttpHandler {
         try {
             if (method.equals("POST")) {
                 response = handlePost(httpExchange);
-            } else {
+            } else if(method.equals("GET")){
+                response = "Welcome to SayIt";
+                //throw new Exception("GET method have not implemented");
+            }
+            else {
                 throw new Exception("Not Valid Request Method");
             }
         } catch (Exception e) {
