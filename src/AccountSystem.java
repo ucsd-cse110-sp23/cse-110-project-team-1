@@ -27,9 +27,9 @@ import java.io.PrintWriter;
 
 public class AccountSystem {
 
-    public JUser currentUser;
-    private final String uri = "mongodb+srv://sjgoh:adObuNGxznemoldt@cluster0.0yck06r.mongodb.net/?retryWrites=true&w=majority";
-    public String savePath = "saveFiles/AutoLoginIn.json";
+    public static JUser currentUser;
+    private final static String uri = "mongodb+srv://sjgoh:adObuNGxznemoldt@cluster0.0yck06r.mongodb.net/?retryWrites=true&w=majority";
+    public static String savePath = "saveFiles/AutoLoginIn.json";
     public final String QUESTION_FIELD = "Question";
     public final String ANSWER_FIELD = "Answer";
     //Field Strings
@@ -56,7 +56,7 @@ public class AccountSystem {
      * @returns EMAIL_TAKEN if there is already an email in the database matching the passed in email
      * @returns CREATE_SUCCESS if account was created successfully
      */
-    String createAccount(String email, String password, boolean autoLogIn) {
+    static String createAccount(String email, String password, boolean autoLogIn) {
         currentUser = new JUser(email, password);
         if (autoLogIn) {
             createAutoLogIn(email, password, "null");
@@ -94,7 +94,7 @@ public class AccountSystem {
      * @returns LOGIN_SUCCESS when login went sucessful
      */
     @SuppressWarnings("unchecked")
-    public String loginAccount(String email, String password, boolean autoLogIn) {
+    public static String loginAccount(String email, String password, boolean autoLogIn) {
         try (MongoClient mongoClient = MongoClients.create(uri)) {
 
 
@@ -162,7 +162,7 @@ public class AccountSystem {
      * Sets email and password in the file as a json
      */
     @SuppressWarnings("unchecked")
-    private void createAutoLogIn(String email, String password, String filepath) {
+    private static void createAutoLogIn(String email, String password, String filepath) {
         if (filepath != null) {
             savePath = filepath;
         }
@@ -199,7 +199,7 @@ public class AccountSystem {
      * @returns null if there is no autoLogIn file (i.e user has not yet choosen to auto login for their account on this device)
      * @return status response from loginAccount method if there is an autoLogIn File. 
      */
-    public String checkAutoLogIN(String filepath) {
+    public static String checkAutoLogIN(String filepath) {
         if (filepath != null) {
             savePath = filepath;
         }

@@ -14,12 +14,6 @@ public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
     public static final String CREATETYPE = "CREATE";
 
-    AccountSystem as;
-
-    public handler(AccountSystem as) {
-        this.as = as;
-    }
-
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String response = "Request Received";
@@ -88,7 +82,7 @@ public class handler implements HttpHandler {
      * @return the login status
      */
     private String logInHandler(String email, String password, boolean autoLogIn) {
-        return as.loginAccount(email, password, autoLogIn);
+        return AccountSystem.loginAccount(email, password, autoLogIn);
     }
 
     /**
@@ -98,6 +92,6 @@ public class handler implements HttpHandler {
      * @return the create status
      */
     private String createHandler(String email, String password) {
-        return as.createAccount(email, password, false);
+        return AccountSystem.createAccount(email, password, false);
     }
 }

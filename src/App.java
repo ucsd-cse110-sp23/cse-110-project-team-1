@@ -9,22 +9,13 @@ public class App {
     public static final String EMAIL_TAKEN = "This email has been taken";
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
-    AccountSystem as;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                AccountSystem as = new AccountSystem();
-
-                // open server
-                try {
-                    new Server(as);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                
                 // Check if auto-login is enabled
-                if (checkAutoLoginStatus(as)) {
+                if (checkAutoLoginStatus()) {
                     // Open SayIt screen directly
                     openSayItScreen();
                 } else {
@@ -36,8 +27,8 @@ public class App {
     }
 
     // 
-    private static boolean checkAutoLoginStatus(AccountSystem as) {
-        String loginStatus = as.checkAutoLogIN(null);
+    private static boolean checkAutoLoginStatus() {
+        String loginStatus = AccountSystem.checkAutoLogIN(null);
         if(loginStatus == LOGIN_SUCCESS){
             return true;
         }
