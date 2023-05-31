@@ -112,6 +112,11 @@ class QAPanel extends JPanel{
         updateDisplay();
     }
 
+
+    public void setPrefixQ(String prefix) {
+        prefixQ = prefix + ": ";
+    }
+
     /**
      * @return the words preceding each question when displayed (ex "Q: ")
      */
@@ -549,7 +554,7 @@ public class SayIt extends JFrame{
             System.out.println(parser.command);
 
             if (parser.command == null) {
-                qaPanel.createQuestion(parser.COMMAND_NOT_FOUND, "Invalid Command Entered", 0);
+                qaPanel.createQuestion(parser.COMMAND_NOT_FOUND, question, 0);
                 answer = parser.COMMAND_NOT_FOUND;
                 qaPanel.changeAnswer(answer);
                 RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
@@ -563,9 +568,10 @@ public class SayIt extends JFrame{
                 return recentQ;
 
             } else if (parser.command.equals(parser.QUESTION)) {
-                qaPanel.createQuestion(parser.QUESTION,parser.getPrompt(),0); //TODO accept/pase command
+                qaPanel.createQuestion(parser.QUESTION,parser.getPrompt(),0);
                 answer = chatGPT.run(parser.getPrompt());
                 qaPanel.changeAnswer(answer);
+                qaPanel.setPrefixQ(parser.QUESTION);
 
                 RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
                 addListenerToRecentQ(recentQ);
