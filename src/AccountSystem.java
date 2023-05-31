@@ -27,9 +27,11 @@ import java.io.PrintWriter;
 
 public class AccountSystem {
 
-    public JUser currentUser;
-    private final String uri = "mongodb+srv://sjgoh:adObuNGxznemoldt@cluster0.0yck06r.mongodb.net/?retryWrites=true&w=majority";
-    public String savePath = "saveFiles/AutoLoginIn.json";
+    public static JUser currentUser;
+    private final static String uri = "mongodb+srv://sjgoh:adObuNGxznemoldt@cluster0.0yck06r.mongodb.net/?retryWrites=true&w=majority";
+    public static String savePath = "saveFiles/AutoLoginIn.json";
+    public final String QUESTION_FIELD = "Question";
+    public final String ANSWER_FIELD = "Answer";
     //Field Strings
     public static final String EMAIL = "Email";
     public static final String PASS = "Password";
@@ -38,6 +40,7 @@ public class AccountSystem {
     public static final String COM_STRING = "Commands";
     public static final String QUE_STRING = "Questions";
     public static final String ANS_STRING = "Answers";
+    
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
     public static final String LOGIN_SUCCESS = "Login successful";
@@ -53,7 +56,7 @@ public class AccountSystem {
      * @returns EMAIL_TAKEN if there is already an email in the database matching the passed in email
      * @returns CREATE_SUCCESS if account was created successfully
      */
-    String createAccount(String email, String password, boolean autoLogIn) {
+    static String createAccount(String email, String password, boolean autoLogIn) {
         currentUser = new JUser(email, password);
         if (autoLogIn) {
             createAutoLogIn(email, password, "null");
@@ -91,10 +94,7 @@ public class AccountSystem {
      * @returns LOGIN_SUCCESS when login went sucessful
      */
     @SuppressWarnings("unchecked")
-    public String loginAccount(String email, String password, boolean autoLogIn) {
-        if (autoLogIn) {
-            createAutoLogIn(email, password, "null");
-        }
+    public static String loginAccount(String email, String password, boolean autoLogIn) {
         try (MongoClient mongoClient = MongoClients.create(uri)) {
 
 
@@ -110,6 +110,11 @@ public class AccountSystem {
                 return WRONG_PASSWORD;
             }
 
+            if (autoLogIn) {
+                createAutoLogIn(email, password, null);
+                System.out.println("AotoLogin created: email = " + email);
+            }
+            
             currentUser = new JUser(email, password);
             List<Document> prompts = (List<Document>)account.get(PROMPT_STRING);
             for (Document d: prompts) {
@@ -117,7 +122,7 @@ public class AccountSystem {
                 QuestionAnswer qa = new QuestionAnswer((int)d.get(QID), (String)d.get(COM_STRING), (String)d.get(QUE_STRING), (String)d.get(ANS_STRING));
                 currentUser.addPrompt(qa);
             }
-            
+            System.out.println(LOGIN_SUCCESS + ": email = " + email);
             return LOGIN_SUCCESS;
         }
     }
@@ -128,7 +133,7 @@ public class AccountSystem {
      * This means please call either createAccount or loginAccount before this method
      * @ensures currentUser prompts are updated in the database
     */
-    public void updateAccount() {
+    public static void updateAccount() {
         if (currentUser == null) {
             return;
         }
@@ -157,13 +162,16 @@ public class AccountSystem {
      * Sets email and password in the file as a json
      */
     @SuppressWarnings("unchecked")
-    private void createAutoLogIn(String email, String password, String filepath) {
+    private static void createAutoLogIn(String email, String password, String filepath) {
         if (filepath != null) {
             savePath = filepath;
         }
         File save = new File(savePath);
+        File parentDir = save.getParentFile();
+        if (parentDir != null) {
+            parentDir.mkdirs();
+        }
         try {
-            save.getParentFile().mkdirs(); 
             save.createNewFile();
         } catch (IOException io) {
             io.printStackTrace();
@@ -191,7 +199,7 @@ public class AccountSystem {
      * @returns null if there is no autoLogIn file (i.e user has not yet choosen to auto login for their account on this device)
      * @return status response from loginAccount method if there is an autoLogIn File. 
      */
-    public String checkAutoLogIN(String filepath) {
+    public static String checkAutoLogIN(String filepath) {
         if (filepath != null) {
             savePath = filepath;
         }
@@ -210,12 +218,21 @@ public class AccountSystem {
         }
         return null;
     }
-    
+
+    /*
+     * To Clear the AccountSystem by reset currentUser to null()
+     */
+    public static void clear(){
+        currentUser = null;
+        return;
+    }
+
     public static void main(String[] args) {
-        AccountSystem system = new AccountSystem();
-        system.createAccount("Test", "TestPassword", false);
-        system.loginAccount("Test", "TestPassword", false);
-        system.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
-        system.updateAccount();
+        AccountSystem.createAccount("Test", "TestPassword", false);
+        AccountSystem.loginAccount("Test", "TestPassword", false);
+        AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
+        AccountSystem.updateAccount();
+        AccountSystem.clear();
+        System.out.println(AccountSystem.currentUser);
     }
 }

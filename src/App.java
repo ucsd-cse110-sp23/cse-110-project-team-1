@@ -1,5 +1,10 @@
+import java.io.IOException;
+
 import javax.swing.*;
 
+/**
+ * !! Open the server before running this Program
+ */
 public class App {
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
@@ -11,34 +16,31 @@ public class App {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                AccountSystem as = new AccountSystem();
-
                 // Check if auto-login is enabled
-                boolean autoLoginEnabled = checkAutoLoginStatus(as);
-
-                if (autoLoginEnabled) {
+                if (checkAutoLoginStatus()) {
                     // Open SayIt screen directly
                     openSayItScreen();
                 } else {
-                    // Open LoginScreen
-                    openLoginScreen(as);
+                    // LoginScreen
+                    openLoginScreen();
                 }
             }
         });
     }
 
-    private static boolean checkAutoLoginStatus(AccountSystem as) {
-        String loginStatus = as.checkAutoLogIN("null");
+    // 
+    private static boolean checkAutoLoginStatus() {
+        String loginStatus = AccountSystem.checkAutoLogIN(null);
         if(loginStatus == LOGIN_SUCCESS){
             return true;
         }
         return false;
     }
 
-    private static void openLoginScreen(AccountSystem as) {
+    private static void openLoginScreen() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new LoginScreen(as);
+                new LoginScreen();
             }
         });
     }
