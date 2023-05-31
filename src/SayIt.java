@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.*;
 
 // import javax.management.Query;
 // import javax.sound.sampled.*;
@@ -183,7 +184,7 @@ class MainPanel extends JPanel{
     JButton recButton;
     JButton dltButton;
     boolean isRec = false;
-    String startBlurb = "New Question";
+    String startBlurb = "Start Recording";
     String stopBlurb = "Stop Recording";
     String deletBlurd = "Delete";
 
@@ -211,7 +212,7 @@ class MainPanel extends JPanel{
         this.add(recButton, BorderLayout.SOUTH);
 
         dltButton = new JButton(deletBlurd);
-        this.add(dltButton, BorderLayout.EAST);
+        // this.add(dltButton, BorderLayout.EAST);
     }
 
     public String getRecStartBlurb(){ return startBlurb;}
@@ -391,7 +392,7 @@ class SideBar extends JPanel{
         promptHistory.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         clearButton = new JButton("Clear All");
-        this.add(clearButton, BorderLayout.SOUTH);
+        // this.add(clearButton, BorderLayout.SOUTH);
         clearButton.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
@@ -598,15 +599,16 @@ public class SayIt extends JFrame{
     public RecentQuestion changeRecording(){
         RecentQuestion recentQ;
         if (mainPanel.getIsRec()){
-            recentQ = finishRecording();
-            mainPanel.stopRecording();
-            return recentQ;
+                recentQ = finishRecording();
+                mainPanel.stopRecording();
+                return recentQ;
         } else {
             // recorder.start();
             mainPanel.startRecording();
             if (!recorder.start()){
                 mainPanel.stopRecording();
-                mainPanel.getQaPanel().changeAnswer("Please connect microphone");
+                JOptionPane.showMessageDialog(null, "Error: Please connect microphone");
+                // mainPanel.getQaPanel().changeAnswer("Please connect microphone");
             }
 
             return null;
