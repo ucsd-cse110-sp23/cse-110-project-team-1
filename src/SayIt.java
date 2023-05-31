@@ -413,6 +413,7 @@ class SideBar extends JPanel{
 
 // the main app
 public class SayIt extends JFrame{
+    public final String URL = "http://localhost:8100/sayit";
 
     private MainPanel mainPanel;
     private JButton recButton;
@@ -467,9 +468,11 @@ public class SayIt extends JFrame{
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // setVisible(true);
         setSize(600, 600); //400, 600
-        setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        //setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setUndecorated(false);
         setLayout(new GridBagLayout());
+        setLocationRelativeTo(null); // Center the window
+
         GridBagConstraints c = new GridBagConstraints();
         if (shouldFill) {
                         //natural height, maximum width
