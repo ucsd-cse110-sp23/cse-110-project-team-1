@@ -4,7 +4,7 @@ import java.util.ArrayList;
 public class Parser {
     public final String COMMAND_NOT_FOUND = "Error: Command not found";
     public final String QUESTION = "Question";
-    public final String DELETE = "Delete";
+    public final String DELETE_PROMPT = "Delete Prompt";
     public final String CLEAR_ALL = "Clear All";
     String transcription;
     String command;
@@ -23,14 +23,15 @@ public class Parser {
         if (filteredString.length >= 1) {
             if (filteredString[0].equals("question")) {
                 command = QUESTION;
-            } else if (filteredString[0].equals("delete")) {
-                command = DELETE;
             }
-        } 
+        }
+         
         if (filteredString.length >= 2) {
             if (filteredString[0].equals("clear") && filteredString[1].equals("all")) {
                 command = CLEAR_ALL;
-            } // keep adding more commands next iteration (email stuff)
+            } else if (filteredString[0].equals("delete") && filteredString[1].equals("prompt")) {
+                command = DELETE_PROMPT;
+            }// keep adding more commands next iteration (email stuff)
         }
         
     }

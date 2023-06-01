@@ -570,8 +570,8 @@ public class SayIt extends JFrame{
             } else if (parser.command.equals(parser.QUESTION)) {
                 qaPanel.createQuestion(parser.QUESTION,parser.getPrompt(),0);
                 answer = chatGPT.run(parser.getPrompt());
-                qaPanel.changeAnswer(answer);
                 qaPanel.setPrefixQ(parser.QUESTION);
+                qaPanel.changeAnswer(answer);
 
                 RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
                 addListenerToRecentQ(recentQ);
@@ -582,11 +582,13 @@ public class SayIt extends JFrame{
 
                 qaPanel.setQuestionID(histClass.addEntry(question, answer));
                 return recentQ;
-            } else if (parser.command.equals(parser.DELETE)) {
+            } else if (parser.command.equals(parser.DELETE_PROMPT)) {
                 deleteClicked();
+                qaPanel.setPrefixQ("Q: ");
                 return currQ;
             } else if (parser.command.equals(parser.CLEAR_ALL)) {
                 clearClicked();
+                qaPanel.setPrefixQ("Q: ");
                 return currQ;
             } 
             
