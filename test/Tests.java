@@ -833,4 +833,69 @@ public class Tests {
         }
         assertFalse(itemExists);
     }
+
+    @Test
+    public void testQuestionWithVoice() {
+        String testPrompt = "Question. What is Java UI?";
+        Parser parser = new Parser(testPrompt);
+        assertEquals(null, parser.command);
+
+        parser.Parse();
+        assertEquals(parser.QUESTION, parser.command);
+        assertEquals(parser.getPrompt(), "What is Java UI?");
+
+        // AccountMediator history = new AccountMediator();
+        // String filePath = "saveFiles/testingFiles/tempHistoryForVoice.json";
+        // File tempHistory = new File(filePath);
+        // if (tempHistory.exists()) {
+        //     assertTrue(tempHistory.delete());
+        // }
+        // ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        // assertEquals(0, entries.size());
+
+        // String question = "Question. What is Java UI?";
+        // SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, question), new MockRecorder(true), filePath);
+        // QAPanel qaPanel = app.getMainPanel().getQaPanel();
+
+        // app.changeRecording();
+        // app.changeRecording();
+
+        // assertEquals(qaPanel.getQuestionAnswer().command, "Question");
+        // assertEquals(qaPanel.getQuestionAnswer().question, "What is Java UI?");
+        // assertEquals(qaPanel.getQuestionAnswer().answer, "");
+        // assertEquals(qaPanel.getQuestionAnswer().qID, 1);  
+    }
+
+    @Test
+    public void testDeleteWithVoice() {
+        String testPrompt = "Delete prompt now";
+        Parser parser = new Parser(testPrompt);
+        assertEquals(null, parser.command);
+
+        parser.Parse();
+        assertEquals(parser.DELETE_PROMPT, parser.command);
+        assertEquals(null, parser.getPrompt());
+    }
+
+    @Test
+    public void testClearAllWithVoice() {
+        String testPrompt = "Clear all prompts now";
+        Parser parser = new Parser(testPrompt);
+        assertEquals(null, parser.command);
+
+        parser.Parse();
+        assertEquals(parser.CLEAR_ALL, parser.command);
+        assertEquals(null, parser.getPrompt());
+    }
+
+    @Test
+    public void testErrorMessageWithVoice() {
+        String testPrompt = "Boopie";
+        Parser parser = new Parser(testPrompt);
+        assertEquals(null, parser.command);
+
+        parser.Parse();
+        assertEquals(null, parser.command);
+    }
 }
+

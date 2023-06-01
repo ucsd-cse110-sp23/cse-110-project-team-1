@@ -113,6 +113,11 @@ class QAPanel extends JPanel{
         updateDisplay();
     }
 
+
+    public void setPrefixQ(String prefix) {
+        prefixQ = prefix + ": ";
+    }
+
     /**
      * @return the words preceding each question when displayed (ex "Q: ")
      */
@@ -542,28 +547,72 @@ public class SayIt extends JFrame{
         recorder.finish();
         String question;
         String answer;
+        Parser parser;
         QAPanel qaPanel = mainPanel.getQaPanel();
         try {
             question = whisper.transcription(null);
-            // question = "test " + i;
-            qaPanel.createQuestion(null,question,0); //TODO accept/pase command
-            answer = chatGPT.run(question);
+            parser = new Parser(question);
+            parser.Parse();
+
+            System.out.println(question);
+            System.out.println(parser.command);
+
+            if (parser.command == null) {
+                qaPanel.createQuestion(parser.COMMAND_NOT_FOUND, question, 0);
+                answer = parser.COMMAND_NOT_FOUND;
+                qaPanel.changeAnswer(answer);
+                RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+                addListenerToRecentQ(recentQ);
+                currQ = recentQ;
+
+                dltButton.setEnabled(true);
+                clearButton.setEnabled(true);
+
+                qaPanel.setQuestionID(histClass.addEntry(question, answer));
+                return recentQ;
+
+            } else if (parser.command.equals(parser.QUESTION)) {
+                qaPanel.createQuestion(parser.QUESTION,parser.getPrompt(),0);
+                answer = chatGPT.run(parser.getPrompt());
+                qaPanel.setPrefixQ(parser.QUESTION);
+                qaPanel.changeAnswer(answer);
+
+                RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+                addListenerToRecentQ(recentQ);
+                currQ = recentQ;
+
+                dltButton.setEnabled(true);
+                clearButton.setEnabled(true);
+
+                qaPanel.setQuestionID(histClass.addEntry(question, answer));
+                return recentQ;
+            } else if (parser.command.equals(parser.DELETE_PROMPT)) {
+                deleteClicked();
+                qaPanel.setPrefixQ("Q: ");
+                return currQ;
+            } else if (parser.command.equals(parser.CLEAR_ALL)) {
+                clearClicked();
+                qaPanel.setPrefixQ("Q: ");
+                return currQ;
+            } 
+            
+            // answer = chatGPT.run(question);
             // answer = "test answer " + i;
             // i++;
-            qaPanel.changeAnswer(answer);
-            //int numEntriesJson = History.initial(null).size();
+            // qaPanel.changeAnswer(answer);
+            // int numEntriesJson = History.initial(null).size();
 
-            RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
-            addListenerToRecentQ(recentQ);
-            //set the current question on screen to be 
-            currQ = recentQ;
-            //set the delete button to be enabled (can delete now)
-            dltButton.setEnabled(true);
-            clearButton.setEnabled(true);
+            // RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+            // addListenerToRecentQ(recentQ);
+            // set the current question on screen to be 
+            // currQ = recentQ;
+            // set the delete button to be enabled (can delete now)
+            // dltButton.setEnabled(true);
+            // clearButton.setEnabled(true);
 
-            qaPanel.setQuestionID(histClass.addEntry(question, answer));
+            // qaPanel.setQuestionID(histClass.addEntry(question, answer));
 
-            return recentQ;
+            return currQ;
         } catch( IOException io) {
             io.printStackTrace();
             System.out.println("IO exception at Whisper transcription");
@@ -642,8 +691,7 @@ public class SayIt extends JFrame{
 
     public void clearClicked(){
         histClass.clear();
-        sideBar.clearHistory();
-                
+        sideBar.clearHistory();        
         mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
         currQ = null;
         clearButton.setEnabled(false);
