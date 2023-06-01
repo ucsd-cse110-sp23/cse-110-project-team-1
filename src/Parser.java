@@ -16,7 +16,6 @@ public class Parser {
 
     /**
      * Given a transcription, it parses it to find the command and sets the command of that transcription 
-     * @return a string for ChatGPT to read through
      */
     public void Parse() {
         String[] filteredString = transcription.replaceAll("\\p{P}", "").toLowerCase().split("\\s+");
