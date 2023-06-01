@@ -112,7 +112,7 @@ public class MS2USTest {
 
         String question = "Question. What is Java UI?";
         String answer = "Java UI is Java UI";
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, question), new MockRecorder(true), filePath);
+        SayIt app = new SayIt(new MockGPT(true, answer), new MockWhisper(true, question), new MockRecorder(true), filePath);
         QAPanel qaPanel = app.getMainPanel().getQaPanel();
 
         app.changeRecording();
