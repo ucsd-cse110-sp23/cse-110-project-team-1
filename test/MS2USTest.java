@@ -98,5 +98,35 @@ public class MS2USTest {
         assertEquals(as.createAccount(user, password, autoLogin), AccountSystem.EMAIL_TAKEN);
         assertEquals(as.loginAccount(user, password, autoLogin), AccountSystem.LOGIN_SUCCESS);
     }
+
+    @Test
+    public void US3S1M2Test() {
+        AccountMediator history = new AccountMediator();
+        String filePath = "saveFiles/testingFiles/tempHistoryForVoice.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
+        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(0, entries.size());
+
+        String question = "Question. What is Java UI?";
+        String answer = "Java UI is Java UI";
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, question), new MockRecorder(true), filePath);
+        QAPanel qaPanel = app.getMainPanel().getQaPanel();
+
+        app.changeRecording();
+        app.changeRecording();
+
+        assertEquals(qaPanel.getQuestionAnswer().command, "Question");
+        assertEquals(qaPanel.getQuestionAnswer().question, "What is Java UI?");
+        assertEquals(qaPanel.getQuestionAnswer().answer, answer);
+        assertEquals(qaPanel.getQuestionAnswer().qID, 1);
+
+        assertEquals(app.getMainPanel().getQaPanel().getQuestionText(),
+        "Question: " + answer);
+        assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+        app.getMainPanel().getQaPanel().getPrefixA() + answer);
+    }
 }
 
