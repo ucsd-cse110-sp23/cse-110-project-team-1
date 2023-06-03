@@ -127,7 +127,7 @@ public class AccountSystem {
         }
     }
 
-    /*
+    /* 
      * updatAccount takes prompts in currentUser and updates the MongoDB database with them 
      * @requires currentUser != null
      * This means please call either createAccount or loginAccount before this method

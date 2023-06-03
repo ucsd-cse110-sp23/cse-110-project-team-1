@@ -28,7 +28,6 @@ public class App {
         });
     }
 
-    // 
     private static boolean checkAutoLoginStatus() {
         String loginStatus = AccountSystem.checkAutoLogIN(null);
         if(loginStatus == LOGIN_SUCCESS){

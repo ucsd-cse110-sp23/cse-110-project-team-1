@@ -338,24 +338,46 @@ public class Tests {
         assertEquals(question1, ((RecentQuestion) listItem1).getText());
     }
 
+    // @Test
+    // public void createAcc(){
+    //     //TODO: create an account with testPHLoad, 11111 as email and password
+    //     assertEquals(AccountSystem.CREATE_SUCCESS, AccountSystem.createAccount("testPHLoad", "11111", false));
+    //     // QuestionAnswer qa3 = new QuestionAnswer(-1, "Question", "Hey Alexa, what happened to Meta?", "\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive.");
+    //     // QuestionAnswer qa2 = new QuestionAnswer(-1, "Question", "Hey Siri, do you know the top 10 Japanese pop songs today?", "\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services.");
+    //     // QuestionAnswer qa1 = new QuestionAnswer(-1, "Question", "Hey Google, what is Japanese pop?", "\n\nJapanese pop, or J-pop, is a musical genre that originated in Japan in the 1990s. It is widely known for its catchy, upbeat melodies, sophisticated production, and often over-the-top visual presentations. Common themes in J-pop include subject matter relating to love, romance, light themes and family. J-pop is often seen as a commercial, mainstream genre, though some artists explore more experimental or alternative themes in their music.");
+        
+    //     // int id = AccountSystem.currentUser.addPrompt(qa1);
+    //     // qa1.qID = id;
+    //     // id = AccountSystem.currentUser.addPrompt(qa2);
+    //     // qa2.qID = id;
+    //     // id = AccountSystem.currentUser.addPrompt(qa3);
+    //     // qa3.qID = id;
+    //     // AccountSystem.updateAccount();
+    // }
+    @Test
+    public void testTakenAcc(){
+            assertEquals(AccountSystem.EMAIL_TAKEN, AccountSystem.createAccount("testPHLoad", "11111", false));
+    }
+
      @Test
     public void testPromptHistoryLoad(){
-        SayIt app = new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), "saveFiles/testingFiles/historyTestingSave.json");
+        AccountSystem.loginAccount("testPHLoad", "11111", false);
+        
+        SayIt app = new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
         PromptHistory ph = app.getSideBar().getPromptHistory();
-        //assertEquals(3, ph.getComponentCount());
+        assertEquals(3+1, ph.getHistory().getComponentCount());
         String question1 = "Hey Alexa, what happened to Meta?";
-        question1 = question1.substring(0, 20) + "...";
+        question1 = "Question" + "\n" + question1.substring(0, 20) + "...";
         String question2 = "Hey Siri, do you know the top 10 Japanese pop songs today?";
-        question2 = question2.substring(0, 20) + "...";
+        question2 = "Question" + "\n" + question2.substring(0, 20) + "...";
         String question3 = "Hey Google, what is Japanese pop?";
-        question3 = question3.substring(0, 20) + "...";
+        question3 = "Question" + "\n" + question3.substring(0, 20) + "...";
         Component listItem3 = ph.getHistory().getComponent(0);
         assertEquals(question1, ((RecentQuestion) listItem3).getText());
         Component listItem2 = ph.getHistory().getComponent(1);
         assertEquals(question2, ((RecentQuestion) listItem2).getText());
         Component listItem1 = ph.getHistory().getComponent(2);
         assertEquals(question3, ((RecentQuestion) listItem1).getText()); 
-        
     } 
 
     /**
@@ -398,6 +420,7 @@ public class Tests {
         assertTrue(test);
     }
 
+    //TODO: from here down, fix so uses mongodb account stuff
     /**
      * History Class test
      */
