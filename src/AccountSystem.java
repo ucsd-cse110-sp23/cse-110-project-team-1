@@ -14,7 +14,6 @@ import static com.mongodb.client.model.Updates.*;
 import static java.util.Arrays.asList;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -191,32 +190,6 @@ public class AccountSystem {
             ex.printStackTrace();
             System.out.println("Wrong file path");
         } 
-    }
-
-    /*
-     * This method should be called before the Account UI appears to instantly log in user
-     * Relies on if a file is present so when testing please remember to delete your files in saveFiles folder
-     * @returns null if there is no autoLogIn file (i.e user has not yet choosen to auto login for their account on this device)
-     * @return status response from loginAccount method if there is an autoLogIn File. 
-     */
-    public static String checkAutoLogIN(String filepath) {
-        if (filepath != null) {
-            savePath = filepath;
-        }
-        File save = new File(savePath);
-        if (save.isFile()) {
-            try {
-            Object obj = new JSONParser().parse(new FileReader(savePath));
-            
-            JSONObject saveBody = (JSONObject) obj;
-            String email = (String)saveBody.get(EMAIL);
-            String password = (String)saveBody.get(PASS);
-            return loginAccount(email, password, false);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
     }
 
     /*
