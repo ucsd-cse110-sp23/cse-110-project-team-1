@@ -92,6 +92,14 @@ public class JUser {
         return -1;
     }
 
+    /**
+     * @require promptHistory!=null 
+     * @return the size of the prompt History
+     */
+    public int getPromptHistorySize() {
+        return promptHistory.size();
+    }
+
     /*
      * Deep copies promptHistory so modifications to the returned arraylist does not affect promptHistory
      * You should be only modifying it through the above methods
