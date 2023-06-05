@@ -2,13 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.*;
-import java.util.HashMap;
-import java.io.*;
-
-import org.json.JSONException;
-import org.json.simple.JSONObject;
-
 
 public class LoginScreen extends JFrame {
     public final String URL = "http://localhost:8101/";
@@ -82,7 +75,11 @@ public class LoginScreen extends JFrame {
                     }else{
                         autoLogIn = false;
                     }
-                    performLogin(email,password,autoLogIn);
+                    Thread t = new Thread(() -> { 
+                        String loginStatus = LoginLogic.performLogin(email, password, autoLogIn);
+                        checkLogin(loginStatus);
+                    });
+                    t.start();
                 }
             }
         });
@@ -104,68 +101,20 @@ public class LoginScreen extends JFrame {
         add(mainPanel);
     }
 
-    /**
-     * sends a log in request to the server
-     * @param email -the email sends to the server
-     * @param password -the password of that email
-     * @param autoLogIn -sets to auto-login if it is true
-     * 
-    */ 
-    private void performLogin(String email, String password, boolean autoLogIn) {
-        Thread t = new Thread(() -> {
-            try {
-                // Set request body with arguments
-                HashMap<String,Object> requestData = new HashMap<String,Object>();            
-                requestData.put("postType", LOGINTYPE);
-                requestData.put("email", email);
-                requestData.put("password", password);
-                requestData.put("autoLogIn", autoLogIn);
-
-                JSONObject requestDataJson = new JSONObject(requestData);
-                // Send the login request to the server
-                URL url = new URL(URL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setDoOutput(true);
-
-                //send the request
-                try (OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream())) {
-                    out.write(requestDataJson.toString());
-                }
-
-                // Receive the response from the server
-                try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                    String loginStatus = in.readLine();
-
-                    // Check if login was successful
-                    if (loginStatus.equals(LOGIN_SUCCESS)) {
-                        // Perform further actions upon successful login
-                        SwingUtilities.invokeLater(() -> {
-                            new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
-                            closeLoginScreen();
-                        });
-                    } else {
-                        SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
-                        });
-                    }
-                }
-            } catch (MalformedURLException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Malformed URL: " + ex.getMessage());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "I/O Error: " + ex.getMessage());
-            } catch (JSONException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "JSON Error: " + ex.getMessage());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
-            }
-        });
-        t.start();
-}
+    private void checkLogin(String loginStatus){
+        // Check if login was successful
+        if (loginStatus.equals(LOGIN_SUCCESS)) {
+        // Perform further actions upon successful login
+            SwingUtilities.invokeLater(() -> {
+                new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+                closeLoginScreen();
+            });
+        } else {
+            SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
+            });
+        }
+    }
     
  private void closeLoginScreen() {
         dispose(); // Close the LoginScreen frame
