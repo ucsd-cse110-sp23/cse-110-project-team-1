@@ -507,8 +507,10 @@ public class USTests {
     * Then the question and answer should disappear from the main screen. 
     * And the question should disappear from the prompt history 
     * side window and history, leaving the prompt 
-    * side window and main display empty */
-    @Test
+    * side window and main display empty
+    * REDUNDANT WITH MS2US4S2
+    */
+    //@Test
     public void US7S1Test() {
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
         AccountSystem.currentUser.clearPromptHistory();
