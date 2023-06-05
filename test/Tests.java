@@ -218,7 +218,7 @@ public class Tests {
         QAPanel tQAPanel = new QAPanel(qa);
         tQAPanel.clearDisplay();
         assertNotEquals(qa, tQAPanel.getQuestionAnswer());
-        assertEquals(-1, tQAPanel.getQuestionID());
+        assertEquals(null, tQAPanel.getQuestionAnswer());
         assertEquals(tQAPanel.getPrefixQ(), tQAPanel.getQuestionText());
         assertEquals(tQAPanel.getPrefixA(), tQAPanel.getAnswerText());
     }
@@ -296,10 +296,11 @@ public class Tests {
     public void testdisplayAskedQinBar(){
         PromptHistory ph = new PromptHistory();
         String question = "question?";
-        QuestionAnswer qa = new QuestionAnswer(1, "Question",question, "answer?");
+        String command = "Question";
+        QuestionAnswer qa = new QuestionAnswer(1, command,question, "answer?");
         ph.addQA(qa);
         Component listItem = ph.getHistory().getComponent(0);
-        assertEquals(question, ((RecentQuestion) listItem).getText());
+        assertEquals(command + ": " + question, ((RecentQuestion) listItem).getText());
         // for (int i = 0; i < listItems.length; i++) {
         //   if (listItems[i] instanceof RecentQuestion) {
         //     assertEquals(question, ((RecentQuestion) listItems[i]).getText());
@@ -311,11 +312,12 @@ public class Tests {
     @Test
     public void testdisplayAskedQConcat(){
         PromptHistory ph = new PromptHistory();
+        String command = "Question";
         String question = "long long long long long long long long long long question?";
-        QuestionAnswer qa = new QuestionAnswer(1, "Question",question, "answer?");
+        QuestionAnswer qa = new QuestionAnswer(1, command,question, "answer?");
         ph.addQA(qa);
         Component listItem = ph.getHistory().getComponent(0);
-        assertEquals(question.substring(0, 20) + "...", ((RecentQuestion) listItem).getText());
+        assertEquals(command + ": " + question.substring(0, 20) + "...", ((RecentQuestion) listItem).getText());
         // for (int i = 0; i < listItems.length; i++) {
         //   if (listItems[i] instanceof RecentQuestion) {
         //     assertEquals(question, ((RecentQuestion) listItems[i]).getText());
@@ -326,43 +328,44 @@ public class Tests {
     @Test
     public void testArrangebyMostRecent(){
         PromptHistory ph = new PromptHistory();
+        String command = "Question";
         String question1 = "question1?";
         String question2 = "question2?";
-        QuestionAnswer qa1 = new QuestionAnswer(1, "Question",question1, "answer?");
+        QuestionAnswer qa1 = new QuestionAnswer(1, command,question1, "answer?");
         ph.addQA(qa1);
-        QuestionAnswer qa2 = new QuestionAnswer(2, "Question",question2, "answer?");
+        QuestionAnswer qa2 = new QuestionAnswer(2, command,question2, "answer?");
         ph.addQA(qa2);
         Component listItem2 = ph.getHistory().getComponent(0);
-        assertEquals(question2, ((RecentQuestion) listItem2).getText());
+        assertEquals(command + ": " + question2, ((RecentQuestion) listItem2).getText());
         Component listItem1 = ph.getHistory().getComponent(1);
-        assertEquals(question1, ((RecentQuestion) listItem1).getText());
+        assertEquals(command + ": " + question1, ((RecentQuestion) listItem1).getText());
     }
 
-     @Test
+    //TODO: Should we access currentUser from Account System like this?
+    @Test
     public void testPromptHistoryLoad(){
-        SayIt app = new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), "saveFiles/testingFiles/historyTestingSave.json");
+        AccountSystem.loginAccount("testPHLoad", "11111", false);
+        
+        SayIt app = new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
         PromptHistory ph = app.getSideBar().getPromptHistory();
-        //assertEquals(3, ph.getComponentCount());
+        assertEquals(3+1, ph.getHistory().getComponentCount());
         String question1 = "Hey Alexa, what happened to Meta?";
-        question1 = question1.substring(0, 20) + "...";
+        question1 = "Question" + ": " + question1.substring(0, 20) + "...";
         String question2 = "Hey Siri, do you know the top 10 Japanese pop songs today?";
-        question2 = question2.substring(0, 20) + "...";
+        question2 = "Question" + ": " + question2.substring(0, 20) + "...";
         String question3 = "Hey Google, what is Japanese pop?";
-        question3 = question3.substring(0, 20) + "...";
+        question3 = "Question" + ": " + question3.substring(0, 20) + "...";
         Component listItem3 = ph.getHistory().getComponent(0);
         assertEquals(question1, ((RecentQuestion) listItem3).getText());
         Component listItem2 = ph.getHistory().getComponent(1);
         assertEquals(question2, ((RecentQuestion) listItem2).getText());
         Component listItem1 = ph.getHistory().getComponent(2);
         assertEquals(question3, ((RecentQuestion) listItem1).getText()); 
-        
     } 
 
     /**
      * SayIt tests 
      */
-
-
 
     /**
      * Recorder tests
@@ -399,180 +402,315 @@ public class Tests {
     }
 
     /**
-     * History Class test
+     * History Class TESTS ARE NOT APPLICABLE
      */
-    @Test
-    public void testInitializeNoFileFound() {
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/tempHistoryNoFile.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        history.initial(filePath);
-        assertTrue(tempHistory.exists());
-        assertTrue(history.saveBody.isEmpty());
-    }
+     // @Test
+    // public void testInitializeNoFileFound() {
+    //     AccountMediator history = new AccountMediator();
+    //     String filePath = "saveFiles/testingFiles/tempHistoryNoFile.json";
+    //     File tempHistory = new File(filePath);
+    //     if (tempHistory.exists()) {
+    //         assertTrue(tempHistory.delete());
+    //     }
+    //     history.initial(filePath);
+    //     assertTrue(tempHistory.exists());
+    //     assertTrue(history.saveBody.isEmpty());
+    // }
     /*
      * Dont delete the historyTestingSave
      */
-    @Test
-    public void testInitializeFileFound() {
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/historyTestingSave.json";
-        File save = new File(filePath);
-        assertTrue(save.exists());
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
-        assertFalse(history.saveBody.isEmpty());
-        assertEquals(1, entries.get(0).getValue0());
-        assertEquals("\n\nJapanese pop, or J-pop, is a musical genre that originated in Japan in the 1990s. It is widely known for its catchy, upbeat melodies, sophisticated production, and often over-the-top visual presentations. Common themes in J-pop include subject matter relating to love, romance, light themes and family. J-pop is often seen as a commercial, mainstream genre, though some artists explore more experimental or alternative themes in their music."
-        ,entries.get(0).getValue2());
-        assertEquals("Hey Google, what is Japanese pop?", entries.get(0).getValue1());
+    // @Test
+    // public void testInitializeFileFound() {
 
-        assertEquals(2, entries.get(1).getValue0());
-        assertEquals("\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services."
-        , entries.get(1).getValue2());
-        assertEquals("Hey Siri, do you know the top 10 Japanese pop songs today?", entries.get(1).getValue1());
+    //     AccountMediator history = new AccountMediator();
+    //     String filePath = "saveFiles/testingFiles/historyTestingSave.json";
+    //     File save = new File(filePath);
+    //     assertTrue(save.exists());
+    //     ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+    //     assertFalse(history.saveBody.isEmpty());
+    //     assertEquals(1, entries.get(0).getValue0());
+    //     assertEquals("\n\nJapanese pop, or J-pop, is a musical genre that originated in Japan in the 1990s. It is widely known for its catchy, upbeat melodies, sophisticated production, and often over-the-top visual presentations. Common themes in J-pop include subject matter relating to love, romance, light themes and family. J-pop is often seen as a commercial, mainstream genre, though some artists explore more experimental or alternative themes in their music."
+    //     ,entries.get(0).getValue2());
+    //     assertEquals("Hey Google, what is Japanese pop?", entries.get(0).getValue1());
 
-        assertEquals(3, entries.get(2).getValue0());
-        assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive."
-        , entries.get(2).getValue2() );
-        assertEquals("Hey Alexa, what happened to Meta?", entries.get(2).getValue1());
-        boolean test = false;
-        try {
-            entries.get(3);
-        } catch(IndexOutOfBoundsException ex) {
-            test = true;
-        }
-        assertTrue(test);
-        assertEquals(3, entries.size());
+    //     assertEquals(2, entries.get(1).getValue0());
+    //     assertEquals("\n\nI'm sorry, I don't know the top 10 Japanese pop songs today. However, you can find the top 10 Japanese pop songs on many music streaming services."
+    //     , entries.get(1).getValue2());
+    //     assertEquals("Hey Siri, do you know the top 10 Japanese pop songs today?", entries.get(1).getValue1());
+
+    //     assertEquals(3, entries.get(2).getValue0());
+    //     assertEquals("\n\nUnfortunately, Meta was discontinued in August of 2020. It was shut down due to constraints on the business model, as well as the competitive market, which made it difficult for Meta to remain competitive."
+    //     , entries.get(2).getValue2() );
+    //     assertEquals("Hey Alexa, what happened to Meta?", entries.get(2).getValue1());
+    //     boolean test = false;
+    //     try {
+    //         entries.get(3);
+    //     } catch(IndexOutOfBoundsException ex) {
+    //         test = true;
+    //     }
+    //     assertTrue(test);
+    //     assertEquals(3, entries.size());
+    // }
+
+    // @Test
+    // public void testAddEntry() {
+    //     AccountMediator history = new AccountMediator();
+    //     String filePath = "saveFiles/testingFiles/tempHistory.json";
+    //     File tempHistory = new File(filePath);
+    //     if (tempHistory.exists()) {
+    //         assertTrue(tempHistory.delete());
+    //     }
+    //     ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+    //     assertEquals(0, entries.size());
+    //     String question = null;
+    //     String answer = "testA";
+    //     for (int i = 0; i < 10; i++) {
+    //         history.addEntry(question, answer);
+    //         entries = history.initial(filePath);
+    //         assertEquals(i+1, entries.size());
+    //         assertEquals(i+1, entries.get(i).getValue0());
+    //         assertEquals(question, entries.get(i).getValue1());
+    //         assertEquals(answer, entries.get(i).getValue2());
+    //     }
+    // }
+    // @Test
+    // public void testRemoveEntriesBackwards(){
+    //     AccountMediator history = new AccountMediator();
+    //     String filePath = "saveFiles/testingFiles/tempHistoryRemoveBackwards.json";
+    //     File tempHistory = new File(filePath);
+    //     if (tempHistory.exists()) {
+    //         assertTrue(tempHistory.delete());
+    //     }
+    //     ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+    //     assertEquals(0, entries.size());
+    //     String question = null;
+    //     String answer = "testA";
+    //     for (int i = 0; i < 10; i++) {
+    //         history.addEntry(question, answer);
+    //         entries = history.initial(filePath);
+    //         assertEquals(i+1, entries.size());
+    //         assertEquals(i+1, entries.get(i).getValue0());
+    //         assertEquals(question, entries.get(i).getValue1());
+    //         assertEquals(answer, entries.get(i).getValue2());
+    //     }
+
+    //     assertEquals(10, entries.size());
+    //     for (int i = 10; i > 1; i--) { 
+    //         entries = history.initial(filePath);
+    //         assertEquals(i, entries.size());
+    //         assertEquals(i, entries.get(i-1).getValue0());
+    //         assertEquals(question, entries.get(i-1).getValue1());
+    //         assertEquals(answer, entries.get(i-1).getValue2());
+    //         history.removeEntry(i);
+    //     }
+    //     //remove nothing
+    //     history.removeEntry(1);
+    //     assertEquals(0, entries.size());
+    // }
+
+    // @Test
+    // public void testRemoveEntryForwards(){
+    //     AccountMediator history = new AccountMediator();
+    //     String filePath = "saveFiles/testingFiles/tempHistoryRemoveForward.json";
+    //     File tempHistory = new File(filePath);
+    //     if (tempHistory.exists()) {
+    //         assertTrue(tempHistory.delete());
+    //     }
+    //     ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+    //     assertEquals(0, entries.size());
+    //     String question = null;
+    //     String answer = "testA";
+    //     for (int i = 0; i < 10; i++) {
+    //         history.addEntry(question, answer);
+    //         entries = history.initial(filePath);
+    //         assertEquals(i+1, entries.size());
+    //         assertEquals(i+1, entries.get(i).getValue0());
+    //         assertEquals(question, entries.get(i).getValue1());
+    //         assertEquals(answer, entries.get(i).getValue2());
+    //     }
+
+    //     assertEquals(10, entries.size());
+    //     int savedSize = entries.size();
+
+    //     for (int i = 1; i < 10; i++) {
+    //         entries = history.initial(filePath);
+    //         assertEquals(i, entries.get(0).getValue0());
+    //         assertEquals(question, entries.get(0).getValue1());
+    //         assertEquals(answer, entries.get(0).getValue2());
+    //         history.removeEntry(i);
+    //         assertEquals(savedSize - i, entries.size());
+    //     }
+
+    //     history.removeEntry(savedSize);
+    //     assertEquals(0, entries.size());
+    // }
+
+    // @Test
+    // public void testHistoryClear(){
+    //     AccountMediator history = new AccountMediator();
+    //     String filePath = "saveFiles/testingFiles/tempHistoryRemove.json";
+    //     File tempHistory = new File(filePath);
+    //     if (tempHistory.exists()) {
+    //         assertTrue(tempHistory.delete());
+    //     }
+    //     ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+    //     assertEquals(0, entries.size());
+    //     String question = null;
+    //     String answer = "testA";
+    //     for (int i = 0; i < 10; i++) {
+    //         history.addEntry(question, answer);
+    //         entries = history.initial(filePath);
+    //         assertEquals(i+1, entries.size());
+    //         assertEquals(i+1, entries.get(i).getValue0());
+    //         assertEquals(question, entries.get(i).getValue1());
+    //         assertEquals(answer, entries.get(i).getValue2());
+    //     }
+
+    //     assertEquals(10, entries.size());
+
+    //     history.clear();
+    //     assertEquals(0, entries.size());
+
+    //     history.addEntry(question, answer);
+    //     assertEquals(1, entries.size());
+    //     assertEquals(1, entries.get(0).getValue0());
+    //     assertEquals(question, entries.get(0).getValue1());
+    //     assertEquals(answer, entries.get(0).getValue2());
+    // }
+
+    /**
+     * AccountSystem Class
+     */
+
+    /**
+     * TODO: when running tests, must comment out this test
+     * Use to create a new account with given prompts
+     */
+    //@Test
+    public void createAcc(){
+        assertEquals(AccountSystem.CREATE_SUCCESS, AccountSystem.createAccount("ms2us3s2", "password", false));
+        // QuestionAnswer qa3 = new QuestionAnswer(-1, "Question", "question 3", "answer 3");
+        // QuestionAnswer qa2 = new QuestionAnswer(-1, "Question", "quesiton 2", "answer 2");
+        // QuestionAnswer qa1 = new QuestionAnswer(-1, "Question", "quesiton 1", "answer 1");
+        
+        // int id = AccountSystem.currentUser.addPrompt(qa1);
+        // qa1.qID = id;
+        // id = AccountSystem.currentUser.addPrompt(qa2);
+        // qa2.qID = id;
+        // id = AccountSystem.currentUser.addPrompt(qa3);
+        // qa3.qID = id;
+        // AccountSystem.updateAccount();
     }
 
     @Test
-    public void testAddEntry() {
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/tempHistory.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
-        assertEquals(0, entries.size());
-        String question = null;
-        String answer = "testA";
-        for (int i = 0; i < 10; i++) {
-            history.addEntry(question, answer);
-            entries = history.initial(filePath);
-            assertEquals(i+1, entries.size());
-            assertEquals(i+1, entries.get(i).getValue0());
-            assertEquals(question, entries.get(i).getValue1());
-            assertEquals(answer, entries.get(i).getValue2());
-        }
-    }
-    @Test
-    public void testRemoveEntriesBackwards(){
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/tempHistoryRemoveBackwards.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
-        assertEquals(0, entries.size());
-        String question = null;
-        String answer = "testA";
-        for (int i = 0; i < 10; i++) {
-            history.addEntry(question, answer);
-            entries = history.initial(filePath);
-            assertEquals(i+1, entries.size());
-            assertEquals(i+1, entries.get(i).getValue0());
-            assertEquals(question, entries.get(i).getValue1());
-            assertEquals(answer, entries.get(i).getValue2());
-        }
-
-        assertEquals(10, entries.size());
-        for (int i = 10; i > 1; i--) { 
-            entries = history.initial(filePath);
-            assertEquals(i, entries.size());
-            assertEquals(i, entries.get(i-1).getValue0());
-            assertEquals(question, entries.get(i-1).getValue1());
-            assertEquals(answer, entries.get(i-1).getValue2());
-            history.removeEntry(i);
-        }
-        //remove nothing
-        history.removeEntry(1);
-        assertEquals(0, entries.size());
+    public void testCreateTakenAcc(){
+            assertEquals(AccountSystem.EMAIL_TAKEN, AccountSystem.createAccount("testPHLoad", "11111", false));
     }
 
     @Test
-    public void testRemoveEntryForwards(){
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/tempHistoryRemoveForward.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
-        assertEquals(0, entries.size());
-        String question = null;
-        String answer = "testA";
-        for (int i = 0; i < 10; i++) {
-            history.addEntry(question, answer);
-            entries = history.initial(filePath);
-            assertEquals(i+1, entries.size());
-            assertEquals(i+1, entries.get(i).getValue0());
-            assertEquals(question, entries.get(i).getValue1());
-            assertEquals(answer, entries.get(i).getValue2());
-        }
-
-        assertEquals(10, entries.size());
-        int savedSize = entries.size();
-
-        for (int i = 1; i < 10; i++) {
-            entries = history.initial(filePath);
-            assertEquals(i, entries.get(0).getValue0());
-            assertEquals(question, entries.get(0).getValue1());
-            assertEquals(answer, entries.get(0).getValue2());
-            history.removeEntry(i);
-            assertEquals(savedSize - i, entries.size());
-        }
-
-        history.removeEntry(savedSize);
-        assertEquals(0, entries.size());
+    public void testLoginAccEmailFail(){
+            assertEquals(AccountSystem.EMAIL_NOT_FOUND, AccountSystem.loginAccount("notanemail", "11111", false));
     }
 
     @Test
-    public void testHistoryClear(){
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/tempHistoryRemove.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
-        assertEquals(0, entries.size());
-        String question = null;
-        String answer = "testA";
-        for (int i = 0; i < 10; i++) {
-            history.addEntry(question, answer);
-            entries = history.initial(filePath);
-            assertEquals(i+1, entries.size());
-            assertEquals(i+1, entries.get(i).getValue0());
-            assertEquals(question, entries.get(i).getValue1());
-            assertEquals(answer, entries.get(i).getValue2());
-        }
-
-        assertEquals(10, entries.size());
-
-        history.clear();
-        assertEquals(0, entries.size());
-
-        history.addEntry(question, answer);
-        assertEquals(1, entries.size());
-        assertEquals(1, entries.get(0).getValue0());
-        assertEquals(question, entries.get(0).getValue1());
-        assertEquals(answer, entries.get(0).getValue2());
+    public void testLoginAccPassFail(){
+            assertEquals(AccountSystem.WRONG_PASSWORD, AccountSystem.loginAccount("testPHLoad", "incorrectpass", false));
     }
+
+    @Test
+    public void testLoginAccSuccess(){
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testPHLoad", "11111", false));
+    }
+
+    @Test
+    public void testUpdateAcc(){
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("AccSysUpdateEmail", "password", false));
+            AccountSystem.currentUser.clearPromptHistory();
+            AccountSystem.updateAccount();
+            String q = "question";
+            String a = "answer";
+            String command = "Question";
+            for (int i = 1; i <= 3; i++){
+                QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
+                qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            }            
+            AccountSystem.updateAccount();
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("AccSysUpdateEmail", "password", false));
+            int j = 1;
+            for (QuestionAnswer qa : AccountSystem.currentUser.getPromptHistory()){
+                assertEquals(command, qa.command);
+                assertEquals(q+j, qa.question);
+                assertEquals(a+j, qa.answer);
+                j++;
+            }
+            AccountSystem.currentUser.clearPromptHistory();
+            AccountSystem.updateAccount();
+    }
+
+    /**
+     * JUser Class
+     */
+
+     @Test
+     public void testAddPrompt(){
+        JUser user = new JUser(null, null);
+        String q = "question";
+        String a = "answer";
+        String command = "Question";
+        int size = 3;
+        for (int i = 1; i <= size; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
+            qa.qID = user.addPrompt(qa);
+        }
+        int j = 1;
+        for (QuestionAnswer qa : user.getPromptHistory()){
+            assertEquals(command, qa.command);
+            assertEquals(q+j, qa.question);
+            assertEquals(a+j, qa.answer);
+            j++;
+        }
+        assertEquals(size, user.getPromptHistorySize());
+     }
+
+     @Test
+     public void testDeletebyID(){
+        JUser user = new JUser(null, null);
+        String q = "question";
+        String a = "answer";
+        String command = "Question";
+        int i = 0;
+        int size = 3;
+        int fQID;
+        int lQID;
+        QuestionAnswer firstQa = new QuestionAnswer(-1, command, q+i, a+i);
+        firstQa.qID = user.addPrompt(firstQa);
+        i++;
+        while (i < size){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
+            qa.qID = user.addPrompt(qa);
+            i++;
+        }
+        QuestionAnswer lastQa = new QuestionAnswer(-1, command, q+i, a+i);
+        lastQa.qID = user.addPrompt(lastQa);
+        i++;
+        fQID = firstQa.qID;
+        lQID = lastQa.qID;
+        int prevSize = user.getPromptHistorySize();
+        user.deletePromptbyID(fQID);
+        assertEquals(prevSize-1, user.getPromptHistorySize());
+        boolean fInPH = false;
+        boolean lInPH = false;
+        for(QuestionAnswer quesAns : user.getPromptHistory()){
+            if (quesAns.qID == fQID){ fInPH = true;}
+            if (quesAns.qID == lQID){ lInPH = true;}
+        }
+        assertFalse(fInPH);
+        assertTrue(lInPH);
+    }
+
+    /**
+     * QAPanel Class
+     */
 
     @Test
     public void testSetQuestionID() {
@@ -593,7 +731,8 @@ public class Tests {
 
     @Test
     public void testClickedQuestionFromDatabase(){
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), "saveFiles/testingFiles/readOnlyHistory.json");
+        AccountSystem.loginAccount("testPHLoad", "11111", false);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
         PromptHistory ph = app.getSideBar().getPromptHistory();
         int i = 0;
         Component qa = ph.getHistory().getComponent(i++);
@@ -613,7 +752,8 @@ public class Tests {
 
     @Test
     public void testClickedAnswerFromDatabase(){
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), "saveFiles/testingFiles/readOnlyHistory.json");
+        AccountSystem.loginAccount("testPHLoad", "11111", false);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
         PromptHistory ph = app.getSideBar().getPromptHistory();
         int i = 0;
         Component qa = ph.getHistory().getComponent(i++);
@@ -630,29 +770,31 @@ public class Tests {
         //includes 1 because of Jpanel for UI usage
         assertEquals(3+1, ph.getHistory().getComponents().length);
     }
+
+    //TODO: adapt to mongodb from here down.
     @Test 
     public void testDeleteQAFromMainUI() {
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/testDelQAFromMainUI.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testDelQAFromMainUI", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
         String question = "Question ";
         String answer = "Answer ";
+        String command = "Question";
         int end = 10;
-        for (int i = 0; i < end; i++) {
-            history.addEntry(question + i, answer + i);
-        }
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        for (int i = 0; i < end; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }            
+        AccountSystem.updateAccount();
+        
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         Component qa = ph.getHistory().getComponent(0);
         app.showPromptHistQuestionOnQAPrompt((RecentQuestion) qa);
         assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
-        assertTrue(SayIt.getCurrQ() != null);
+        assertTrue(app.getCurrQ() != null);
         app.deleteClicked();
         assertEquals(panel.getPrefixA(), panel.getAnswerText());
         assertEquals(panel.getPrefixQ(), panel.getQuestionText());
@@ -661,22 +803,21 @@ public class Tests {
     @Test 
     public void testDeleteQAFromSideBar() {
         //intialize file
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/testDeleteQAFromSideBar.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testDeleteQAFromSideBar", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
         String question = "Question ";
         String answer = "Answer ";
+        String command = "Question";
         int end = 10;
-        for (int i = 0; i < end; i++) {
-            history.addEntry(question + i, answer + i);
-        }
+        for (int i = 0; i < end; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }            
+        AccountSystem.updateAccount();
 
         //start the app
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //get number of items in prompt history
@@ -691,7 +832,7 @@ public class Tests {
         assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
-        assertTrue(SayIt.getCurrQ() != null);
+        assertTrue(app.getCurrQ() != null);
         app.deleteClicked();
 
         listItems = ph.getHistory().getComponents();
@@ -710,24 +851,22 @@ public class Tests {
     @Test 
     public void testDeleteQAwHist() {
         //intialize file
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/testDeleteQAwHist.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testDeleteQAwHist", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
         String question = "Question ";
         String answer = "Answer ";
+        String command = "Question";
         int end = 10;
-        for (int i = 0; i < end; i++) {
-            history.addEntry(question + i, answer + i);
-        }
-        entries = new ArrayList<>(history.initial(filePath));
-        
-        int numEntries = entries.size();
+        for (int i = 0; i < end; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }            
+        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+
+        AccountSystem.updateAccount();
         //start the app
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //click on the question
@@ -740,34 +879,30 @@ public class Tests {
         assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
-        assertTrue(SayIt.getCurrQ() != null);
+        assertTrue(app.getCurrQ() != null);
         app.deleteClicked();
 
-        entries = new ArrayList<>(history.initial(filePath));
-        assertEquals(numEntries - 1, entries.size());
+        assertEquals(numEntries - 1, AccountSystem.currentUser.getPromptHistorySize());
     }
 
     @Test 
     public void testClearQAwHist() {
         //intialize file
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/testClearQAwHist.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testClearQAwHist", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
         String question = "Question ";
         String answer = "Answer ";
+        String command = "Question";
         int end = 10;
-        for (int i = 0; i < end; i++) {
-            history.addEntry(question + i, answer + i);
-        }
-        entries = new ArrayList<>(history.initial(filePath));
-        
-        int numEntries = entries.size();
+        for (int i = 0; i < end; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }            
+
+        AccountSystem.updateAccount();
         //start the app
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //click on the question
@@ -780,32 +915,30 @@ public class Tests {
         assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
-        assertTrue(SayIt.getCurrQ() != null);
+        assertTrue(app.getCurrQ() != null);
         app.clearClicked();
 
-        entries = new ArrayList<>(history.initial(filePath));
-        assertEquals(0, entries.size());
+        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
     }
 
     @Test 
     public void testClearQAFromSideBar() {
         //intialize file
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/testClearQAFromSideBar.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
-        }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testClearQAFromSideBar", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
         String question = "Question ";
         String answer = "Answer ";
+        String command = "Question";
         int end = 10;
-        for (int i = 0; i < end; i++) {
-            history.addEntry(question + i, answer + i);
-        }
+        for (int i = 0; i < end; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }            
 
+        AccountSystem.updateAccount();
         //start the app
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), filePath);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //get number of items in prompt history
@@ -820,7 +953,7 @@ public class Tests {
         assertEquals(answer + (end-1), panel.getAnswer());
         assertEquals(question + (end-1), panel.getQuestion());
         //delete it
-        assertTrue(SayIt.getCurrQ() != null);
+        assertTrue(app.getCurrQ() != null);
         app.clearClicked();
 
         listItems = ph.getHistory().getComponents();

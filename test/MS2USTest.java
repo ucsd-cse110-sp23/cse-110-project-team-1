@@ -63,16 +63,16 @@ public class MS2USTest {
     * Then the account is created and the screen closes 
     * and you see the login screen again.
     */
+    //tests that does not create if account is taken FIX TEST LATER
     @Test
-    public void US1S1Test(){
+    public void MS2US1S1Test(){
         //Given that the application is not set to automatically sign in
         boolean autoLogin = false;
         String user = "iamauseer";
         String password = "Anp455w05e##";
         String verifyPw = "Anp455w05e##";
-        MockAccountSystem as = new MockAccountSystem(user, password, autoLogin);
         //since after the first time testing this, the account has already been created, we use the email taken response
-        assertEquals(as.createAccount(user, password, false), AccountSystem.EMAIL_TAKEN);
+        assertEquals(AccountSystem.createAccount(user, password, false), AccountSystem.EMAIL_TAKEN);
         //CreateScreen newAcc = new CreateScreen(as);
         //assertEquals(password, verifyPw);
         //assertFalse(as.autoLogin);
@@ -88,7 +88,7 @@ public class MS2USTest {
      * Then display the main answer area without displaying the sign-in screen
      */
     @Test
-    public void US10S1Test(){
+    public void MS2US10S1Test(){
         //Given that the application is set to automatically sign in
         boolean autoLogin = true;
         String user = "autosignaccount";
@@ -100,20 +100,69 @@ public class MS2USTest {
     }
 
     @Test
-    public void US3S1M2Test() {
-        AccountMediator history = new AccountMediator();
-        String filePath = "saveFiles/testingFiles/tempHistoryForVoice.json";
-        File tempHistory = new File(filePath);
-        if (tempHistory.exists()) {
-            assertTrue(tempHistory.delete());
+    public void MS2US2S1Test(){
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("ms2us2s1", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
+        String q = "question";
+        String a = "answer";
+        String command = "Question";
+        int size = 3;
+        for (int i = 1; i <= size; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }            
+        AccountSystem.updateAccount();
+
+        String question = "What is Java UI?";
+        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, command + " " + question), new MockRecorder(true), null);
+        
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        assertEquals(size + 1, ph.getHistory().getComponents().length);
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("AccSysUpdateEmail", "password", false));
+        int j = 1;
+        for (QuestionAnswer qa : AccountSystem.currentUser.getPromptHistory()){
+            assertEquals(command, qa.command);
+            assertEquals(q+j, qa.question);
+            assertEquals(a+j, qa.answer);
+            j++;
         }
-        ArrayList<Triplet<Integer,String,String>> entries = new ArrayList<>(history.initial(filePath));
-        assertEquals(0, entries.size());
+        
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
+    }
+
+    @Test
+    public void MS2US2S2Test() {
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
+
+        SayIt app = new SayIt(new MockGPT(true, null), new MockWhisper(true, null), new MockRecorder(true), null);
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        //assertEquals(3, ph.getComponentCount());
+        Component[] listItems = ph.getHistory().getComponents();
+        boolean noPrompts = true;
+        for(Component listItem : listItems){
+            if (listItem instanceof RecentQuestion){
+                noPrompts = false;
+            }
+        }
+        assertTrue(noPrompts);
+    }
+    
+    @Test
+    public void M2US3S1Test() {
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("tempHistoryForVoice", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
+
+        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
 
         String question = "Question. What is Java UI?";
         String questionraw = "What is Java UI?";
         String answer = "Java UI is Java UI";
-        SayIt app = new SayIt(new MockGPT(true, answer), new MockWhisper(true, question), new MockRecorder(true), filePath);
+        SayIt app = new SayIt(new MockGPT(true, answer), new MockWhisper(true, question), new MockRecorder(true), null);
         QAPanel qaPanel = app.getMainPanel().getQaPanel();
 
         app.changeRecording();
@@ -128,6 +177,32 @@ public class MS2USTest {
         "Question: " + questionraw);
         assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
         app.getMainPanel().getQaPanel().getPrefixA() + answer);
+    }
+
+    @Test
+    public void M2US3S2Test() {
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("ms2us3s2", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
+
+        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+
+        String question = "Ask a Question. What is Java UI?";
+        String answer = "Java UI is Java UI";
+        SayIt app = new SayIt(new MockGPT(true, answer), new MockWhisper(true, question), new MockRecorder(true), null);
+        QAPanel qaPanel = app.getMainPanel().getQaPanel();
+
+        app.changeRecording();
+        app.changeRecording();
+
+        Parser p = new Parser(null);
+        assertEquals(qaPanel.getQuestionAnswer().command, p.COMMAND_NOT_FOUND);
+        assertEquals(qaPanel.getQuestionAnswer().question, question);
+        assertEquals(qaPanel.getQuestionAnswer().answer, p.COMMAND_NOT_FOUND);
+
+        assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_Q + question, app.getMainPanel().getQaPanel().getQuestionText());
+        assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+        app.getMainPanel().getQaPanel().getPrefixA() + p.COMMAND_NOT_FOUND);
     }
 }
 

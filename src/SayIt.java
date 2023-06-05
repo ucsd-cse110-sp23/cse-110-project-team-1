@@ -16,6 +16,9 @@ class QAPanel extends JPanel{
     private final String EMPTY_COMMAND = null;
     private final int EMPTY_ID = -1;
 
+    public final String DEF_PRE_Q = "Q: ";
+    public final String DEF_PRE_A = "A: ";
+
     Color green = new Color(188, 226, 158);
     
     QuestionAnswer qaPrompt;
@@ -23,8 +26,8 @@ class QAPanel extends JPanel{
     private JTextArea question;
     private JTextArea answer;
     //int qID;
-    String prefixQ = "Q: ";
-    String prefixA = "A: ";
+    String prefixQ = DEF_PRE_Q;
+    String prefixA = DEF_PRE_A;
 
     /**
      * Creates new panel where the question and answer are displayed
@@ -56,19 +59,30 @@ class QAPanel extends JPanel{
         return qaPrompt;
     }
 
+    /**
+     * @require this.getQuestionAnswer() != null
+     */
     public int getQuestionID(){
         return qaPrompt.qID;
     }
 
+    /**
+     * @require this.getQuestionAnswer() != null
+     */
     public String getQuestion(){
         return qaPrompt.question;
     }
 
+    /**
+     * @require this.getQuestionAnswer() != null
+     */
     public String getAnswer(){
         return qaPrompt.answer;
     }
 
-
+    /**
+     * @require this.getQuestionAnswer() != null
+     */
     public void setQuestionID(int id) {
         //qID = id;
         qaPrompt.qID = id;
@@ -105,17 +119,24 @@ class QAPanel extends JPanel{
     public void changeAnswer(String newAnswer){
         //stop gap, might change
         if (qaPrompt == null){
-            createQuestion(EMPTY_COMMAND, EMPTY_QUESTION, EMPTY_ID);
+            answer.setText(prefixA + newAnswer);
+            //createQuestion(EMPTY_COMMAND, EMPTY_QUESTION, EMPTY_ID);
+        } else {
+            qaPrompt.answer = newAnswer;
+            // answer.setText(prefixA + newAnswer);
+            
+            updateDisplay();
+    
         }
-        qaPrompt.answer = newAnswer;
-        // answer.setText(prefixA + newAnswer);
-        
-        updateDisplay();
     }
 
 
     public void setPrefixQ(String prefix) {
         prefixQ = prefix + ": ";
+    }
+
+    public void resetPrefixQ(){
+        prefixQ = DEF_PRE_Q;
     }
 
     /**
@@ -157,7 +178,9 @@ class QAPanel extends JPanel{
      * sets the displayed QuestionAnswer to null and clears the display for the question and answer
      */
     public void clearDisplay(){
-        changeQuestion(new QuestionAnswer());
+        changeQuestion(null);
+        resetPrefixQ();
+        updateDisplay();
     }
 
     /**
@@ -210,7 +233,7 @@ class MainPanel extends JPanel{
         this.setLayout(new BorderLayout()); // set layout of task
 
         //Currently sets the Question Answer panel to display no question or answer upon the main panel being set up
-        qaPanel = new QAPanel(new QuestionAnswer());
+        qaPanel = new QAPanel(null);
         this.add(qaPanel, BorderLayout.CENTER);
 
         recButton = new JButton(startBlurb);
@@ -278,14 +301,19 @@ class RecentQuestion extends JButton{
 
     QuestionAnswer questionAnswer;
     int maxCharLimit = 20;
+    /**
+     * @require qa.command != null
+     * @param qa
+     */
     RecentQuestion(QuestionAnswer qa){
         questionAnswer = qa;
+        String buttonText = qa.command + ": ";
         if (qa.question.length() > maxCharLimit){
-            this.setText(qa.question.substring(0, maxCharLimit) + "...");
+            this.setText(buttonText + qa.question.substring(0, maxCharLimit) + "...");
         } else if (qa.question.length() <= 0) {
-            this.setText(" ");//to avoid the button from being too thin
+            this.setText(buttonText + " ");//to avoid the button from being too thin
         } else {
-            this.setText(qa.question);
+            this.setText(buttonText + qa.question);
         }
     }
 
@@ -298,7 +326,7 @@ class PromptHistory extends JPanel{
     JLabel title;
     JPanel history;
     JScrollPane histPane;
-    AccountMediator histClass;
+    // AccountMediator histClass;
 
     PromptHistory(){
         // history = new JList<String>(getHistory());
@@ -438,7 +466,8 @@ public class SayIt extends JFrame{
     // testing purpose
     //int i;
 
-    AccountMediator histClass;
+    // AccountMediator histClass;
+    JUser currentJUser;
 
     /**
      * @return panel housing the record button and 
@@ -471,7 +500,13 @@ public class SayIt extends JFrame{
         //i = 0;
 
         setTitle("SayIt Assistant");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        // setDefaultCloseOperation(EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                AccountSystem.updateAccount();
+                System.exit(0);
+            }
+        });
         // setVisible(true);
         setSize(600, 600); //400, 600
         //setExtendedState(JFrame.MAXIMIZED_BOTH); 
@@ -488,7 +523,8 @@ public class SayIt extends JFrame{
         this.chatGPT = chatGPT;
         this.whisper = whisper;
         this.recorder = recorder;
-        histClass = new AccountMediator();
+        // histClass = new AccountMediator();
+        this.currentJUser = AccountSystem.currentUser;
 
         sideBar = new SideBar();
         c.fill = GridBagConstraints.BOTH;
@@ -501,8 +537,8 @@ public class SayIt extends JFrame{
 
         // Load history and add listener
         //TODO fix HISTORY and Command
-        for (Triplet<Integer,String,String> entry : histClass.initial(saveFile)) {
-            RecentQuestion recentQ = sideBar.promptHistory.addQA(new QuestionAnswer(entry.getValue0(), null,entry.getValue1(), entry.getValue2()));
+        for (QuestionAnswer questionAnswer : currentJUser.getPromptHistory()) {
+            RecentQuestion recentQ = sideBar.promptHistory.addQA(questionAnswer);
             addListenerToRecentQ(recentQ);
         }
 
@@ -523,7 +559,7 @@ public class SayIt extends JFrame{
 
         dltButton.setEnabled(false);
 
-        if (histClass.entries.size() == 0) {
+        if (currentJUser.getPromptHistorySize() == 0) {
             clearButton.setEnabled(false);
         }
 
@@ -561,14 +597,15 @@ public class SayIt extends JFrame{
                 qaPanel.createQuestion(parser.COMMAND_NOT_FOUND, question, 0);
                 answer = parser.COMMAND_NOT_FOUND;
                 qaPanel.changeAnswer(answer);
+                
                 RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
                 addListenerToRecentQ(recentQ);
                 currQ = recentQ;
 
                 dltButton.setEnabled(true);
                 clearButton.setEnabled(true);
-
-                qaPanel.setQuestionID(histClass.addEntry(question, answer));
+                //TODO: currently uses qaPanel's questionAnswer, would pulling it from recentQ make more sense?
+                qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
 
             } else if (parser.command.equals(parser.QUESTION)) {
@@ -584,15 +621,13 @@ public class SayIt extends JFrame{
                 dltButton.setEnabled(true);
                 clearButton.setEnabled(true);
 
-                qaPanel.setQuestionID(histClass.addEntry(question, answer));
+                qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
             } else if (parser.command.equals(parser.DELETE_PROMPT)) {
                 deleteClicked();
-                qaPanel.setPrefixQ("Q: ");
                 return currQ;
             } else if (parser.command.equals(parser.CLEAR_ALL)) {
                 clearClicked();
-                qaPanel.setPrefixQ("Q: ");
                 return currQ;
             } 
             
@@ -629,7 +664,7 @@ public class SayIt extends JFrame{
      * This method sets the RecentQustion(button) 
      * that is showing QuestionAnswer in QAPanel 
      */
-    public static RecentQuestion setCurrQ(RecentQuestion recentQ){
+    public RecentQuestion setCurrQ(RecentQuestion recentQ){
         currQ = recentQ;
         return recentQ;
     }
@@ -637,7 +672,7 @@ public class SayIt extends JFrame{
     /*
      * This method get the RecentQustion(button) in QAPanel 
      */
-    public static RecentQuestion getCurrQ(){
+    public RecentQuestion getCurrQ(){
         return currQ;
     }
 
@@ -664,12 +699,12 @@ public class SayIt extends JFrame{
         }
     }
 
-    public AccountMediator getHistClass(){
-        return histClass;
-    }
+    // public AccountMediator getHistClass(){
+    //     return histClass;
+    // }
 
     public void showPromptHistQuestionOnQAPrompt(RecentQuestion recentQ){
-        SayIt.setCurrQ(recentQ);
+        this.setCurrQ(recentQ);
         QuestionAnswer toDisplay = recentQ.getQuestionAnswer();
         QAPanel qaPanel = mainPanel.getQaPanel();
         qaPanel.changeQuestion(toDisplay);
@@ -678,21 +713,21 @@ public class SayIt extends JFrame{
 
     public void deleteClicked(){
         if(currQ != null){
-            histClass.removeEntry(currQ.getQuestionAnswer().qID);
+            currentJUser.deletePromptbyID(currQ.getQuestionAnswer().qID);
             sideBar.getPromptHistory().dltQuestion(currQ);
-            mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
+            mainPanel.qaPanel.clearDisplay();
             currQ = null;
             dltButton.setEnabled(false);
-            if (histClass.entries.size() == 0 ) {
+            if (currentJUser.getPromptHistorySize() == 0 ) {
                 clearButton.setEnabled(false);
             }
         }
     }
 
     public void clearClicked(){
-        histClass.clear();
+        currentJUser.clearPromptHistory();
         sideBar.clearHistory();        
-        mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
+        mainPanel.qaPanel.clearDisplay();
         currQ = null;
         clearButton.setEnabled(false);
         dltButton.setEnabled(false);
@@ -717,13 +752,7 @@ public class SayIt extends JFrame{
         new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                histClass.clear();
-                sideBar.clearHistory();
-                
-                mainPanel.qaPanel.changeQuestion(new QuestionAnswer());
-                currQ = null;
-                clearButton.setEnabled(false);
-                dltButton.setEnabled(false);
+                clearClicked();
             }
         }
         );
