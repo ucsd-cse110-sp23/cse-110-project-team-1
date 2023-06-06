@@ -507,8 +507,10 @@ public class USTests {
     * Then the question and answer should disappear from the main screen. 
     * And the question should disappear from the prompt history 
     * side window and history, leaving the prompt 
-    * side window and main display empty */
-    @Test
+    * side window and main display empty
+    * REDUNDANT WITH MS2US4S1
+    */
+    //@Test
     public void US7S1Test() {
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
         AccountSystem.currentUser.clearPromptHistory();
@@ -559,8 +561,9 @@ public class USTests {
      *  Given the application is open
      *  When there is no question answer displayed
      *  Then there is no delete button
+     * REDUNDANT WITH MS2US4S2
      */
-    @Test
+    //@Test
     public void US7S2Test(){
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
         AccountSystem.currentUser.clearPromptHistory();
@@ -585,8 +588,9 @@ public class USTests {
      * Then the question and answer should disappear from the main screen. 
      * And the question should disappear from the prompt history side window and history. 
      * However it should also leave other asked questions untouched.
+     * REDUNDANT WITH M2US4S2
      */
-    @Test
+    //@Test
     public void US7S3Test(){
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s3", "password", false));
         AccountSystem.currentUser.clearPromptHistory();
