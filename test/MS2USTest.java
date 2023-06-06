@@ -204,5 +204,242 @@ public class MS2USTest {
         assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
         app.getMainPanel().getQaPanel().getPrefixA() + p.COMMAND_NOT_FOUND);
     }
+
+    /**
+     * There is a question in prompt history and Q&A showed on screen
+     * 
+     * Given there are one or more questions in the side bar
+     * And there is Q&A showed in the main screen
+     * When user sends a voice command of "Delete Prompt"
+     * Then the current Q&A should disappear from the main screen
+     * And this question should be deleted from the sideBar and prompt history
+     */
+    @Test
+    public void M2US4S1Test() {
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("ms2us4s1", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        String q = "question";
+        String a = "answer";
+        String command = "Question";
+        for (int i = 1; i <= 3; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }
+        AccountSystem.updateAccount();
+
+        //given the application is open
+        String question1 = "Question question 1";
+        String answer1 = "question 1 answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, question1);
+        MockGPT mockGPT = new MockGPT(true, answer1);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        //says a question
+        app.changeRecording();
+
+        RecentQuestion rq = app.changeRecording();
+
+        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        int numPHItems = ph.getHistory().getComponents().length;
+        //when the user says the delete command
+        String delCommand = "Delete Prompt";
+        mockWhisper.setTranscription(delCommand);
+        app.changeRecording();
+        app.changeRecording();
+
+        //question and answer disappear from main screen
+        QAPanel qa = app.getMainPanel().getQaPanel();
+        assertEquals(qa.getPrefixQ(), qa.getQuestionText());
+        assertEquals(qa.getPrefixA(), qa.getAnswerText());
+
+        //question and answer disappear from side bar
+        Component[] listItems = ph.getHistory().getComponents();
+        boolean itemExists = false;
+        for(Component item : listItems){
+            if (item instanceof RecentQuestion){
+                if (((RecentQuestion) item) == rq){
+                    itemExists = true;
+                }
+            }
+        }
+        assertFalse(itemExists);
+        assertEquals(numPHItems -1, listItems.length);
+
+        //question and answer disappear from history
+        assertEquals(numEntries - 1, AccountSystem.currentUser.getPromptHistorySize());
+    }
+
+    /**
+     * The question is clicked on.
+     */
+    @Test
+    public void M2US4S1V2Test() {
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        String q = "question";
+        String a = "answer";
+        String command = "Question";
+        for (int i = 1; i <= 3; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }
+        AccountSystem.updateAccount();
+
+        //given the application is open
+        String question1 = "question 1";
+        String answer1 = "question 1 answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, question1);
+        MockGPT mockGPT = new MockGPT(true, answer1);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+
+        app.changeRecording();
+
+        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        //click on the most recent question in prompt history
+        RecentQuestion rq = (RecentQuestion) ph.getHistory().getComponent(0);
+        app.showPromptHistQuestionOnQAPrompt(rq);
+        int numPHItems = ph.getHistory().getComponents().length;
+        //when the user says the delete command
+        String delCommand = "Delete Prompt";
+        mockWhisper.setTranscription(delCommand);
+        app.changeRecording();
+        app.changeRecording();
+
+        //question and answer disappear from main screen
+        QAPanel qa = app.getMainPanel().getQaPanel();
+        assertEquals(qa.DEF_PRE_Q, qa.getPrefixQ());
+        assertEquals(qa.DEF_PRE_A, qa.getPrefixA());
+        assertEquals(qa.getPrefixQ(), qa.getQuestionText());
+        assertEquals(qa.getPrefixA(), qa.getAnswerText());
+
+        //question and answer disappear from side bar
+        Component[] listItems = ph.getHistory().getComponents();
+        boolean itemExists = false;
+        boolean phHasQuestions = false;
+        for(Component item : listItems){
+            if (item instanceof RecentQuestion){
+                if (((RecentQuestion) item) == rq){
+                    itemExists = true;
+                }
+                phHasQuestions = true;
+            }
+        }
+        assertFalse(itemExists);
+        assertTrue(phHasQuestions);
+        assertEquals(numPHItems -1, listItems.length);
+
+        //question and answer disappear from history
+        assertEquals(numEntries - 1, AccountSystem.currentUser.getPromptHistorySize());
+    }
+    /**
+     * There is a question in prompt history but no Q&A showed in screen
+     * 
+     * Given there is a question in prompt history
+     * And no Q&A showed in screen
+     * When user sends a voice command of "Delete Prompt"
+     * Then nothing should happen
+     */
+    @Test
+    public void M2US4S2Test() {
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        String q = "question";
+        String a = "answer";
+        String command = "Question";
+        for (int i = 1; i <= 3; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
+            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+        }
+        AccountSystem.updateAccount();
+
+        //given the application is open
+        String question1 = "question 1";
+        String answer1 = "question 1 answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, question1);
+        MockGPT mockGPT = new MockGPT(true, answer1);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+
+        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+        PromptHistory ph = app.getSideBar().getPromptHistory();
+        int numPHItems = ph.getHistory().getComponents().length;
+        //no question answer displayed on screen
+        assertEquals(null, app.getCurrQ());
+        //when the user says the delete command
+        String delCommand = "Delete Prompt";
+        mockWhisper.setTranscription(delCommand);
+        app.changeRecording();
+        app.changeRecording();
+        //no question answer displayed on screen
+        assertEquals(null, app.getCurrQ());
+        //question and answer do not change
+        QAPanel qa = app.getMainPanel().getQaPanel();
+        assertEquals(qa.DEF_PRE_Q, qa.getPrefixQ());
+        assertEquals(qa.DEF_PRE_A, qa.getPrefixA());
+        assertEquals(qa.getPrefixQ(), qa.getQuestionText());
+        assertEquals(qa.getPrefixA(), qa.getAnswerText());
+
+        //number of prompts in side bar do not change
+        Component[] listItems = ph.getHistory().getComponents();
+
+        assertEquals(numPHItems, listItems.length);
+
+        //number of prompts in user do not change
+        assertEquals(numEntries, AccountSystem.currentUser.getPromptHistorySize());
+    }
+
+     /**
+      * There is no question in prompt history and no Q&A showed in screen
+      * Given there is no question in prompt history
+      * And no Q&A showed in screen
+      * When user sends a voice command of "Delete Prompt"
+      * Then nothing should happen
+      */
+
+      @Test
+      public void M2US4S3Test() {
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+          AccountSystem.currentUser.clearPromptHistory();
+          AccountSystem.updateAccount();
+
+          //given the application is open
+          String question1 = "question 1";
+          String answer1 = "question 1 answer";
+          MockRecorder mockRec = new MockRecorder(true);
+          MockWhisper mockWhisper = new MockWhisper(true, question1);
+          MockGPT mockGPT = new MockGPT(true, answer1);
+          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+
+          int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+          PromptHistory ph = app.getSideBar().getPromptHistory();
+          int numPHItems = ph.getHistory().getComponents().length;
+          //no question answer displayed on screen
+          assertEquals(null, app.getCurrQ());
+          //when the user says the delete command
+          String delCommand = "Delete Prompt";
+          mockWhisper.setTranscription(delCommand);
+          app.changeRecording();
+          app.changeRecording();
+          //no question answer displayed on screen
+          assertEquals(null, app.getCurrQ());
+
+          //question and answer stay the default on the main screen
+          QAPanel qa = app.getMainPanel().getQaPanel();
+          assertEquals(qa.DEF_PRE_Q, qa.getPrefixQ());
+          assertEquals(qa.DEF_PRE_A, qa.getPrefixA());
+          assertEquals(qa.getPrefixQ(), qa.getQuestionText());
+          assertEquals(qa.getPrefixA(), qa.getAnswerText());
+
+          //the number of prompts in the side bar stays the same
+          Component[] listItems = ph.getHistory().getComponents();
+
+          assertEquals(numPHItems, listItems.length);
+
+          //the number of prompts in the user stays the same
+          assertEquals(numEntries, AccountSystem.currentUser.getPromptHistorySize());
+      }
 }
 
