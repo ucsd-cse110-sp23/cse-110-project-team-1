@@ -23,6 +23,8 @@ public class CreateScreen extends JFrame {
     public static final String CREATETYPE = "CREATE";
     public final String URL = "http://localhost:8101/";
 
+    public static final String EMAIL = "Email";
+    public static final String PASS = "Password";
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
     public static final String LOGIN_SUCCESS = "Login successful";
