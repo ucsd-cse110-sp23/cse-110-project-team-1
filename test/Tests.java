@@ -586,9 +586,9 @@ public class Tests {
      * TODO: when running tests, must comment out this test
      * Use to create a new account with given prompts
      */
-    @Test
+    //@Test
     public void createAcc(){
-        assertEquals(AccountSystem.CREATE_SUCCESS, AccountSystem.createAccount("ms2us4s1", "password", false));
+        assertEquals(AccountSystem.CREATE_SUCCESS, AccountSystem.createAccount("ms2us3s2", "password", false));
         // QuestionAnswer qa3 = new QuestionAnswer(-1, "Question", "question 3", "answer 3");
         // QuestionAnswer qa2 = new QuestionAnswer(-1, "Question", "quesiton 2", "answer 2");
         // QuestionAnswer qa1 = new QuestionAnswer(-1, "Question", "quesiton 1", "answer 1");
