@@ -561,8 +561,9 @@ public class USTests {
      *  Given the application is open
      *  When there is no question answer displayed
      *  Then there is no delete button
+     * REDUNDANT WITH MS2US4S2
      */
-    @Test
+    //@Test
     public void US7S2Test(){
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
         AccountSystem.currentUser.clearPromptHistory();
