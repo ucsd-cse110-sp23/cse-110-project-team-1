@@ -643,8 +643,9 @@ public class USTests {
      * When Helen clicks the "Clear All" button
      * Then all the prompts are cleared in the history 
      * And all the prompts and answers on the current page are cleared
+     * REDUNDANT WITH MS2US5S1
      */
-    @Test
+    //@Test
     public void US8S1Test(){
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
         AccountSystem.currentUser.clearPromptHistory();
@@ -699,8 +700,9 @@ public class USTests {
      * Given that that the prompt history is empty
      * When Helen clicks the "Clear All" button
      * Then do not change anything
+     * REDUNDANT WITH MS2US5S3
      */
-    @Test
+    //@Test
     public void US8S2Test(){
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s1", "password", false));
         AccountSystem.currentUser.clearPromptHistory();
