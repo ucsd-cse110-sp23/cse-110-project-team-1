@@ -33,7 +33,8 @@ public class App {
                     checkAutoLogIN(null);
                 }else{
                     JOptionPane.showMessageDialog(null, 
-                    "The server is not running. Please start the server and try again.", 
+                    //"The server is not running. Please start the server and try again.", 
+                    "Why don't you open the server and try again",
                     "Server Error", 
                     JOptionPane.ERROR_MESSAGE);
                 }
