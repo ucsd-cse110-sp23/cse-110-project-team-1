@@ -3,6 +3,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.SendFailedException;
@@ -18,7 +19,7 @@ public class EmailSystem {
     private static final String EMAIL_FAIL = "Email failed to send";
     private static final String NAME_ERROR = "Name Error";
 
-    public static String sendEmail(String header, String body) {
+    public static String sendEmail(String header, String body, String toEmail) {
         Properties props = new Properties();
 		props.put("mail.smtp.host", AccountSystem.currentUser.stmpHost); //SMTP Host
 		props.put("mail.smtp.port", AccountSystem.currentUser.tlsPort); //TLS Port
@@ -44,13 +45,15 @@ public class EmailSystem {
     
             emailContent.setFrom(new InternetAddress(AccountSystem.currentUser.messageEmail, AccountSystem.currentUser.firstName + " " + AccountSystem.currentUser.lastName));
     
-            //emailContent.setReplyTo(InternetAddress.parse("no_reply@example.com", false));
+            emailContent.setReplyTo(InternetAddress.parse(AccountSystem.currentUser.messageEmail, false));
     
             emailContent.setSubject(header, "UTF-8");
     
             emailContent.setText(body, "UTF-8");
     
             emailContent.setSentDate(new Date());
+
+            emailContent.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail, false));
 
             Transport.send(emailContent);
             return EMAIL_SUCESS;

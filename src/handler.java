@@ -110,7 +110,8 @@ public class handler implements HttpHandler {
         JSONObject requestData = new JSONObject(postData);
         String header = requestData.getString("header");
         String body  = requestData.getString("body");
-        return sendHandler(header, body);
+        String toEmail = requestData.getString("toEmail");
+        return sendHandler(header, body, toEmail);
     }
 
     /**
@@ -156,7 +157,7 @@ public class handler implements HttpHandler {
      * @param body - body of email
      * @return email return messages 
      */
-    private String sendHandler(String header, String body) {
-        return EmailSystem.sendEmail(header, body);
+    private String sendHandler(String header, String body, String toEmail) {
+        return EmailSystem.sendEmail(header, body, toEmail);
     }
 }

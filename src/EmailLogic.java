@@ -22,13 +22,14 @@ public class EmailLogic {
      * @return -the login status
      * 
     */ 
-    public static String performSendEmail(String header, String body) {
+    public static String performSendEmail(String header, String body, String toEmail) {
         String response = "Email Failed in performSendEmail";
             try {
                 // Set request body with arguments
                 HashMap<String,Object> requestData = new HashMap<String,Object>();            
                 requestData.put("header", header);
                 requestData.put("body", body);
+                requestData.put("toEmail", toEmail);
 
                 JSONObject requestDataJson = new JSONObject(requestData);
                 // Send the login request to the server
