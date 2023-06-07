@@ -525,7 +525,7 @@ public class SayIt extends JFrame{
         this.recorder = recorder;
         // histClass = new AccountMediator();
         this.currentJUser = AccountSystem.currentUser;
-
+        System.out.println(currentJUser);
         sideBar = new SideBar();
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = 1;
