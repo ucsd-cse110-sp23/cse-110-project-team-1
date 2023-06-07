@@ -8,6 +8,7 @@ public class JUser {
     // email info 
     String firstName;
     String lastName;
+    String displayName;
     String messageEmail;
     String stmpHost;
     String tlsPort; 
@@ -21,12 +22,13 @@ public class JUser {
     }
     
     //Constructor for if there is email info
-    public JUser(String email, String password, String firstName, String lastName, 
+    public JUser(String email, String password, String firstName, String lastName, String displayName,
     String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.displayName = displayName;
         this.messageEmail = messageEmail;
         this.stmpHost = stmpHost;
         this.tlsPort = tlsPort;
@@ -35,9 +37,10 @@ public class JUser {
     }
 
     //Setter for email info
-    public void setEmailInfo(String firstName, String lastName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
+    public void setEmailInfo(String firstName, String lastName, String displayName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.displayName = displayName;
         this.messageEmail = messageEmail;
         this.stmpHost = stmpHost;
         this.tlsPort = tlsPort;

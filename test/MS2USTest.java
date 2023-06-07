@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import javax.sound.sampled.LineUnavailableException;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import java.io.FileReader;
 
 import java.io.IOException;
@@ -16,10 +18,14 @@ import java.lang.InterruptedException;
 import java.io.File;
 import java.awt.*;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.javatuples.Triplet;
 import java.util.ArrayList;
 
-
+import java.awt.Frame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 
 
@@ -35,6 +41,25 @@ class MockAccountSystem extends AccountSystem{
         this.autoLogin = autoLogin;
     }
 
+}
+
+class WindowChecker{
+    private String mostRecentWindow;
+    protected Frame frame;
+    WindowListener listener = new WindowAdapter() {
+        public void windowOpened(WindowEvent evt) {
+           frame = (Frame) evt.getSource();
+           mostRecentWindow = frame.getTitle();
+        }   
+     };
+
+    public String getMostRecentWindow() {
+        return mostRecentWindow;
+    }
+
+    public Frame getRecentFrame(){
+        return frame;
+    }
 }
 
 /* 
@@ -441,5 +466,257 @@ public class MS2USTest {
           //the number of prompts in the user stays the same
           assertEquals(numEntries, AccountSystem.currentUser.getPromptHistorySize());
       }
+
+      /**
+       * First time setting up an email and clicks "Save"
+       * 
+       * Given that the application is opne
+       * And their user logs into their account
+       * When user hits "Start" and says "Setup Email"
+       * Then a new window should pop up, asking for their first name, last name,
+       *  display name, email address, SMTP host, TLS port, and her email password
+       * Then the user fills in the fields then clicks "Save"
+       * Then when the user clicks "Start"
+       * And says "Setup Email"
+       * Then the fields are filled out with the information they put in previously.
+       */
+
+       @Test
+       public void M2US7S1Test() {
+          WindowChecker windowChecker = new WindowChecker();    
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+          AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+
+          //given the application is open
+          String question1 = "Setup Email";
+          String answer1 = "question 1 answer";
+          MockRecorder mockRec = new MockRecorder(true);
+          MockWhisper mockWhisper = new MockWhisper(true, question1);
+          MockGPT mockGPT = new MockGPT(true, answer1);
+          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+ 
+          //when the user says the setup command
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens
+          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+          //fill out fields
+
+          String fName = "John";
+          String lName = "Doe";
+          String dName = "JD";
+          String mEmail = "email@email.com";
+          String smtp = "smtp.serveraddress.com";
+          String tls = "aJAKnNlLkjJjJjJSAMPLE33";
+          String pass = "sampleEmailPass";
+
+          EmailUI emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          emailFrame.firstNTextField.setText(fName);
+          emailFrame.lastNTextField.setText(lName);
+          emailFrame.displayNTextField.setText(dName);
+          emailFrame.emailTextField.setText(mEmail);
+          emailFrame.SMTPTextField.setText(smtp);
+          emailFrame.TLSTextField.setText(tls);
+          emailFrame.emailPasswordTextField.setText(tls);
+          
+          //click save button
+          emailFrame.saveClicked();
+
+          assertEquals(fName, AccountSystem.currentUser.firstName);
+          assertEquals(lName, AccountSystem.currentUser.lastName);
+          assertEquals(dName, AccountSystem.currentUser.displayName);
+          assertEquals(mEmail, AccountSystem.currentUser.messageEmail);
+          assertEquals(smtp, AccountSystem.currentUser.stmpHost);
+          assertEquals(tls, AccountSystem.currentUser.tlsPort);
+          assertEquals(pass, AccountSystem.currentUser.messageEmailPass);
+
+          //when the user says the setup command again
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens again
+          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+
+          emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+
+          assertEquals(fName, emailFrame.firstNTextField.getText());
+          assertEquals(lName, emailFrame.lastNTextField.getText());
+          assertEquals(dName, emailFrame.displayNTextField.getText());
+          assertEquals(mEmail, emailFrame.emailTextField.getText());
+          assertEquals(smtp, emailFrame.SMTPTextField.getText());
+          assertEquals(tls, emailFrame.TLSTextField.getText());
+          assertEquals(pass, emailFrame.emailPasswordTextField.getText());
+          
+          //click cancel button
+          emailFrame.cancelClicked();
+       }      
+
+      /**
+       * Setting up an email and clicking "Cancel"
+       * Given that the application is open
+       * And the user logs into their account
+       * And the user hasn't filled out the setup email section previously and clicked "Save"
+       * When the user hits "Start" and says "Setup Email"
+       * Then a new window should pop up, asking for their first name, last name, display name
+       *  email address, SMTP host, TLS port, and her email password.
+       * Then when the user fills in the fields then clicks "Cancel"
+       * And clicks "Start"
+       * And says "Setup Email"
+       * Then all the fields are blank
+       */
+
+       @Test
+       public void M2US7S2Test() {
+          WindowChecker windowChecker = new WindowChecker();    
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+          AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+
+          //given the application is open
+          String question1 = "Setup Email";
+          String answer1 = "question 1 answer";
+          MockRecorder mockRec = new MockRecorder(true);
+          MockWhisper mockWhisper = new MockWhisper(true, question1);
+          MockGPT mockGPT = new MockGPT(true, answer1);
+          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+ 
+          //when the user says the setup command
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens
+          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+          //fill out fields
+
+          String fName = "NewJohn";
+          String lName = "NewDoe";
+          String dName = "NewJD";
+          String mEmail = "Newemail@email.com";
+          String smtp = "Newsmtp.serveraddress.com";
+          String tls = "NewaJAKnNlLkjJjJjJSAMPLE33";
+          String pass = "NewsampleEmailPass";
+
+          EmailUI emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          emailFrame.firstNTextField.setText(fName);
+          emailFrame.lastNTextField.setText(lName);
+          emailFrame.displayNTextField.setText(dName);
+          emailFrame.emailTextField.setText(mEmail);
+          emailFrame.SMTPTextField.setText(smtp);
+          emailFrame.TLSTextField.setText(tls);
+          emailFrame.emailPasswordTextField.setText(tls);
+          
+          //click save button
+          emailFrame.cancelClicked();
+
+          JUser currentJUser = AccountSystem.currentUser;
+          assertNotEquals(fName, currentJUser.firstName);
+          assertNotEquals(lName, currentJUser.lastName);
+          assertNotEquals(dName, currentJUser.displayName);
+          assertNotEquals(mEmail, currentJUser.messageEmail);
+          assertNotEquals(smtp, currentJUser.stmpHost);
+          assertNotEquals(tls, currentJUser.tlsPort);
+          assertNotEquals(pass, currentJUser.messageEmailPass);
+
+          //when the user says the setup command again
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens again
+          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+
+          emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+
+          assertNotEquals(fName, emailFrame.firstNTextField.getText());
+          assertNotEquals(lName, emailFrame.lastNTextField.getText());
+          assertNotEquals(dName, emailFrame.displayNTextField.getText());
+          assertNotEquals(mEmail, emailFrame.emailTextField.getText());
+          assertNotEquals(smtp, emailFrame.SMTPTextField.getText());
+          assertNotEquals(tls, emailFrame.TLSTextField.getText());
+          assertNotEquals(pass, emailFrame.emailPasswordTextField.getText());
+
+          emailFrame.cancelClicked();
+       }
+
+       /**
+       * Setting up an email and clicking "Cancel" when fields were filled out
+       * 
+       * Given that the application is open
+       * And the user logs into their account
+       * And the user filled out the setup email section previously and clicked "Save"
+       * When the user hits "Start" and says "Setup Email"
+       * Then a new window should pop up, asking for their first name, last name, display name,
+       *  email address, SMTP host, TLS port, and her email password
+       * Then when the user changes the fields and clicks Cancel
+       * And the user clicks "Start" and says "Setup Email"
+       * Then all the fields are what they previously
+       */
+
+       @Test
+       public void M2US7S3Test() {
+          WindowChecker windowChecker = new WindowChecker();    
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+          AccountSystem.updateEmailInfo("first", "last", "display", "another@gmail.org", "aj fhghiowef", "tlsdfakj hojif", "lkasdskjl56564");
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+
+          //given the application is open
+          String question1 = "Setup Email";
+          String answer1 = "question 1 answer";
+          MockRecorder mockRec = new MockRecorder(true);
+          MockWhisper mockWhisper = new MockWhisper(true, question1);
+          MockGPT mockGPT = new MockGPT(true, answer1);
+          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+ 
+          //when the user says the setup command
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens
+          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+          //fill out fields
+
+          String fName = "NewJohn";
+          String lName = "NewDoe";
+          String dName = "NewJD";
+          String mEmail = "Newemail@email.com";
+          String smtp = "Newsmtp.serveraddress.com";
+          String tls = "NewaJAKnNlLkjJjJjJSAMPLE33";
+          String pass = "NewsampleEmailPass";
+
+          EmailUI emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          emailFrame.firstNTextField.setText(fName);
+          emailFrame.lastNTextField.setText(lName);
+          emailFrame.displayNTextField.setText(dName);
+          emailFrame.emailTextField.setText(mEmail);
+          emailFrame.SMTPTextField.setText(smtp);
+          emailFrame.TLSTextField.setText(tls);
+          emailFrame.emailPasswordTextField.setText(tls);
+          
+          //click save button
+          emailFrame.cancelClicked();
+
+          JUser currentJUser = AccountSystem.currentUser;
+          assertNotEquals(fName, currentJUser.firstName);
+          assertNotEquals(lName, currentJUser.lastName);
+          assertNotEquals(dName, currentJUser.displayName);
+          assertNotEquals(mEmail, currentJUser.messageEmail);
+          assertNotEquals(smtp, currentJUser.stmpHost);
+          assertNotEquals(tls, currentJUser.tlsPort);
+          assertNotEquals(pass, currentJUser.messageEmailPass);
+
+          //when the user says the setup command again
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens again
+          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+
+          emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+
+          assertNotEquals(fName, emailFrame.firstNTextField.getText());
+          assertNotEquals(lName, emailFrame.lastNTextField.getText());
+          assertNotEquals(dName, emailFrame.displayNTextField.getText());
+          assertNotEquals(mEmail, emailFrame.emailTextField.getText());
+          assertNotEquals(smtp, emailFrame.SMTPTextField.getText());
+          assertNotEquals(tls, emailFrame.TLSTextField.getText());
+          assertNotEquals(pass, emailFrame.emailPasswordTextField.getText());
+
+          emailFrame.cancelClicked();
+       }
 }
 

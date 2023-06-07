@@ -26,63 +26,66 @@ public class EmailUI extends JFrame {
     public static final String SETUPTYPE = "SETUP";
     public static final String SETUP_SUCCESS = "Email setup Success";
 
-    private JTextField firstNTextField;
-    private JTextField lastNTextField;
-    private JTextField displayNTextField;
-    private JTextField emailTextField;
-    private JTextField SMTPTextField;
-    private JTextField TLSTextField;
-    private JTextField emailPasswordTextField;
+    protected JTextField firstNTextField;
+    protected JTextField lastNTextField;
+    protected JTextField displayNTextField;
+    protected JTextField emailTextField;
+    protected JTextField SMTPTextField;
+    protected JTextField TLSTextField;
+    protected JTextField emailPasswordTextField;
+
+    JUser currentJUser;
    
-    public EmailUI() {
+    public EmailUI(JUser currentJUser) {
         setTitle("Email setup");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Terminates the program when the frame is closed
         setSize(400, 300); // Window size
         setLocationRelativeTo(null); // Center the window
 
+        this.currentJUser = currentJUser;
         // Main Panel to hold components by GridLayout
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(8,2,10,10));
 
         // First Name field
         JLabel firstNLabel = new JLabel("First Name:");
-        firstNTextField = new JTextField();
+        firstNTextField = new JTextField(currentJUser.firstName);
         mainPanel.add(firstNLabel);
         mainPanel.add(firstNTextField);
 
         // Last Name field
         JLabel lastNLabel = new JLabel("Last Name:");
-        lastNTextField = new JTextField();
+        lastNTextField = new JTextField(currentJUser.lastName);
         mainPanel.add(lastNLabel);
         mainPanel.add(lastNTextField);
 
         // Display Name field
         JLabel displayNLabel = new JLabel("Display Name:");
-        displayNTextField = new JTextField();
+        displayNTextField = new JTextField(currentJUser.displayName);
         mainPanel.add(displayNLabel);
         mainPanel.add(displayNTextField);
 
         // Email field
         JLabel emailLabel = new JLabel("Email:");
-        emailTextField = new JTextField();
+        emailTextField = new JTextField(currentJUser.messageEmail);
         mainPanel.add(emailLabel);
         mainPanel.add(emailTextField);
 
         // SMTP field
         JLabel SMTPLabel = new JLabel("SMTP:");
-        SMTPTextField = new JTextField();
+        SMTPTextField = new JTextField(currentJUser.stmpHost);
         mainPanel.add(SMTPLabel);
         mainPanel.add(SMTPTextField);
 
         // TLS field
         JLabel TLSLabel = new JLabel("TLS:");
-        TLSTextField = new JTextField();
+        TLSTextField = new JTextField(currentJUser.tlsPort);
         mainPanel.add(TLSLabel);
         mainPanel.add(TLSTextField);
 
         // Email Password field
         JLabel emailPasswordLabel = new JLabel("Email Password:");
-        emailPasswordTextField = new JTextField();
+        emailPasswordTextField = new JTextField(currentJUser.messageEmailPass);
         mainPanel.add(emailPasswordLabel);
         mainPanel.add(emailPasswordTextField);
 
@@ -90,33 +93,7 @@ public class EmailUI extends JFrame {
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String firstN = firstNTextField.getText();
-                String lastN = lastNTextField.getText();
-                String displayN = displayNTextField.getText();
-                String email = emailTextField.getText();
-                String SMTP = SMTPTextField.getText();
-                String TLS = TLSTextField.getText();
-                String emailPassword = emailPasswordTextField.getText();
-
-                // Check Email field & Passwordfield
-                if (firstN.isEmpty()) {
-                    JOptionPane.showMessageDialog(EmailUI.this, "Please input first name");
-                } else if (lastN.isEmpty()) {
-                    JOptionPane.showMessageDialog(EmailUI.this, "Please input last name");
-                } else if (displayN.isEmpty()) {
-                    JOptionPane.showMessageDialog(EmailUI.this, "Please input display name");
-                } else if (email.isEmpty()) {
-                    JOptionPane.showMessageDialog(EmailUI.this, "Please input email");
-                } else if (SMTP.isEmpty()) {
-                    JOptionPane.showMessageDialog(EmailUI.this, "Please input SMTP");
-                } else if (TLS.isEmpty()) {
-                    JOptionPane.showMessageDialog(EmailUI.this, "Please input TLS");
-                } else if (emailPassword.isEmpty()) {
-                    JOptionPane.showMessageDialog(EmailUI.this, "Please input email password");
-                } else {
-                    // Perform email setup. Send request to the server
-                    performEmailSetup(firstN, lastN, displayN, email, SMTP, TLS, emailPassword);
-                }
+                saveClicked();
             }
         });
         mainPanel.add(saveButton);
@@ -125,14 +102,48 @@ public class EmailUI extends JFrame {
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // close email setup window
-                EmailUI.this.dispose();
+                cancelClicked();
             }
         });
         mainPanel.add(cancelButton);
 
         add(mainPanel);
 
+    }
+
+    protected void saveClicked(){
+        String firstN = firstNTextField.getText();
+        String lastN = lastNTextField.getText();
+        String displayN = displayNTextField.getText();
+        String email = emailTextField.getText();
+        String SMTP = SMTPTextField.getText();
+        String TLS = TLSTextField.getText();
+        String emailPassword = emailPasswordTextField.getText();
+
+        // Check Email field & Passwordfield
+        if (firstN.isEmpty()) {
+            JOptionPane.showMessageDialog(EmailUI.this, "Please input first name");
+        } else if (lastN.isEmpty()) {
+            JOptionPane.showMessageDialog(EmailUI.this, "Please input last name");
+        } else if (displayN.isEmpty()) {
+            JOptionPane.showMessageDialog(EmailUI.this, "Please input display name");
+        } else if (email.isEmpty()) {
+            JOptionPane.showMessageDialog(EmailUI.this, "Please input email");
+        } else if (SMTP.isEmpty()) {
+            JOptionPane.showMessageDialog(EmailUI.this, "Please input SMTP");
+        } else if (TLS.isEmpty()) {
+            JOptionPane.showMessageDialog(EmailUI.this, "Please input TLS");
+        } else if (emailPassword.isEmpty()) {
+            JOptionPane.showMessageDialog(EmailUI.this, "Please input email password");
+        } else {
+            // Perform email setup. Send request to the server
+            performEmailSetup(firstN, lastN, displayN, email, SMTP, TLS, emailPassword);
+        }
+    }
+
+    protected void cancelClicked(){
+        // close email setup window
+        EmailUI.this.dispose();
     }
 
     private void performEmailSetup(String firstName, String lastName, String displayName, String email, String SMTP, String TLS, String emailPassword) {
@@ -168,6 +179,7 @@ public class EmailUI extends JFrame {
 
                     // check if email setup is successful
                     if (setupStatus.equals(SETUP_SUCCESS)) {
+                        currentJUser.setEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, emailPassword);
                         JOptionPane.showMessageDialog(EmailUI.this, "Email setup successful");
                         EmailUI.this.dispose();
                     } else {
@@ -190,7 +202,7 @@ public class EmailUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        EmailUI emailUI = new EmailUI();
+        EmailUI emailUI = new EmailUI(new JUser("testEmail", "testPassword"));
         emailUI.setVisible(true);
     }
 }

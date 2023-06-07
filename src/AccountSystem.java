@@ -42,6 +42,7 @@ public class AccountSystem {
     //Email field Strings
     public static final String FIRSTNAME = "FIRST_NAME";
     public static final String LASTNAME = "LAST_NAME";
+    public static final String DISPLAYNAME = "DISPLAY_NAME";
     public static final String MESSAGE_EMAIL = "Message_Email";
     public static final String STMP = "STMP";
     public static final String TLS = "TLS";
@@ -124,7 +125,8 @@ public class AccountSystem {
             boolean emailInfoExists = account.containsKey(FIRSTNAME);
             if (emailInfoExists) {
                 currentUser = new JUser(email, password, (String)account.get(FIRSTNAME), 
-                                        (String)account.get(LASTNAME), 
+                                        (String)account.get(LASTNAME),
+                                        (String)account.get(DISPLAYNAME), 
                                         (String)account.get(MESSAGE_EMAIL), 
                                         (String)account.get(STMP), 
                                         (String)account.get(TLS), 
@@ -174,7 +176,7 @@ public class AccountSystem {
             System.out.println(updateResult);
         }
     }
-    public static void updateEmailInfo (String firstName, String lastName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
+    public static void updateEmailInfo (String firstName, String lastName, String displayName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
         if (currentUser == null) {
             return;
         }
@@ -185,6 +187,7 @@ public class AccountSystem {
             BasicDBObject account = new BasicDBObject();
             account.append(FIRSTNAME, firstName);
             account.append(LASTNAME, lastName);
+            account.append(DISPLAYNAME, displayName);
             account.append(MESSAGE_EMAIL, messageEmail);
             account.append(STMP, stmpHost);
             account.append(TLS, tlsPort);
@@ -246,6 +249,7 @@ public class AccountSystem {
      * @return SETUP_SUCCESS if the email was setup successfully
      */
     public static String emailSetup(String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS){
+        updateEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, password);
         return SETUP_SUCCESS;
     }
 

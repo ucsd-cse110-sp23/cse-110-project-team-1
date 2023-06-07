@@ -630,12 +630,12 @@ public class SayIt extends JFrame{
                 clearClicked();
                 return currQ;
             } else if (parser.command.equals(Parser.SETUP_EMAIL)) {
-                EmailUI emailSetUp = new EmailUI();
+                EmailUI emailSetUp = new EmailUI(currentJUser);
                 // Create the frame here for the email setup
                 return currQ;
             } else if (parser.command.equals(Parser.CREATE_EMAIL)) {
                 qaPanel.createQuestion(Parser.CREATE_EMAIL,parser.getPrompt(),0);
-                answer = chatGPT.run(parser.getPrompt() + "display name: " + currentJUser.firstName);
+                answer = chatGPT.run(parser.getPrompt() + "display name: " + currentJUser.displayName);
                 qaPanel.setPrefixQ(Parser.CREATE_EMAIL);
                 qaPanel.changeAnswer(answer);
 
