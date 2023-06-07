@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class LoginScreen extends JFrame {
     public final String URL = "http://localhost:8101/";
@@ -68,17 +69,34 @@ public class LoginScreen extends JFrame {
                 } else if (password.isEmpty()) {
                     JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
                 } else {
-                    boolean autoLogIn;
                     // Email and password are inputted, perform login functionality here
-                    if(autoLoginCheckbox.isSelected()){
-                        autoLogIn = true;
-                    }else{
-                        autoLogIn = false;
-                    }
                     Thread t = new Thread(() -> { 
-                        String loginStatus = LoginLogic.performLogin(email, password, autoLogIn);
-                        checkLogin(loginStatus);
+
+                        //tries to login
+                        ArrayList<Object> loginResult= LoginLogic.performLogin(email, password, false); 
+                        String loginStatus = (String) loginResult.get(0);
+                        
+                        //login successfully: Create JUser using the PromptHistory sends from the server and open SayIt
+                        if(loginStatus.equals(LOGIN_SUCCESS)){
+    
+                            if(autoLoginCheckbox.isSelected()){
+                                LoginLogic.createAutoLogIn(email, password, null);
+                            }
+                            
+                            dispose();
+                            JUser user = new JUser(email,password,(ArrayList<QuestionAnswer>)loginResult.get(1));
+                            new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user);
+
+                        }else{
+
+                            SwingUtilities.invokeLater(() -> {
+                                JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
+                            });
+
+                        }
+
                     });
+
                     t.start();
                 }
             }
@@ -99,25 +117,6 @@ public class LoginScreen extends JFrame {
 
         // Add the panel to the frame
         add(mainPanel);
-    }
-
-    private void checkLogin(String loginStatus){
-        // Check if login was successful
-        if (loginStatus.equals(LOGIN_SUCCESS)) {
-        // Perform further actions upon successful login
-            SwingUtilities.invokeLater(() -> {
-                new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
-                closeLoginScreen();
-            });
-        } else {
-            SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
-            });
-        }
-    }
-    
- private void closeLoginScreen() {
-        dispose(); // Close the LoginScreen frame
     }
 
     public static void main(String[] args) {

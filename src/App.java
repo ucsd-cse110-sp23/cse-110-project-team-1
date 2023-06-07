@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -25,37 +26,22 @@ public class App {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 // Check if auto-login is enabled
-                if (checkAutoLoginStatus()) {
-                    // Open SayIt screen directly
-                    openSayItScreen();
-                } else {
-                    // LoginScreen
-                    openLoginScreen();
-                }
+                checkAutoLogIN(null);
             }
         });
     }
-
-    //
-    private static boolean checkAutoLoginStatus() {
-        String loginStatus = checkAutoLogIN(null);
-        if(loginStatus.equals(LOGIN_SUCCESS)){
-            return true;
-        }
-        return false;
-    }
     
-    /*
-     * This method should be called before the Account UI appears to instantly log in user
-     * Relies on if a file is present so when testing please remember to delete your files in saveFiles folder
-     * @returns Fail to find Log-in file if there is no autoLogIn file (i.e user has not yet choosen to auto login for their account on this device)
-     * @return status response from loginAccount method if there is an autoLogIn File. 
+    /**
+     * this method checks the auto login status in thie machine by checking the local file path
+     * @param filepath
      */
-    public static String checkAutoLogIN(String filepath) {
+    public static void checkAutoLogIN(String filepath) {
         if (filepath != null) {
             savePath = filepath;
         }
+       
         File save = new File(savePath);
+       
         if (save.isFile()) {
             try {
                 Object obj = new JSONParser().parse(new FileReader(savePath));
@@ -63,27 +49,27 @@ public class App {
                 JSONObject saveBody = (JSONObject) obj;
                 String email = (String)saveBody.get(EMAIL);
                 String password = (String)saveBody.get(PASS);
-                return LoginLogic.performLogin(email, password, false);
+               
+                //tries to login
+                ArrayList<Object> loginResult= LoginLogic.performLogin(email, password, false); 
+                String loginStatus = (String) loginResult.get(0);
+                //login successfully: Create JUser using the PromptHistory sends from the server and open SayIt
+                if(loginStatus.equals(LOGIN_SUCCESS)){
+                    JUser user = new JUser(email,password,(ArrayList<QuestionAnswer>)loginResult.get(1));
+                    new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user);
+                }
             } catch(Exception e) {
                 e.printStackTrace();
             }
+        }else{
+            openLoginScreen();
         }
-        return "Fail to find Log-in file";
     }
-
 
     private static void openLoginScreen() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new LoginScreen();
-            }
-        });
-    }
-
-    private static void openSayItScreen() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
             }
         });
     }

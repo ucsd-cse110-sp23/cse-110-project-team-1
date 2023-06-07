@@ -13,10 +13,13 @@ import static com.mongodb.client.model.Updates.*;
 
 import static java.util.Arrays.asList;
 
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.io.IOException;
 
 import java.io.File;
@@ -26,7 +29,6 @@ import java.io.PrintWriter;
 
 public class AccountSystem {
 
-    public static JUser currentUser;
     private final static String uri = "mongodb+srv://sjgoh:adObuNGxznemoldt@cluster0.0yck06r.mongodb.net/?retryWrites=true&w=majority";
     public static String savePath = "saveFiles/AutoLoginIn.json";
     public final String QUESTION_FIELD = "Question";
@@ -56,10 +58,7 @@ public class AccountSystem {
      * @returns CREATE_SUCCESS if account was created successfully
      */
     static String createAccount(String email, String password, boolean autoLogIn) {
-        currentUser = new JUser(email, password);
-        if (autoLogIn) {
-            createAutoLogIn(email, password, "null");
-        }
+
         try (MongoClient mongoClient = MongoClients.create(uri)) {
 
 
@@ -84,7 +83,7 @@ public class AccountSystem {
     }
 
     /*
-     * Tries to login into an existing account in the mongoDB database
+     * Tries to verify the email and password matched in MangoDB
      * @param email of account
      * @param password of account
      * @param autoLogIN: if the user wishes to be auto logined for this device 
@@ -92,39 +91,54 @@ public class AccountSystem {
      * @returns WRONG_PASSWORD when there is an email; however, password does not match
      * @returns LOGIN_SUCCESS when login went sucessful
      */
-    @SuppressWarnings("unchecked")
-    public static String loginAccount(String email, String password, boolean autoLogIn) {
-        try (MongoClient mongoClient = MongoClients.create(uri)) {
+@SuppressWarnings("unchecked")
+public static JSONObject loginAccount(String email, String password, boolean autoLogIn) {
 
+    JSONObject response = new JSONObject();
+    JSONArray promptHList = new JSONArray();
 
-            MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
-            MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
+    try (MongoClient mongoClient = MongoClients.create(uri)) {
+        MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
+        MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
 
-            Document account = accounts.find(eq(EMAIL, email)).first();
-            if (account == null) {
-                return EMAIL_NOT_FOUND;
-            }
-            String pass = (String)account.get(PASS);
-            if (!pass.equals(password)) {
-                return WRONG_PASSWORD;
-            }
-
-            if (autoLogIn) {
-                createAutoLogIn(email, password, null);
-                System.out.println("AotoLogin created: email = " + email);
-            }
-            
-            currentUser = new JUser(email, password);
-            List<Document> prompts = (List<Document>)account.get(PROMPT_STRING);
-            for (Document d: prompts) {
-                System.out.println(d.toJson());
-                QuestionAnswer qa = new QuestionAnswer((int)d.get(QID), (String)d.get(COM_STRING), (String)d.get(QUE_STRING), (String)d.get(ANS_STRING));
-                currentUser.addPrompt(qa);
-            }
-            System.out.println(LOGIN_SUCCESS + ": email = " + email);
-            return LOGIN_SUCCESS;
+        Document account = accounts.find(eq(EMAIL, email)).first();
+        if (account == null) {
+            response.put("status", EMAIL_NOT_FOUND);
+            response.put("promptHistory", promptHList);
+            return response;
         }
+        String pass = (String) account.get(PASS);
+        if (!pass.equals(password)) {
+            response.put("status", WRONG_PASSWORD);
+            response.put("promptHistory", promptHList);
+            return response;
+        }
+
+        // Login Successfully!! getting Prompt History
+        System.out.println(LOGIN_SUCCESS + ": email = " + email);
+        List<Document> prompts = (List<Document>) account.get(PROMPT_STRING);
+
+        for (Document d : prompts) {
+            System.out.println(d.toJson());
+            JSONObject prompt = new JSONObject();
+            prompt.put("qid", d.get(QID));
+            prompt.put("comment", d.get(COM_STRING));
+            prompt.put("question", d.get(QUE_STRING));
+            prompt.put("answer", d.get(ANS_STRING));
+            promptHList.put(prompt);
+        }
+
+        response.put("status", LOGIN_SUCCESS);
+        response.put("promptHistory", promptHList);
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.put("status", "Error: " + e.getMessage());
+        response.put("promptHistory", promptHList);
     }
+
+    return response;
+}
+
 
     /* 
      * updatAccount takes prompts in currentUser and updates the MongoDB database with them 
@@ -155,56 +169,13 @@ public class AccountSystem {
             System.out.println(updateResult);
         }
     }
-    /*
-     * Helper method to create the autologin file 
-     * Sets email and password in the file as a json
-     */
-    @SuppressWarnings("unchecked")
-    private static void createAutoLogIn(String email, String password, String filepath) {
-        if (filepath != null) {
-            savePath = filepath;
-        }
-        File save = new File(savePath);
-        File parentDir = save.getParentFile();
-        if (parentDir != null) {
-            parentDir.mkdirs();
-        }
-        try {
-            save.createNewFile();
-        } catch (IOException io) {
-            io.printStackTrace();
-        }
 
-        JSONObject saveBody = new JSONObject();
-        saveBody.put(EMAIL, email);
-        saveBody.put(PASS, password);
-
-
-        try {
-            PrintWriter pw = new PrintWriter(savePath);
-            pw.write(saveBody.toJSONString());
-            pw.flush();
-            pw.close();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-            System.out.println("Wrong file path");
-        } 
-    }
-
-    /*
-     * To Clear the AccountSystem by reset currentUser to null()
-     */
-    public static void clear(){
-        currentUser = null;
-        return;
-    }
 
     public static void main(String[] args) {
         AccountSystem.createAccount("Test", "TestPassword", false);
         AccountSystem.loginAccount("Test", "TestPassword", false);
-        AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
+        //AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
         AccountSystem.updateAccount();
-        AccountSystem.clear();
-        System.out.println(AccountSystem.currentUser);
+        //System.out.println(AccountSystem.currentUser);
     }
 }

@@ -486,7 +486,7 @@ public class SayIt extends JFrame{
      * @param args
      */
     public static void main(String[] args){
-        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null,new JUser("123","123"));
     }
 
     // MainPanel mainPanel
@@ -496,7 +496,7 @@ public class SayIt extends JFrame{
      * @param whisper 
      * @param recorder
      */
-    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile) {
+    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile,JUser currUser) {
         //i = 0;
 
         setTitle("SayIt Assistant");
@@ -524,7 +524,7 @@ public class SayIt extends JFrame{
         this.whisper = whisper;
         this.recorder = recorder;
         // histClass = new AccountMediator();
-        this.currentJUser = AccountSystem.currentUser;
+        this.currentJUser = currUser;
 
         sideBar = new SideBar();
         c.fill = GridBagConstraints.BOTH;

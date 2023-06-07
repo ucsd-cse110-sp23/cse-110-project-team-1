@@ -11,6 +11,12 @@ public class JUser {
         promptHistory = new ArrayList<>();
     }
 
+    public JUser(String email, String password, ArrayList<QuestionAnswer> promptHistory) {
+        this.email = email;
+        this.password = password;
+        this.promptHistory = promptHistory;
+    }
+
     /*
      * Need to call the methods: CreateAccount, LoginAccount, or checkAutoLogin
      * first before running this

@@ -1,5 +1,6 @@
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -8,6 +9,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -18,6 +21,13 @@ public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
     public static final String CREATETYPE = "CREATE";
 
+        //Return messages
+        public static final String CREATE_SUCCESS = "Account created successfully";
+        public static final String LOGIN_SUCCESS = "Login successful";
+        public static final String EMAIL_TAKEN = "This email has been taken";
+        public static final String EMAIL_NOT_FOUND = "This email was not found";
+        public static final String WRONG_PASSWORD = "Wrong password";
+
     /**
      * This method handles POST and GET request received by server.
      * The POST received should have indicated whether this is a login request or 
@@ -25,16 +35,14 @@ public class handler implements HttpHandler {
      */
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-        String response = "Request Received";
+        String response = "request Receieved";
         String method = httpExchange.getRequestMethod();
-
         try {
-            if (method.equals("POST")) {
+            if (method.equals("POST")) {    //handle "POST"
                 response = handlePost(httpExchange);
-            } else if(method.equals("GET")){
-                response = "Welcome to SayIt";
-                //throw new Exception("GET method have not implemented");
-            }
+            } else if(method.equals("GET")){    //handle "GET"
+                response = handleGet(httpExchange);
+            } 
             else {
                 throw new Exception("Not Valid Request Method");
             }
@@ -43,8 +51,7 @@ public class handler implements HttpHandler {
             response = e.toString();
             e.printStackTrace();
         }
-
-        // Sending back response to the client
+        // Sending back the response to the client                
         httpExchange.sendResponseHeaders(200, response.length());
         OutputStream outStream = httpExchange.getResponseBody();
         outStream.write(response.getBytes());
@@ -57,8 +64,6 @@ public class handler implements HttpHandler {
      * @return -the response get from the server
      */
     private String handlePost(HttpExchange httpExchange) throws IOException {
-        String response = "handlePost Received";
-
         InputStream inStream = httpExchange.getRequestBody();
         String postData = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8))
                 .lines()
@@ -67,20 +72,26 @@ public class handler implements HttpHandler {
         JSONObject requestData = new JSONObject(postData);
         String postType = requestData.getString("postType");
 
-        if (postType.equals(LOGINTYPE)) {
+        if (postType.equals(LOGINTYPE)) {       //handle "LOGIN"
             String email = requestData.getString("email");
             String password = requestData.getString("password");
             boolean autoLogIn = requestData.getBoolean("autoLogIn");
-            response = logInHandler(email, password, autoLogIn);
-        } else if (postType.equals(CREATETYPE)) {
+            return logInHandler(httpExchange,email, password, autoLogIn);
+        } else if (postType.equals(CREATETYPE)) {       //handle "CREATE"
             String email = requestData.getString("email");
             String password = requestData.getString("password");
-            response = createHandler(email, password);
+            return createHandler(httpExchange, email, password);
         } else {
             throw new IOException("Unsupported postType: " + postType);
         }
+    }
 
-        return response;
+    /**
+     * This method handles the "Get" request to the server
+     * However in this server context "\" the client only sends "Get" when opening this app
+     */
+    private String handleGet(HttpExchange httpExchange) throws IOException{
+        return "Welcome to SayIt";
     }
 
     /**
@@ -89,9 +100,18 @@ public class handler implements HttpHandler {
      * @param password -the password of the email
      * @param autoLogIn -determ whether to make this app autoLogin for this account 
      * @return the login status
+     * @throws IOException
      */
-    private String logInHandler(String email, String password, boolean autoLogIn) {
-        return AccountSystem.loginAccount(email, password, autoLogIn);
+    private String logInHandler(HttpExchange httpExchange,String email, String password, boolean autoLogIn) throws IOException {
+        Map<String, ArrayList<QuestionAnswer>> response = AccountSystem.loginAccount(email, password, autoLogIn);
+
+        // Convert the response map to a JSON object
+        JSONObject jsonResponse = new JSONObject(response);
+    
+        // Convert the JSON object to a string
+        String responseString = jsonResponse.toString();
+    
+        return responseString;
     }
 
     /**
@@ -99,8 +119,9 @@ public class handler implements HttpHandler {
      * @param email -the email tries to create
      * @param password -sets the password for new account
      * @return the create status
+     * @throws IOException
      */
-    private String createHandler(String email, String password) {
+    private String createHandler(HttpExchange httpExchange,String email, String password) throws IOException {
         return AccountSystem.createAccount(email, password, false);
     }
 }
