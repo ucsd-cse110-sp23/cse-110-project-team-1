@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.sound.sampled.LineUnavailableException;
+import javax.swing.event.SwingPropertyChangeSupport;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -50,6 +51,7 @@ class WindowChecker{
         public void windowOpened(WindowEvent evt) {
            frame = (Frame) evt.getSource();
            mostRecentWindow = frame.getTitle();
+           System.out.println("hi");
         }   
      };
 
@@ -60,8 +62,19 @@ class WindowChecker{
     public Frame getRecentFrame(){
         return frame;
     }
+
+    
 }
 
+class NonHTTPEmailUI extends EmailUI{
+    NonHTTPEmailUI(JUser user){super(user);}
+    
+    @Override
+    protected void performEmailSetup(String firstName, String lastName, String displayName, String email, String SMTP, String TLS, String emailPassword){
+        AccountSystem.emailSetup(firstName, lastName, displayName, email, emailPassword, SMTP, TLS);
+        currentJUser.setEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, emailPassword);
+    }
+}
 /* 
 class MockCreateScreen extends CreateScreen{
     String account;
@@ -481,9 +494,9 @@ public class MS2USTest {
        * Then the fields are filled out with the information they put in previously.
        */
 
+       //tests that the window opens
        @Test
-       public void M2US7S1Test() {
-          WindowChecker windowChecker = new WindowChecker();    
+       public void M2US7S1pt1Test() {
           assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
           AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
           assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
@@ -500,8 +513,21 @@ public class MS2USTest {
           app.changeRecording();
           app.changeRecording();
           //the setup window opens
-          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
-          //fill out fields
+          assertTrue(app.emailSetUp != null);
+
+          EmailUI emailFrame = (app.emailSetUp);
+          //click cancel button
+          emailFrame.cancelClicked();
+       }      
+
+       //tests that the Email Setup works as expected
+       @Test
+       public void M2US7S1pt2Test() {
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+          AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+
+          //given the setup frame is already open, fill out fields
 
           String fName = "John";
           String lName = "Doe";
@@ -511,14 +537,14 @@ public class MS2USTest {
           String tls = "aJAKnNlLkjJjJjJSAMPLE33";
           String pass = "sampleEmailPass";
 
-          EmailUI emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          EmailUI emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
           emailFrame.firstNTextField.setText(fName);
           emailFrame.lastNTextField.setText(lName);
           emailFrame.displayNTextField.setText(dName);
           emailFrame.emailTextField.setText(mEmail);
           emailFrame.SMTPTextField.setText(smtp);
           emailFrame.TLSTextField.setText(tls);
-          emailFrame.emailPasswordTextField.setText(tls);
+          emailFrame.emailPasswordTextField.setText(pass);
           
           //click save button
           emailFrame.saveClicked();
@@ -531,13 +557,8 @@ public class MS2USTest {
           assertEquals(tls, AccountSystem.currentUser.tlsPort);
           assertEquals(pass, AccountSystem.currentUser.messageEmailPass);
 
-          //when the user says the setup command again
-          app.changeRecording();
-          app.changeRecording();
-          //the setup window opens again
-          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
-
-          emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          //when the setup window opens again
+          emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
 
           assertEquals(fName, emailFrame.firstNTextField.getText());
           assertEquals(lName, emailFrame.lastNTextField.getText());
@@ -549,7 +570,7 @@ public class MS2USTest {
           
           //click cancel button
           emailFrame.cancelClicked();
-       }      
+       }
 
       /**
        * Setting up an email and clicking "Cancel"
@@ -566,8 +587,7 @@ public class MS2USTest {
        */
 
        @Test
-       public void M2US7S2Test() {
-          WindowChecker windowChecker = new WindowChecker();    
+       public void M2US7S2Test() {    
           assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
           AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
           assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
@@ -584,7 +604,7 @@ public class MS2USTest {
           app.changeRecording();
           app.changeRecording();
           //the setup window opens
-          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+          assertTrue(app.emailSetUp != null);
           //fill out fields
 
           String fName = "NewJohn";
@@ -595,7 +615,7 @@ public class MS2USTest {
           String tls = "NewaJAKnNlLkjJjJjJSAMPLE33";
           String pass = "NewsampleEmailPass";
 
-          EmailUI emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          EmailUI emailFrame = ((EmailUI) app.emailSetUp);
           emailFrame.firstNTextField.setText(fName);
           emailFrame.lastNTextField.setText(lName);
           emailFrame.displayNTextField.setText(dName);
@@ -620,9 +640,9 @@ public class MS2USTest {
           app.changeRecording();
           app.changeRecording();
           //the setup window opens again
-          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+          assertTrue(app.emailSetUp != null);
 
-          emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          emailFrame = (app.emailSetUp);
 
           assertNotEquals(fName, emailFrame.firstNTextField.getText());
           assertNotEquals(lName, emailFrame.lastNTextField.getText());
@@ -668,7 +688,7 @@ public class MS2USTest {
           app.changeRecording();
           app.changeRecording();
           //the setup window opens
-          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+          assertTrue(app.emailSetUp != null);
           //fill out fields
 
           String fName = "NewJohn";
@@ -679,7 +699,7 @@ public class MS2USTest {
           String tls = "NewaJAKnNlLkjJjJjJSAMPLE33";
           String pass = "NewsampleEmailPass";
 
-          EmailUI emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          EmailUI emailFrame = (app.emailSetUp);
           emailFrame.firstNTextField.setText(fName);
           emailFrame.lastNTextField.setText(lName);
           emailFrame.displayNTextField.setText(dName);
@@ -704,9 +724,9 @@ public class MS2USTest {
           app.changeRecording();
           app.changeRecording();
           //the setup window opens again
-          assertTrue(windowChecker.getRecentFrame() instanceof EmailUI);
+          assertTrue(app.emailSetUp != null);
 
-          emailFrame = ((EmailUI) windowChecker.getRecentFrame());
+          emailFrame = (app.emailSetUp);
 
           assertNotEquals(fName, emailFrame.firstNTextField.getText());
           assertNotEquals(lName, emailFrame.lastNTextField.getText());

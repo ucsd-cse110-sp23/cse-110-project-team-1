@@ -13,7 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class EmailLogic {
-    public static final String URL = "http://localhost:8101/";
+    public static final String URL = "http://localhost:8100/";
     /**
      * sends a log in request to the server
      * @param email -the email sends to the server

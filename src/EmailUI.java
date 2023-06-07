@@ -21,7 +21,7 @@ import java.io.BufferedReader;
 import java.net.MalformedURLException;
 
 public class EmailUI extends JFrame {
-    public final String URL = "http://localhost:8101/";
+    public final String URL = "http://localhost:8100/";
     public static final String SETUP_FAIL = "Login Fail";
     public static final String SETUPTYPE = "SETUP";
     public static final String SETUP_SUCCESS = "Email setup Success";
@@ -146,7 +146,7 @@ public class EmailUI extends JFrame {
         EmailUI.this.dispose();
     }
 
-    private void performEmailSetup(String firstName, String lastName, String displayName, String email, String SMTP, String TLS, String emailPassword) {
+    protected void performEmailSetup(String firstName, String lastName, String displayName, String email, String SMTP, String TLS, String emailPassword) {
         String setupStatus = SETUP_FAIL;
             try {
                 // Set request body with arguments

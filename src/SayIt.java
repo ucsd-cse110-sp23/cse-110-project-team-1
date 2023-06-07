@@ -469,6 +469,8 @@ public class SayIt extends JFrame{
     // AccountMediator histClass;
     JUser currentJUser;
 
+    EmailUI emailSetUp;
+
     /**
      * @return panel housing the record button and 
      * the question/answer panel where the current question/answer are displayed
@@ -630,7 +632,7 @@ public class SayIt extends JFrame{
                 clearClicked();
                 return currQ;
             } else if (parser.command.equals(Parser.SETUP_EMAIL)) {
-                EmailUI emailSetUp = new EmailUI(currentJUser);
+                emailSetUp = new EmailUI(currentJUser);
                 // Create the frame here for the email setup
                 return currQ;
             } else if (parser.command.equals(Parser.CREATE_EMAIL)) {
