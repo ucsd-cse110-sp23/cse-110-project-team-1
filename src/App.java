@@ -51,7 +51,7 @@ public class App {
                 String password = (String)saveBody.get(PASS);
                
                 //tries to login
-                ArrayList<Object> loginResult= LoginLogic.performLogin(email, password, false); 
+                ArrayList<Object> loginResult = Requests.performLogin(email, password, false); 
                 String loginStatus = (String) loginResult.get(0);
                 //login successfully: Create JUser using the PromptHistory sends from the server and open SayIt
                 if(loginStatus.equals(LOGIN_SUCCESS)){

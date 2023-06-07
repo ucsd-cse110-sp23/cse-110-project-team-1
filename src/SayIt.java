@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
 // import javax.management.Query;
 // import javax.sound.sampled.*;
@@ -9,6 +10,8 @@ import javax.swing.*;
 // import javax.swing.event.ChangeEvent;
 
 import org.javatuples.Triplet;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 class QAPanel extends JPanel{
@@ -447,7 +450,8 @@ class SideBar extends JPanel{
 
 // the main app
 public class SayIt extends JFrame{
-    public final String URL = "http://localhost:8100/sayit";
+    public static final String UPDATE_SUCCESS = "Update Success";
+
 
     private MainPanel mainPanel;
     private JButton recButton;
@@ -502,9 +506,15 @@ public class SayIt extends JFrame{
         setTitle("SayIt Assistant");
         // setDefaultCloseOperation(EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosing(java.awt.event.WindowEvent e) {
-                AccountSystem.updateAccount();
-                System.exit(0);
+            public void windowClosing(java.awt.event.WindowEvent e) {                
+                String updateStatus = Requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
+                if(updateStatus.equals(UPDATE_SUCCESS)){
+                    System.exit(0);
+                }else{
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(SayIt.this, updateStatus);
+                    });
+                }
             }
         });
         // setVisible(true);

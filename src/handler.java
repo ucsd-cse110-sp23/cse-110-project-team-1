@@ -1,6 +1,7 @@
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
     public static final String CREATETYPE = "CREATE";
+    public static final String UPDATETYPE = "UPDATE";
 
         //Return messages
         public static final String CREATE_SUCCESS = "Account created successfully";
@@ -27,6 +29,7 @@ public class handler implements HttpHandler {
         public static final String EMAIL_TAKEN = "This email has been taken";
         public static final String EMAIL_NOT_FOUND = "This email was not found";
         public static final String WRONG_PASSWORD = "Wrong password";
+        public static final String UPDATE_SUCCESS = "Update Success";
 
     /**
      * This method handles POST and GET request received by server.
@@ -76,12 +79,17 @@ public class handler implements HttpHandler {
             String email = requestData.getString("email");
             String password = requestData.getString("password");
             boolean autoLogIn = requestData.getBoolean("autoLogIn");
-            return logInHandler(httpExchange,email, password, autoLogIn);
+            return logInHandler(email, password, autoLogIn);
         } else if (postType.equals(CREATETYPE)) {       //handle "CREATE"
             String email = requestData.getString("email");
             String password = requestData.getString("password");
-            return createHandler(httpExchange, email, password);
-        } else {
+            return createHandler( email, password);
+        } else if (postType.equals(UPDATETYPE)) {       //handle "UPDATE"
+            String email = requestData.getString("email");
+            String password = requestData.getString("password");
+            JSONArray promptHistoryJson = requestData.getJSONArray("promptHistory");
+            return updateHandler(email, password, promptHistoryJson);
+        }else {
             throw new IOException("Unsupported postType: " + postType);
         }
     }
@@ -102,14 +110,11 @@ public class handler implements HttpHandler {
      * @return the login status
      * @throws IOException
      */
-    private String logInHandler(HttpExchange httpExchange,String email, String password, boolean autoLogIn) throws IOException {
-        Map<String, ArrayList<QuestionAnswer>> response = AccountSystem.loginAccount(email, password, autoLogIn);
+    private String logInHandler(String email, String password, boolean autoLogIn) throws IOException {
+        JSONObject response = AccountSystem.loginAccount(email, password, autoLogIn);
 
-        // Convert the response map to a JSON object
-        JSONObject jsonResponse = new JSONObject(response);
-    
         // Convert the JSON object to a string
-        String responseString = jsonResponse.toString();
+        String responseString = response.toString();
     
         return responseString;
     }
@@ -121,7 +126,19 @@ public class handler implements HttpHandler {
      * @return the create status
      * @throws IOException
      */
-    private String createHandler(HttpExchange httpExchange,String email, String password) throws IOException {
+    private String createHandler(String email, String password) throws IOException {
         return AccountSystem.createAccount(email, password, false);
     }
+
+    /**
+     * handle create request. This calls the method from AccountSystem and tries to create a account
+     * @param email -the email tries to create
+     * @param password -sets the password for new account
+     * @return the create status
+     * @throws IOException
+     */
+    private String updateHandler(String email, String password, JSONArray promptHistoryJson) throws IOException {
+        return AccountSystem.updateAccount(email, password, promptHistoryJson);
+    }
+
 }

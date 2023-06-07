@@ -1,19 +1,8 @@
 import javax.swing.*;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
 
 public class CreateScreen extends JFrame {
     private JTextField emailTextField;
@@ -21,8 +10,6 @@ public class CreateScreen extends JFrame {
     private JPasswordField confirmField;
 
     public static final String CREATETYPE = "CREATE";
-    public final String URL = "http://localhost:8101/";
-
     public static final String EMAIL = "Email";
     public static final String PASS = "Password";
     //Return messages
@@ -78,8 +65,22 @@ public class CreateScreen extends JFrame {
                 } else if (!password.equals(confirmPassword)) {
                     JOptionPane.showMessageDialog(CreateScreen.this, "Password and confirm password do not match");
                 } else {
-                    // Create an email in another thread by call helpler method
-                    performCreate(email, password);
+                    Thread t = new Thread(() -> {
+                        // Create an email in another thread by call helpler method
+                        String createStatus = Requests.performCreate(email, password);
+                        // Check if create was successful
+                        if (createStatus.equals(CREATE_SUCCESS)) {
+                            // Perform further actions upon successful login
+                            SwingUtilities.invokeLater(() -> {
+                                closeCreateScreen();
+                            });
+                        } else {
+                            SwingUtilities.invokeLater(() -> {
+                                JOptionPane.showMessageDialog(CreateScreen.this, createStatus);
+                            });
+                        }
+                    });
+                    t.start();
                 }
             }
         });
@@ -91,66 +92,6 @@ public class CreateScreen extends JFrame {
 
         add(mainPanel);
         setVisible(true);
-    }
-
-    /** sends a create request to server; autoLogIn should always be false
-     *  this method used to send create request to the server
-     * @param email -the email sends to the server
-     * @param password -the password of that email
-     * 
-    */ 
-    private void performCreate(String email, String password) {
-        Thread t = new Thread(() -> {
-            try {
-                // Set request body with arguments
-                HashMap<String,Object> requestData = new HashMap<String,Object>();            
-                requestData.put("postType", CREATETYPE);
-                requestData.put("email", email);
-                requestData.put("password", password);
-    
-                JSONObject requestDataJson = new JSONObject(requestData);
-                // Send the create request to the server
-                URL url = new URL(URL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setDoOutput(true);
-    
-                //send the request
-                try (OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream())) {
-                    out.write(requestDataJson.toString());
-                }
-    
-                // Receive the response from the server
-                try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                    String createStatus = in.readLine();
-    
-                    // Check if login was successful
-                    if (createStatus.equals(CREATE_SUCCESS)) {
-                        // Perform further actions upon successful login
-                        SwingUtilities.invokeLater(() -> {
-                            closeCreateScreen();
-                        });
-                    } else {
-                        SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(CreateScreen.this, createStatus);
-                        });
-                    }
-                }
-            } catch (MalformedURLException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Malformed URL: " + ex.getMessage());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "I/O Error: " + ex.getMessage());
-            } catch (JSONException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "JSON Error: " + ex.getMessage());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
-            }
-        });
-        t.start();
     }
 
     private void closeCreateScreen() {

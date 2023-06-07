@@ -14,18 +14,10 @@ import static com.mongodb.client.model.Updates.*;
 import static java.util.Arrays.asList;
 
 import org.json.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.io.IOException;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.PrintWriter;
 
 public class AccountSystem {
 
@@ -48,6 +40,7 @@ public class AccountSystem {
     public static final String EMAIL_TAKEN = "This email has been taken";
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
+    public static final String UPDATE_SUCCESS = "Update Success";
 
     /*
      * Tries to create an account in the mongoDB database
@@ -114,17 +107,17 @@ public static JSONObject loginAccount(String email, String password, boolean aut
             return response;
         }
 
-        // Login Successfully!! getting Prompt History
+        // Login Successfully!!  
         System.out.println(LOGIN_SUCCESS + ": email = " + email);
         List<Document> prompts = (List<Document>) account.get(PROMPT_STRING);
-
+        
         for (Document d : prompts) {
             System.out.println(d.toJson());
             JSONObject prompt = new JSONObject();
-            prompt.put("qid", d.get(QID));
-            prompt.put("comment", d.get(COM_STRING));
-            prompt.put("question", d.get(QUE_STRING));
-            prompt.put("answer", d.get(ANS_STRING));
+            prompt.put(QID, d.get(QID));
+            prompt.put(COM_STRING, d.get(COM_STRING));
+            prompt.put(QUE_STRING, d.get(QUE_STRING));
+            prompt.put(ANS_STRING, d.get(ANS_STRING));
             promptHList.put(prompt);
         }
 
@@ -145,29 +138,35 @@ public static JSONObject loginAccount(String email, String password, boolean aut
      * This means please call either createAccount or loginAccount before this method
      * @ensures currentUser prompts are updated in the database
     */
-    public static void updateAccount() {
-        if (currentUser == null) {
-            return;
-        }
+    public static String updateAccount(String email, String password, JSONArray promptHistoryJson) {
+        String updateStatus = "Update Fail";
         try (MongoClient mongoClient = MongoClients.create(uri)) {
-
-
             MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
             MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
-
-            ArrayList<Document> prompts = new ArrayList<Document>();
-            for (QuestionAnswer qa: currentUser.getPromptHistory()) {
-                Document newEntry = new Document(QID, qa.qID);
-                newEntry.append(COM_STRING, qa.command);
-                newEntry.append(QUE_STRING, qa.question);
-                newEntry.append(ANS_STRING, qa.answer);
+    
+            ArrayList<Document> prompts = new ArrayList<>();
+    
+            for (int i = 0; i < promptHistoryJson.length(); i++) {
+                JSONObject promptJson = promptHistoryJson.getJSONObject(i);
+                int qid = promptJson.getInt(QID);
+                String comment = promptJson.getString(COM_STRING);
+                String question = promptJson.getString(QUE_STRING);
+                String answer = promptJson.getString(ANS_STRING);
+    
+                Document newEntry = new Document(QID, qid);
+                newEntry.append(COM_STRING, comment);
+                newEntry.append(QUE_STRING, question);
+                newEntry.append(ANS_STRING, answer);
                 prompts.add(newEntry);
             }
+    
             Bson updateOperation = set(PROMPT_STRING, prompts);
-            Bson filter = eq(EMAIL,currentUser.email);
+            Bson filter = eq(EMAIL, email);
             UpdateResult updateResult = accounts.updateOne(filter, updateOperation);
             System.out.println(updateResult);
+            updateStatus = UPDATE_SUCCESS;
         }
+        return updateStatus;
     }
 
 
@@ -175,7 +174,7 @@ public static JSONObject loginAccount(String email, String password, boolean aut
         AccountSystem.createAccount("Test", "TestPassword", false);
         AccountSystem.loginAccount("Test", "TestPassword", false);
         //AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
-        AccountSystem.updateAccount();
+        //AccountSystem.updateAccount();
         //System.out.println(AccountSystem.currentUser);
     }
 }
