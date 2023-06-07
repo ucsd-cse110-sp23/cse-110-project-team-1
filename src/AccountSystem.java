@@ -46,6 +46,7 @@ public class AccountSystem {
     public static final String EMAIL_TAKEN = "This email has been taken";
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
+    public static final String SETUP_SUCCESS = "Email setup Success";
 
     /*
      * Tries to create an account in the mongoDB database
@@ -189,6 +190,21 @@ public class AccountSystem {
             ex.printStackTrace();
             System.out.println("Wrong file path");
         } 
+    }
+
+    /**
+     * 
+     * @param firstName
+     * @param lastName
+     * @param displayName
+     * @param email
+     * @param password
+     * @param SMTP
+     * @param TLS
+     * @return SETUP_SUCCESS if the email was setup successfully
+     */
+    public static String emailSetup(String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS){
+        return SETUP_SUCCESS;
     }
 
     /*

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
     public static final String CREATETYPE = "CREATE";
-    public static final String EMAILSETUPTYPE = "EMAILSETUP";
+    public static final String SETUPTYPE = "SETUP";
 
     /**
      * This method handles POST and GET request received by server.
@@ -67,6 +67,7 @@ public class handler implements HttpHandler {
 
         JSONObject requestData = new JSONObject(postData);
         String postType = requestData.getString("postType");
+        System.out.println("postType is: " + postType);
 
         if (postType.equals(LOGINTYPE)) {
             String email = requestData.getString("email");
@@ -77,7 +78,8 @@ public class handler implements HttpHandler {
             String email = requestData.getString("email");
             String password = requestData.getString("password");
             response = createHandler(email, password);
-        } else if(postType.equals(EMAILSETUPTYPE)) {
+        } else if(postType.equals(SETUPTYPE)) {
+            System.out.println("SETUP");
             String firstName = requestData.getString("firstName");
             String lastName = requestData.getString("lastName");
             String displayName = requestData.getString("displayName");
@@ -87,7 +89,8 @@ public class handler implements HttpHandler {
             String TLS = requestData.getString("TLS");
             response = emailSetupHandler(firstName, lastName, displayName, email, password, SMTP, TLS);
         } else {
-            throw new IOException("Unsupported postType: " + postType);
+            System.out.println("Error!!!!!!!!!!!!");
+            // throw new IOException("Unsupported postType: " + postType);
         }
 
         return response;
@@ -115,6 +118,17 @@ public class handler implements HttpHandler {
     }
 
     // TODO: US7-T2
+    /**
+     * 
+     * @param firstName First Name
+     * @param lastName Last Name
+     * @param displayName Displayed Name in the email
+     * @param email Email address
+     * @param password Email password
+     * @param SMTP Email SMTP
+     * @param TLS Email TLS
+     * @return SETUP_SUCCESS if the email was setup successfully
+     */
     private String emailSetupHandler(String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS) {
         return AccountSystem.emailSetup(firstName, lastName, displayName, email, password, SMTP, TLS);
     }

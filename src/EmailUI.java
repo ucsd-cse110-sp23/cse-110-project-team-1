@@ -5,9 +5,26 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.*;
+import java.util.HashMap;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
+
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+
+import java.net.URL;
+
+import java.io.BufferedReader;
+import java.net.MalformedURLException;
 
 public class EmailUI extends JFrame {
     public final String URL = "http://localhost:8101/";
+    public static final String SETUP_FAIL = "Login Fail";
+    public static final String SETUPTYPE = "SETUP";
+    public static final String SETUP_SUCCESS = "Email setup Success";
 
     private JTextField firstNTextField;
     private JTextField lastNTextField;
@@ -97,7 +114,8 @@ public class EmailUI extends JFrame {
                 } else if (emailPassword.isEmpty()) {
                     JOptionPane.showMessageDialog(EmailUI.this, "Please input email password");
                 } else {
-                    
+                    // Perform email setup. Send request to the server
+                    performEmailSetup(firstN, lastN, displayN, email, SMTP, TLS, emailPassword);
                 }
             }
         });
@@ -115,6 +133,60 @@ public class EmailUI extends JFrame {
 
         add(mainPanel);
 
+    }
+
+    private void performEmailSetup(String firstName, String lastName, String displayName, String email, String SMTP, String TLS, String emailPassword) {
+        String setupStatus = SETUP_FAIL;
+            try {
+                // Set request body with arguments
+                HashMap<String,Object> requestData = new HashMap<String,Object>();            
+                requestData.put("postType", SETUPTYPE);
+                requestData.put("firstName", firstName);
+                requestData.put("lastName", lastName);
+                requestData.put("displayName", displayName);
+                requestData.put("email", email);
+                requestData.put("SMTP", SMTP);
+                requestData.put("TLS", TLS);
+                requestData.put("emailPassword", emailPassword);
+
+
+                JSONObject requestDataJson = new JSONObject(requestData);
+                // Send the login request to the server
+                URL url = new URL(URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+
+                //send the request
+                try (OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream())) {
+                    out.write(requestDataJson.toString());
+                }
+
+                // Receive the response from the server
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    setupStatus = in.readLine();
+
+                    // check if email setup is successful
+                    if (setupStatus.equals(SETUP_SUCCESS)) {
+                        JOptionPane.showMessageDialog(EmailUI.this, "Email setup successful");
+                        EmailUI.this.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(EmailUI.this, "Email setup failed");
+                    }
+            } catch (MalformedURLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Malformed URL: " + ex.getMessage());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "I/O Error: " + ex.getMessage());
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "JSON Error: " + ex.getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+            }
+        System.out.println(setupStatus);
     }
 
     public static void main(String[] args) {
