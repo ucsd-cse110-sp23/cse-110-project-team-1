@@ -1,17 +1,12 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.*;
-import java.util.ArrayList;
 
 // import javax.management.Query;
 // import javax.sound.sampled.*;
 import javax.swing.*;
 // import javax.swing.event.ChangeEvent;
 
-import org.javatuples.Triplet;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 
 class QAPanel extends JPanel{
@@ -489,9 +484,9 @@ public class SayIt extends JFrame{
      * starts app
      * @param args
      */
-    public static void main(String[] args){
-        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null,new JUser("123","123"));
-    }
+    //public static void main(String[] args){
+        //new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null,new JUser("123","123"));
+    //}
 
     // MainPanel mainPanel
     /**
@@ -506,19 +501,21 @@ public class SayIt extends JFrame{
         setTitle("SayIt Assistant");
         // setDefaultCloseOperation(EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosing(java.awt.event.WindowEvent e) {                
-                String updateStatus = Requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
-                if(updateStatus.equals(UPDATE_SUCCESS)){
-                    System.exit(0);
-                }else{
-                    SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(SayIt.this, updateStatus);
-                    });
-                }
+            public void windowClosing(java.awt.event.WindowEvent e) {            
+                Thread t = new Thread(() -> {
+                    String updateStatus = Requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
+                    if(updateStatus.equals(UPDATE_SUCCESS)){
+                        System.exit(0);
+                    }else{
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(SayIt.this, updateStatus);
+                        });
+                    }
+                });    
             }
         });
         // setVisible(true);
-        setSize(600, 600); //400, 600
+        setSize(1000, 800); //400, 600
         //setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setUndecorated(false);
         setLayout(new GridBagLayout());
@@ -750,11 +747,14 @@ public class SayIt extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 // int numEntriesJson = History.initial(null).size();
                 // get the added prompt button
-                RecentQuestion recentQ =  changeRecording();
-                // update the QApanel when clicking the question button
-                if(recentQ != null) {
-                    addListenerToRecentQ(recentQ);
-                }
+                Thread t = new Thread(() -> { 
+                    RecentQuestion recentQ =  changeRecording();
+                    // update the QApanel when clicking the question button
+                    if(recentQ != null) {
+                        addListenerToRecentQ(recentQ);
+                    }
+                });
+                t.start();
             }
         }
         );
