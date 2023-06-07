@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 import org.json.simple.JSONObject;
@@ -11,6 +13,8 @@ import javax.swing.*;
  * !! Open the server before running this Program
  */
 public class App {
+    public static String savePath = "saveFiles/AutoLoginIn.json";
+
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
     public static final String LOGIN_SUCCESS = "Login successful";
@@ -19,16 +23,35 @@ public class App {
     public static final String WRONG_PASSWORD = "Wrong password";
     public static final String EMAIL = "Email";
     public static final String PASS = "Password";
-
-    public static String savePath = "saveFiles/AutoLoginIn.json";
+    public final static String URL = "http://localhost:8101/";
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                // Check if auto-login is enabled
-                checkAutoLogIN(null);
+                if(isServerRunning()){
+                    // Check if auto-login is enabled
+                    checkAutoLogIN(null);
+                }else{
+                    JOptionPane.showMessageDialog(null, 
+                    "The server is not running. Please start the server and try again.", 
+                    "Server Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
+    }
+    
+    private static boolean isServerRunning() {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK;
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     /**
