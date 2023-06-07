@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -24,6 +25,12 @@ public class App {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                Server server = new Server();
+                try {
+                    server.startServer();
+                } catch (IOException io) {
+                    System.out.println("server crashed");
+                }
                 // Check if auto-login is enabled
                 if (checkAutoLoginStatus()) {
                     // Open SayIt screen directly

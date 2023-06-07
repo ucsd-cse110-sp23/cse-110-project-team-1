@@ -2,13 +2,46 @@ import java.util.ArrayList;
 
 public class JUser {
     final String email;
-    final String password;
+    final String password; 
     private ArrayList<QuestionAnswer> promptHistory;
+    
+    // email info 
+    String firstName;
+    String lastName;
+    String messageEmail;
+    String stmpHost;
+    String tlsPort; 
+    String messageEmailPass; 
 
+    //Constructor for no email info inputted yet
     public JUser(String email, String password) {
         this.email = email;
         this.password = password;
         promptHistory = new ArrayList<>();
+    }
+    
+    //Constructor for if there is email info
+    public JUser(String email, String password, String firstName, String lastName, 
+    String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.messageEmail = messageEmail;
+        this.stmpHost = stmpHost;
+        this.tlsPort = tlsPort;
+        this.messageEmailPass = messageEmailPass;
+        promptHistory = new ArrayList<>();
+    }
+
+    //Setter for email info
+    public void setEmailInfo(String firstName, String lastName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.messageEmail = messageEmail;
+        this.stmpHost = stmpHost;
+        this.tlsPort = tlsPort;
+        this.messageEmailPass = messageEmailPass;
     }
 
     /*

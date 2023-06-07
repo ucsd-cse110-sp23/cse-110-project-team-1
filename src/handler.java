@@ -35,6 +35,8 @@ public class handler implements HttpHandler {
             } else if(method.equals("GET")){
                 response = "Welcome to SayIt";
                 //throw new Exception("GET method have not implemented");
+            } else if (method.equals("Send")) {
+                response = handleSend(httpExchange);
             }
             else {
                 throw new Exception("Not Valid Request Method");
@@ -94,6 +96,22 @@ public class handler implements HttpHandler {
 
         return response;
     }
+    /**
+     * handles all email send requests to server
+     * @param httpExchange -the request receieved
+     * @return -the response get from the server
+     */
+    private String handleSend(HttpExchange httpExchange) throws IOException {
+        InputStream inStream = httpExchange.getRequestBody();
+        String postData = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining());
+
+        JSONObject requestData = new JSONObject(postData);
+        String header = requestData.getString("header");
+        String body  = requestData.getString("body");
+        return sendHandler(header, body);
+    }
 
     /**
      * handles login request. This calls the method from AccountSystem and tries to login a account
@@ -130,5 +148,15 @@ public class handler implements HttpHandler {
      */
     private String emailSetupHandler(String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS) {
         return AccountSystem.emailSetup(firstName, lastName, displayName, email, password, SMTP, TLS);
+    }
+
+    /**
+     * handles send email requests. Calls from EmailLogic class
+     * @param header - header of email
+     * @param body - body of email
+     * @return email return messages 
+     */
+    private String sendHandler(String header, String body) {
+        return EmailSystem.sendEmail(header, body);
     }
 }
