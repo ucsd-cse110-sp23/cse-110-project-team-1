@@ -594,8 +594,8 @@ public class SayIt extends JFrame{
             System.out.println(parser.command);
 
             if (parser.command == null) {
-                qaPanel.createQuestion(parser.COMMAND_NOT_FOUND, question, 0);
-                answer = parser.COMMAND_NOT_FOUND;
+                qaPanel.createQuestion(Parser.COMMAND_NOT_FOUND, question, 0);
+                answer = Parser.COMMAND_NOT_FOUND;
                 qaPanel.changeAnswer(answer);
                 
                 RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
@@ -608,10 +608,10 @@ public class SayIt extends JFrame{
                 qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
 
-            } else if (parser.command.equals(parser.QUESTION)) {
-                qaPanel.createQuestion(parser.QUESTION,parser.getPrompt(),0);
+            } else if (parser.command.equals(Parser.QUESTION)) {
+                qaPanel.createQuestion(Parser.QUESTION,parser.getPrompt(),0);
                 answer = chatGPT.run(parser.getPrompt());
-                qaPanel.setPrefixQ(parser.QUESTION);
+                qaPanel.setPrefixQ(Parser.QUESTION);
                 qaPanel.changeAnswer(answer);
 
                 RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
@@ -623,13 +623,21 @@ public class SayIt extends JFrame{
 
                 qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
-            } else if (parser.command.equals(parser.DELETE_PROMPT)) {
+            } else if (parser.command.equals(Parser.DELETE_PROMPT)) {
                 deleteClicked();
                 return currQ;
-            } else if (parser.command.equals(parser.CLEAR_ALL)) {
+            } else if (parser.command.equals(Parser.CLEAR_ALL)) {
                 clearClicked();
                 return currQ;
-            } 
+            } else if (parser.command.equals(Parser.SETUP_EMAIL)) {
+                // Create the frame here for the email setup
+                return currQ;
+            } else if (parser.command.equals(Parser.CREATE_EMAIL)) {
+                
+                return currQ;
+            } else if (parser.command.equals(Parser.SEND_EMAIL)) {
+                return currQ;
+            }
             
             // answer = chatGPT.run(question);
             // answer = "test answer " + i;
