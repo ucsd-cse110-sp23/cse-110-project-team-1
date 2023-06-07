@@ -84,13 +84,12 @@ public class handler implements HttpHandler {
             String lastName = requestData.getString("lastName");
             String displayName = requestData.getString("displayName");
             String email = requestData.getString("email");
-            String password = requestData.getString("password");
+            String password = requestData.getString("emailPassword");
             String SMTP = requestData.getString("SMTP");
             String TLS = requestData.getString("TLS");
             response = emailSetupHandler(firstName, lastName, displayName, email, password, SMTP, TLS);
         } else {
-            System.out.println("Error!!!!!!!!!!!!");
-            // throw new IOException("Unsupported postType: " + postType);
+            throw new IOException("Unsupported postType: " + postType);
         }
 
         return response;
