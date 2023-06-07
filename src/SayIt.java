@@ -630,13 +630,42 @@ public class SayIt extends JFrame{
                 clearClicked();
                 return currQ;
             } else if (parser.command.equals(Parser.SETUP_EMAIL)) {
+                EmailUI emailSetUp = new EmailUI();
                 // Create the frame here for the email setup
                 return currQ;
             } else if (parser.command.equals(Parser.CREATE_EMAIL)) {
-                
-                return currQ;
+                qaPanel.createQuestion(Parser.CREATE_EMAIL,parser.getPrompt(),0);
+                answer = chatGPT.run(parser.getPrompt() + "display name: " + currentJUser.firstName);
+                qaPanel.setPrefixQ(Parser.CREATE_EMAIL);
+                qaPanel.changeAnswer(answer);
+
+                RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+                addListenerToRecentQ(recentQ);
+                currQ = recentQ;
+
+                dltButton.setEnabled(true);
+                clearButton.setEnabled(true);
+
+                qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
+                return recentQ;
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
-                return currQ;
+                String response = EmailSystem.sendEmail(parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
+                                                        parser.emailSeparator(currQ.getQuestionAnswer().answer)[1], 
+                                                        "");
+                qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getPrompt(),0);
+                answer = response;
+                qaPanel.setPrefixQ(Parser.SEND_EMAIL);
+                qaPanel.changeAnswer(answer);
+
+                RecentQuestion recentQ = getSideBar().getPromptHistory().addQA(qaPanel.getQuestionAnswer());
+                addListenerToRecentQ(recentQ);
+                currQ = recentQ;
+
+                dltButton.setEnabled(true);
+                clearButton.setEnabled(true);
+
+                qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
+                return recentQ;
             }
             
             // answer = chatGPT.run(question);

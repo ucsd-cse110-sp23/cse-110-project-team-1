@@ -6,6 +6,7 @@ public class Parser {
     public static final String SETUP_EMAIL = "Setup Email";
     public static final String CREATE_EMAIL = "Create Email";
     public static final String SEND_EMAIL = "Send Email";
+    private final String CHATGPT_SUBJECT = "Subject: ";
     String transcription;
     String command;
 
@@ -46,6 +47,9 @@ public class Parser {
     // Returns null if the command is either delete or clear all since don't need to sent to ChatGPT
     public String getPrompt() {
         String prompt;
+        if (command == null) {
+            return null;
+        }
         if (command.equals(QUESTION)) {
             return removeCommand(1);
         } else if (command.equals(CREATE_EMAIL)) {
@@ -65,12 +69,48 @@ public class Parser {
         System.out.println(removedCommandString);
         return removedCommandString;
     }
+
+    /**
+     * @param email is the response from ChatGPT
+     * @return array of size 2 which stores the header and body respectively
+     */
+    public String[] emailSeparator(String email) {
+        String[] emailParts = new String[]{"",""};
+        String[] emailSplit = email.split(System.lineSeparator());
+
+        emailParts[0] = emailSplit[0].substring(CHATGPT_SUBJECT.length());
+
+        for(int i = 1; i < emailSplit.length; i++) {
+            emailParts[1] += emailSplit[i] + "\r\n";
+        }
+
+        return emailParts;
+    }
+
+    public String emailAddress() {
+        String emailAddress = "";
+
+        return emailAddress;
+    }
     public static void main(String[] args) {
+        String email = "Subject: Study Session at Geisel Library at 7 PM\r\n" + 
+        "Dear Jill,\r\n" +
+        "I hope this email finds you well. My name is Helen, and I wanted to reach out to you to confirm our study session at Geisel Library.\r\n" + 
+        "Let's meet at Geisel Library at 7 PM as planned. Geisel Library provides a conducive environment for studying, and I believe it will be a great location for our session.\r\n" +
+        "I'm looking forward to collaborating with you and making progress on our studies. If you have any specific topics or subjects you'd like to focus on during our study session, please let me know.\r\n" +   
+        "If there are any changes or if you have any concerns, please don't hesitate to reach out to me. Otherwise, I'll see you at Geisel Library at 7 PM.\r\n" +
+        "Best regards,\r\n" + 
+        "Helen";
         String testPrompt = "Delete the question.";
         Parser parsing = new Parser(testPrompt);
         parsing.Parse();
 
-        System.out.println(parsing.command);
-        System.out.println(parsing.getPrompt());
+        //System.out.println(parsing.command);
+        //System.out.println(parsing.getPrompt());
+
+        
+        // String[] emailParts = parsing.emailSeparator(email);
+        // System.out.println(emailParts[0]);
+        // System.out.println(emailParts[1]);
     }
 }
