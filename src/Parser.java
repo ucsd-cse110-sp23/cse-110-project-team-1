@@ -25,7 +25,7 @@ public class Parser {
                 command = QUESTION;
             }
         }
-         
+
         if (filteredString.length >= 2) {
             if (filteredString[0].equals("clear") && filteredString[1].equals("all")) {
                 command = CLEAR_ALL;
@@ -38,7 +38,12 @@ public class Parser {
             } else if (filteredString[0].equals("send") && filteredString[1].equals("email")) {
                 command = SEND_EMAIL;
             }
+        }
 
+        if (filteredString.length >= 3) {
+            if (filteredString[0].equals("set") && filteredString[1].equals("up") && filteredString[2].equals("email")) {
+                command = SETUP_EMAIL;
+            }
         }
         
     }
@@ -46,14 +51,14 @@ public class Parser {
     // Before sending to ChatGPT, check if getPrompt.equals(COMMAND_NOT_FOUND) and don't send it
     // Returns null if the command is either delete or clear all since don't need to sent to ChatGPT
     public String getPrompt() {
-        String prompt;
         if (command == null) {
             return null;
-        }
-        if (command.equals(QUESTION)) {
+        } else if (command.equals(QUESTION)) {
             return removeCommand(1);
         } else if (command.equals(CREATE_EMAIL)) {
             return removeCommand(2);
+        } else if (command.equals(SEND_EMAIL)) {
+            return removeCommand(3); // format is Send email to jillb@ucsd.edu
         }
         return null;
     }
@@ -66,7 +71,7 @@ public class Parser {
             commandLength += noCommandPrompt[i].length()+1;
         }
         removedCommandString = transcription.substring(commandLength);
-        System.out.println(removedCommandString);
+        //System.out.println(removedCommandString);
         return removedCommandString;
     }
 
@@ -87,7 +92,7 @@ public class Parser {
         return emailParts;
     }
 
-    public String emailAddress() {
+    public String getEmailAddress() {
         String emailAddress = "";
 
         return emailAddress;
@@ -101,12 +106,12 @@ public class Parser {
         "If there are any changes or if you have any concerns, please don't hesitate to reach out to me. Otherwise, I'll see you at Geisel Library at 7 PM.\r\n" +
         "Best regards,\r\n" + 
         "Helen";
-        String testPrompt = "Delete the question.";
+        String testPrompt = "send email to jillb@ucsd.edu";
         Parser parsing = new Parser(testPrompt);
         parsing.Parse();
 
-        //System.out.println(parsing.command);
-        //System.out.println(parsing.getPrompt());
+        System.out.println(parsing.command);
+        System.out.println(parsing.getPrompt());
 
         
         // String[] emailParts = parsing.emailSeparator(email);
