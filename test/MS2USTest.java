@@ -196,11 +196,11 @@ class MockRequester implements Requester {
 
 class NDMockRequester implements Requester {
 
-    JUser currUser;
+    static JUser currUser;
     boolean error;
 
     NDMockRequester(JUser currUser, boolean error){
-        this.currUser = currUser;
+        NDMockRequester.currUser = currUser;
         this.error = error;
     }
 
@@ -246,8 +246,8 @@ class NDMockRequester implements Requester {
             if ((currUser != null) && currUser.email.equals(email)){
                 createStatus = AccountSystem.EMAIL_TAKEN;
             } else {
-                createStatus = AccountSystem.CREATE_SUCCESS;        
                 currUser = new JUser(email, password);
+                createStatus = AccountSystem.CREATE_SUCCESS;        
             }
         }
         return createStatus;
@@ -281,13 +281,13 @@ public class MS2USTest {
     /**
      * User Story 1 Scenario 1: you are a new user
     * Given that the application is not set to automatically sign in
-    * When a user presses “Create Account”
+    * When a user presses "Create Account"
     * Then a new screen opens with fields username, password, 
     * and verify password, 
-    * and a button “Create Account”
+    * and a button "Create Account"
     * Then, given the username field is filled out with iamauseer, 
     * verify password and password with Anp455w05e##
-    * When the “Create Account” button is pressed
+    * When the "Create Account" button is pressed
     * Then the account is created and the screen closes 
     * and you see the login screen again.
     */
@@ -307,6 +307,27 @@ public class MS2USTest {
         
     }
 
+    /**
+     * US1 Scenario 3: user with taken username
+     * Given that the application is not set to automatically sign in
+     * When a user presses “Create Account”
+     * Then a new screen opens with fields username, password, and verify password, and a button “Create Account”
+     * Then, given the username is filled out with IAmTakenUsername which is a username that is taken by someone else, verify password and password with 123456
+     * When the “Create Account” button is pressed
+     * Then it gives the error message “Username is already taken” and the screen stays open
+     * Then when the username is replaced with something that isn’t taken, and the “Create Account” button is clicked, the account is created and the screen is closed
+     */
+    @Test
+    public void MS2US1S3Test(){
+        //The account with user name "IAmTakenUsername" is  being created previously
+        AccountSystem.createAccount("IAmTakenUsername", "123456", false);
+        //when trying to create the account again
+        boolean autoLogin = false;
+        String user = "IAmTakenUsername";
+        String password = "123456";
+        assertEquals(AccountSystem.createAccount(user, password, autoLogin), AccountSystem.EMAIL_TAKEN);
+
+    }
 
     /**
      * Scenario 1: The application is set to automatically sign in
@@ -1122,8 +1143,8 @@ public class MS2USTest {
            /*
         * Scenario 1: Created an email to Jill with the voice command that has content
         * Given that the user already setup the email
-        * When the user presses the start button and says “Create email to Jill let's meet at Geisel for our 7pm study session”
-        * Then the command “create email” and the rest of the prompt would be shown on the above of screen
+        * When the user presses the start button and says "Create email to Jill let's meet at Geisel for our 7pm study session"
+        * Then the command "create email" and the rest of the prompt would be shown on the above of screen
         * Then the email created would be shown below the prompt area with the display name under the email’s closing.
         */
         @Test
@@ -1176,8 +1197,8 @@ public class MS2USTest {
                /*
         * Scenario 1: Created an email to Jill with the voice command that has content
         * Given that the user already setup the email
-        * When the user presses the start button and says “Create email to Jill let's meet at Geisel for our 7pm study session”
-        * Then the command “create email” and the rest of the prompt would be shown on the above of screen
+        * When the user presses the start button and says "Create email to Jill let's meet at Geisel for our 7pm study session"
+        * Then the command "create email" and the rest of the prompt would be shown on the above of screen
         * Then the email created would be shown below the prompt area with the display name under the email’s closing.
         */
         @Test

@@ -5,9 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class CreateScreen extends JFrame {
-    private JTextField emailTextField;
-    private JPasswordField passwordField;
-    private JPasswordField confirmField;
+    protected JTextField emailTextField;
+    protected JPasswordField passwordField;
+    protected JPasswordField confirmField;
 
     public static final String CREATETYPE = "CREATE";
 
