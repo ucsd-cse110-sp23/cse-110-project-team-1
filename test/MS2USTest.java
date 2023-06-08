@@ -441,5 +441,110 @@ public class MS2USTest {
           //the number of prompts in the user stays the same
           assertEquals(numEntries, AccountSystem.currentUser.getPromptHistorySize());
       }
+
+      /**
+       * User starts with valid command "Clear all"
+       * 
+       * Given that Helen has logged in and Helen's accounts has prompts
+       * When Helen says "Clear all"
+       * Then the prompt history and QA Panel should become empty
+       */
+      public void MS2US5S1Test(){
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
+        
+        String command = "Question";
+        String question1 = "What is Java UI";
+        String answer1 = "Java UI answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
+        MockGPT mockGPT = new MockGPT(true, answer1);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);       
+        
+        // Given the answers of Java UI question and other prompts are recorded in the left sidebar history.
+
+        int beforeQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
+
+        //add question 1
+        app.changeRecording();
+        app.changeRecording();
+
+        //add question 2
+        app.changeRecording();
+        app.changeRecording();
+
+        //check sideBar before clear
+        int afterQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
+        assertEquals(2, afterQ - beforeQ);
+        //check QApanel before clear
+        assertEquals(question1, app.getMainPanel().getQaPanel().getQuestion());
+        assertEquals(answer1, app.getMainPanel().getQaPanel().getAnswer());
+
+        //when the user says the clear command
+        String clearCommand = "Clear Prompt";
+        mockWhisper.setTranscription(clearCommand);
+        app.changeRecording();
+        app.changeRecording();
+
+        //Then all the prompts are cleared in the history
+        //check sideBar
+        int afterDelete = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
+        assertEquals(beforeQ, afterDelete);
+        //check filePath  
+        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+
+        //all the prompts and answers on the current page are cleared
+        //check QAPanel
+        assertEquals(null, app.getMainPanel().getQaPanel().getQuestionAnswer());
+        assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_Q, app.getMainPanel().getQaPanel().getQuestionText());
+        assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_A, app.getMainPanel().getQaPanel().getAnswerText());
+    }
+
+    /**
+     * User starts with valid command "Clear all"
+     * 
+     * Given that Helen has logged in and Helen's accounts has no prompts
+     * When Helen says "Clear all"
+     * Then the prompt history and QA Panel should stay empty
+     */
+    public void MS2US5S3Test(){
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s1", "password", false));
+        AccountSystem.currentUser.clearPromptHistory();
+        AccountSystem.updateAccount();
+        
+        String command = "Question";
+        String question1 = "What is Java UI";
+        String answer1 = "Java UI answer";
+        MockRecorder mockRec = new MockRecorder(true);
+        MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
+        MockGPT mockGPT = new MockGPT(true, answer1);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);       
+        
+        // the prompt history is empty.
+
+        int beforeQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
+
+        //when the user says the clear command
+        String clearCommand = "Clear Prompt";
+        mockWhisper.setTranscription(clearCommand);
+        app.changeRecording();
+        app.changeRecording();
+
+        //Then do not change anything
+        //check sideBar
+        int afterDelete = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
+        assertEquals(beforeQ, afterDelete);
+        //check filePath  
+        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+
+        //all the prompts and answers on the current page are cleared
+        //check QAPanel
+        assertEquals(null, app.getMainPanel().getQaPanel().getQuestionAnswer());
+        assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_Q, app.getMainPanel().getQaPanel().getQuestionText());
+        assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_A, app.getMainPanel().getQaPanel().getAnswerText());
+    }
+
+    
 }
 
