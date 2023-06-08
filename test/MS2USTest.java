@@ -424,7 +424,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>) loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(email, password, user.getPromptHistory());
