@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.*;
 
 public class Server {
-    private static final int SERVER_PORT = 8101;
+    private static final int SERVER_PORT = 8100;
     private static final String SERVER_HOSTNAME = "localhost";
     private HttpServer server;
    

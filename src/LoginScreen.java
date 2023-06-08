@@ -14,6 +14,8 @@ import java.util.ArrayList;
 public class LoginScreen extends JFrame {
     public static String savePath = "saveFiles/AutoLoginIn.json";
 
+    public final String URL = "http://localhost:8100/";
+
     private JTextField emailTextField;
     private JPasswordField passwordField;
     private JCheckBox autoLoginCheckbox;
