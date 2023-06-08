@@ -2,23 +2,21 @@
 cse-110-project-cse-110-team-1 by By  Aaron Li, Hongyi Pan, Cindy Chen, Skyler Goh, Phillip Wu, Sue-hyun Hong
 
 <h1> How to run <h1>
-  
-<h3>Download SayItAssistant.zip<h3>
-  
-  1. Click SayItAssistant.zip in github
-  2. Download through top-right button
-  3. extract zip to any folder
-  4. click cse-110-project-team-1.jar file to run
-  
+    
 <h3>Download entire Project zip<h3>
   
   1. Code -> Download Zip
   2. Open Zip
-  3. Extract SayItAssistant.zip
-  4. extract SayItAssistant.zip to any folder
-  5. click cse-110-project-team-1.jar file to run
+  3. Extract MS2-Demo.zip to a folder
+  4. Open the app folder in VSCode
+  5. click on App.java then click Run
   
-<h3>Burndown Chart: <h3>
+<h3> Voice Commands<h3>
   
-  https://docs.google.com/spreadsheets/d/1Ldhuft15xQ1QZqJJmkta_aoDps4E_GSADx5zRzEWclc/edit?usp=sharing
+  1. Question
+  2. Delete Prompt
+  3. Clear All
+  4. Setup Email
+  5. Create Email
+  6. Send Email
 
