@@ -94,8 +94,21 @@ public class Parser {
 
     public String getEmailAddress() {
         String emailAddress = "";
-
-        return emailAddress;
+        String emailPrompt = removeCommand(2);
+        String[] eSplit = emailPrompt.toLowerCase().split("\\s+");
+        if (eSplit[0].equals("to")) {
+            for (int i = 1; i < eSplit.length; i++) {
+                if (eSplit[i].equals("at")) {
+                    emailAddress += "@";
+                } else {
+                    emailAddress += eSplit[i];
+                }
+            }
+        } else {
+            return "Use correct format: Send email to <email address>";
+        }
+        System.out.println(emailAddress.substring(0, emailAddress.length()-1));
+        return emailAddress.substring(0, emailAddress.length()-1);
     }
     public static void main(String[] args) {
         String email = "Subject: Study Session at Geisel Library at 7 PM\r\n" + 

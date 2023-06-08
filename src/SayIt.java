@@ -653,7 +653,7 @@ public class SayIt extends JFrame{
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
                 String response = EmailSystem.sendEmail(parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
                                                         parser.emailSeparator(currQ.getQuestionAnswer().answer)[1], 
-                                                        "");
+                                                        parser.getEmailAddress());
                 qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getPrompt(),0);
                 answer = response;
                 qaPanel.setPrefixQ(Parser.SEND_EMAIL);
