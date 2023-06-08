@@ -620,7 +620,7 @@ public class SayIt extends JFrame{
 
             } else if (parser.command.equals(Parser.QUESTION)) {
                 if (parser.transcription.replaceAll("\\p{P}", "").length() == Parser.QUESTION.length()) {
-                    JOptionPane.showMessageDialog(null, "Please ask a question");
+                    // JOptionPane.showMessageDialog(null, "Please ask a question");
                     qaPanel.changeAnswer("Please ask a question");
                     mainPanel.stopRecording();
                     return currQ;
@@ -653,7 +653,7 @@ public class SayIt extends JFrame{
             } else if (parser.command.equals(Parser.CREATE_EMAIL)) {
                 // System.out.println(parser.transcription.length());
                 if (parser.transcription.replaceAll("\\p{P}", "").length() == Parser.CREATE_EMAIL.length()) {
-                    JOptionPane.showMessageDialog(null, "Please enter content for email");
+                    // JOptionPane.showMessageDialog(null, "Please enter content for email");
                     qaPanel.changeAnswer("Please enter content for email");
                     mainPanel.stopRecording();
                     return currQ;
@@ -677,13 +677,13 @@ public class SayIt extends JFrame{
                 return recentQ;
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
                 if(currQ == null) {
-                    JOptionPane.showMessageDialog(null, "Please create email first");
+                    // JOptionPane.showMessageDialog(null, "Please create email first");
                     qaPanel.changeAnswer("Please create email first");
                     mainPanel.stopRecording();
                     return currQ;
                 }
                 else if (!currQ.getQuestionAnswer().command.equals(Parser.CREATE_EMAIL)) {
-                    JOptionPane.showMessageDialog(null, "Please create email first");
+                    // JOptionPane.showMessageDialog(null, "Please create email first");
                     qaPanel.changeAnswer("Please create email first");
                     mainPanel.stopRecording();
                     return currQ;
@@ -693,7 +693,7 @@ public class SayIt extends JFrame{
                 String body = emailParts[1];
                 String email = parser.getEmailAddress();
                 if (email.equals(Parser.EMAIL_ADDRESS_ERROR)) {
-                    JOptionPane.showMessageDialog(null, Parser.EMAIL_ADDRESS_ERROR);
+                    // JOptionPane.showMessageDialog(null, Parser.EMAIL_ADDRESS_ERROR);
                     qaPanel.changeAnswer(Parser.EMAIL_ADDRESS_ERROR);
                     mainPanel.stopRecording();
                     return currQ;
