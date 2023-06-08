@@ -1,3 +1,4 @@
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -21,7 +22,6 @@ import java.io.IOException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.PrintWriter;
 
 public class AccountSystem {
@@ -39,13 +39,22 @@ public class AccountSystem {
     public static final String COM_STRING = "Commands";
     public static final String QUE_STRING = "Questions";
     public static final String ANS_STRING = "Answers";
-    
+    //Email field Strings
+    public static final String FIRSTNAME = "FIRST_NAME";
+    public static final String LASTNAME = "LAST_NAME";
+    public static final String DISPLAYNAME = "DISPLAY_NAME";
+    public static final String MESSAGE_EMAIL = "Message_Email";
+    public static final String STMP = "STMP";
+    public static final String TLS = "TLS";
+    public static final String MESSAGE_PASS = "Message_Pass";
+
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
     public static final String LOGIN_SUCCESS = "Login successful";
     public static final String EMAIL_TAKEN = "This email has been taken";
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
+    public static final String SETUP_SUCCESS = "Email setup Success";
 
     /*
      * Tries to create an account in the mongoDB database
@@ -111,17 +120,29 @@ public class AccountSystem {
 
             if (autoLogIn) {
                 createAutoLogIn(email, password, null);
-                System.out.println("AotoLogin created: email = " + email);
+                System.out.println("AutoLogin created: email = " + email);
             }
-            
-            currentUser = new JUser(email, password);
+            boolean emailInfoExists = account.containsKey(FIRSTNAME);
+            if (emailInfoExists) {
+                currentUser = new JUser(email, password, (String)account.get(FIRSTNAME), 
+                                        (String)account.get(LASTNAME),
+                                        (String)account.get(DISPLAYNAME), 
+                                        (String)account.get(MESSAGE_EMAIL), 
+                                        (String)account.get(STMP), 
+                                        (String)account.get(TLS), 
+                                        (String)account.get(MESSAGE_PASS));
+            } else {
+                currentUser = new JUser(email, password);
+            }
             List<Document> prompts = (List<Document>)account.get(PROMPT_STRING);
             for (Document d: prompts) {
                 System.out.println(d.toJson());
                 QuestionAnswer qa = new QuestionAnswer((int)d.get(QID), (String)d.get(COM_STRING), (String)d.get(QUE_STRING), (String)d.get(ANS_STRING));
                 currentUser.addPrompt(qa);
             }
+
             System.out.println(LOGIN_SUCCESS + ": email = " + email);
+            System.out.println(currentUser.getPromptHistory());
             return LOGIN_SUCCESS;
         }
     }
@@ -152,6 +173,31 @@ public class AccountSystem {
             Bson updateOperation = set(PROMPT_STRING, prompts);
             Bson filter = eq(EMAIL,currentUser.email);
             UpdateResult updateResult = accounts.updateOne(filter, updateOperation);
+            System.out.println(updateResult);
+        }
+    }
+    public static void updateEmailInfo (String firstName, String lastName, String displayName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
+        if (currentUser == null) {
+            return;
+        }
+        try (MongoClient mongoClient = MongoClients.create(uri)) {
+            MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
+            MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
+
+            BasicDBObject account = new BasicDBObject();
+            account.append(FIRSTNAME, firstName);
+            account.append(LASTNAME, lastName);
+            account.append(DISPLAYNAME, displayName);
+            account.append(MESSAGE_EMAIL, messageEmail);
+            account.append(STMP, stmpHost);
+            account.append(TLS, tlsPort);
+            account.append(MESSAGE_PASS, messageEmailPass);
+
+            BasicDBObject setQuery = new BasicDBObject();
+            setQuery.append("$set", account);
+            Bson filter = eq(EMAIL,currentUser.email);
+
+            UpdateResult updateResult = accounts.updateOne(filter, setQuery);
             System.out.println(updateResult);
         }
     }
@@ -191,6 +237,22 @@ public class AccountSystem {
         } 
     }
 
+    /**
+     * 
+     * @param firstName
+     * @param lastName
+     * @param displayName
+     * @param email
+     * @param password
+     * @param SMTP
+     * @param TLS
+     * @return SETUP_SUCCESS if the email was setup successfully
+     */
+    public static String emailSetup(String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS){
+        updateEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, password);
+        return SETUP_SUCCESS;
+    }
+
     /*
      * To Clear the AccountSystem by reset currentUser to null()
      */
@@ -198,13 +260,15 @@ public class AccountSystem {
         currentUser = null;
         return;
     }
-
+/* 
     public static void main(String[] args) {
-        AccountSystem.createAccount("Test", "TestPassword", false);
+        AccountSystem.clear();
+        //AccountSystem.createAccount("Test", "TestPassword", false);
         AccountSystem.loginAccount("Test", "TestPassword", false);
         AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
         AccountSystem.updateAccount();
-        AccountSystem.clear();
-        System.out.println(AccountSystem.currentUser);
+        AccountSystem.updateEmailInfo("Skyler", "Goh", "something@gmail.com", "stmp@gmail.com", "69", "password");
+        System.out.println(AccountSystem.currentUser.firstName);
     }
+    */
 }

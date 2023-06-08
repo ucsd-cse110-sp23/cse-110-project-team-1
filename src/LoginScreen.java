@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LoginScreen extends JFrame {
-    public final String URL = "http://localhost:8101/";
+    public final String URL = "http://localhost:8100/";
 
     private JTextField emailTextField;
     private JPasswordField passwordField;

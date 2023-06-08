@@ -30,6 +30,11 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
     implementation 'org.mongodb:mongodb-driver-sync:4.9.1'
+
+    //https://javaee.github.io/javamail/
+    implementation 'javax.mail:javax.mail-api:1.6.2'
+
+    implementation 'com.sun.mail:javax.mail:1.6.2'
 }
 
 sourceSets {

@@ -12,20 +12,8 @@ import javax.swing.JOptionPane;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class LoginLogic {
+public class EmailLogic {
     public static final String URL = "http://localhost:8100/";
-
-    //Return messages
-    public static final String CREATE_SUCCESS = "Email created successfully";
-    public static final String LOGIN_SUCCESS = "Login successful";
-    public static final String EMAIL_TAKEN = "This email has been taken";
-    public static final String EMAIL_NOT_FOUND = "This email was not found";
-    public static final String WRONG_PASSWORD = "Wrong password";
-    public static final String LOGINTYPE = "LOGIN";
-    public static final String LOGIN_FAIL = "Login Fail";
-
-
-
     /**
      * sends a log in request to the server
      * @param email -the email sends to the server
@@ -34,15 +22,14 @@ public class LoginLogic {
      * @return -the login status
      * 
     */ 
-    public static String performLogin(String email, String password, boolean autoLogIn) {
-        String loginStatus = LOGIN_FAIL;
+    public static String performSendEmail(String header, String body, String toEmail) {
+        String response = "Email Failed in performSendEmail";
             try {
                 // Set request body with arguments
                 HashMap<String,Object> requestData = new HashMap<String,Object>();            
-                requestData.put("postType", LOGINTYPE);
-                requestData.put("email", email);
-                requestData.put("password", password);
-                requestData.put("autoLogIn", autoLogIn);
+                requestData.put("header", header);
+                requestData.put("body", body);
+                requestData.put("toEmail", toEmail);
 
                 JSONObject requestDataJson = new JSONObject(requestData);
                 // Send the login request to the server
@@ -58,7 +45,7 @@ public class LoginLogic {
 
                 // Receive the response from the server
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                     loginStatus = in.readLine();
+                response = in.readLine();
             } catch (MalformedURLException ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(null, "Malformed URL: " + ex.getMessage());
@@ -72,7 +59,7 @@ public class LoginLogic {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
             }
-        System.out.println(loginStatus);
-        return loginStatus;
+        System.out.println(response);
+        return response;
     }
 }

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
     public static final String CREATETYPE = "CREATE";
+    public static final String SETUPTYPE = "SETUP";
 
     /**
      * This method handles POST and GET request received by server.
@@ -34,6 +35,8 @@ public class handler implements HttpHandler {
             } else if(method.equals("GET")){
                 response = "Welcome to SayIt";
                 //throw new Exception("GET method have not implemented");
+            } else if (method.equals("Send")) {
+                response = handleSend(httpExchange);
             }
             else {
                 throw new Exception("Not Valid Request Method");
@@ -66,6 +69,7 @@ public class handler implements HttpHandler {
 
         JSONObject requestData = new JSONObject(postData);
         String postType = requestData.getString("postType");
+        System.out.println("postType is: " + postType);
 
         if (postType.equals(LOGINTYPE)) {
             String email = requestData.getString("email");
@@ -76,11 +80,38 @@ public class handler implements HttpHandler {
             String email = requestData.getString("email");
             String password = requestData.getString("password");
             response = createHandler(email, password);
+        } else if(postType.equals(SETUPTYPE)) {
+            System.out.println("SETUP");
+            String firstName = requestData.getString("firstName");
+            String lastName = requestData.getString("lastName");
+            String displayName = requestData.getString("displayName");
+            String email = requestData.getString("email");
+            String password = requestData.getString("emailPassword");
+            String SMTP = requestData.getString("SMTP");
+            String TLS = requestData.getString("TLS");
+            response = emailSetupHandler(firstName, lastName, displayName, email, password, SMTP, TLS);
         } else {
             throw new IOException("Unsupported postType: " + postType);
         }
 
         return response;
+    }
+    /**
+     * handles all email send requests to server
+     * @param httpExchange -the request receieved
+     * @return -the response get from the server
+     */
+    private String handleSend(HttpExchange httpExchange) throws IOException {
+        InputStream inStream = httpExchange.getRequestBody();
+        String postData = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining());
+
+        JSONObject requestData = new JSONObject(postData);
+        String header = requestData.getString("header");
+        String body  = requestData.getString("body");
+        String toEmail = requestData.getString("toEmail");
+        return sendHandler(header, body, toEmail);
     }
 
     /**
@@ -102,5 +133,31 @@ public class handler implements HttpHandler {
      */
     private String createHandler(String email, String password) {
         return AccountSystem.createAccount(email, password, false);
+    }
+
+    // TODO: US7-T2
+    /**
+     * 
+     * @param firstName First Name
+     * @param lastName Last Name
+     * @param displayName Displayed Name in the email
+     * @param email Email address
+     * @param password Email password
+     * @param SMTP Email SMTP
+     * @param TLS Email TLS
+     * @return SETUP_SUCCESS if the email was setup successfully
+     */
+    private String emailSetupHandler(String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS) {
+        return AccountSystem.emailSetup(firstName, lastName, displayName, email, password, SMTP, TLS);
+    }
+
+    /**
+     * handles send email requests. Calls from EmailLogic class
+     * @param header - header of email
+     * @param body - body of email
+     * @return email return messages 
+     */
+    private String sendHandler(String header, String body, String toEmail) {
+        return EmailSystem.sendEmail(header, body, toEmail);
     }
 }

@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.sound.sampled.LineUnavailableException;
+import javax.swing.event.SwingPropertyChangeSupport;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import java.io.FileReader;
 
 import java.io.IOException;
@@ -16,10 +19,14 @@ import java.lang.InterruptedException;
 import java.io.File;
 import java.awt.*;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.javatuples.Triplet;
 import java.util.ArrayList;
 
-
+import java.awt.Frame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 
 
@@ -37,6 +44,22 @@ class MockAccountSystem extends AccountSystem{
 
 }
 
+class NonHTTPEmailUI extends EmailUI{
+    NonHTTPEmailUI(JUser user){super(user);}
+    
+    @Override
+    protected void performEmailSetup(String firstName, String lastName, String displayName, String email, String SMTP, String TLS, String emailPassword){
+        AccountSystem.emailSetup(firstName, lastName, displayName, email, emailPassword, SMTP, TLS);
+        currentJUser.setEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, emailPassword);
+    }
+}
+/* 
+class MockCreateScreen extends CreateScreen{
+    String account;
+    String password;
+    
+}
+*/
 
 
 
@@ -303,7 +326,7 @@ public class MS2USTest {
         assertEquals(qaPanel.getQuestionAnswer().question, question);
         assertEquals(qaPanel.getQuestionAnswer().answer, p.COMMAND_NOT_FOUND);
 
-        assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_Q + question, app.getMainPanel().getQaPanel().getQuestionText());
+        assertEquals(qaPanel.getQuestionAnswer().command + ": " + question, app.getMainPanel().getQaPanel().getQuestionText());
         assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
         app.getMainPanel().getQaPanel().getPrefixA() + p.COMMAND_NOT_FOUND);
     }
@@ -545,8 +568,7 @@ public class MS2USTest {
           assertEquals(numEntries, AccountSystem.currentUser.getPromptHistorySize());
       }
 
-      /**
-       * User starts with valid command "Clear all"
+      /** User starts with valid command "Clear all"
        * 
        * Given that Helen has logged in and Helen's accounts has prompts
        * When Helen says "Clear all"
@@ -647,5 +669,525 @@ public class MS2USTest {
         assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_Q, app.getMainPanel().getQaPanel().getQuestionText());
         assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_A, app.getMainPanel().getQaPanel().getAnswerText());
     }
+  
+      /**
+       * First time setting up an email and clicks "Save"
+       * 
+       * Given that the application is opne
+       * And their user logs into their account
+       * When user hits "Start" and says "Setup Email"
+       * Then a new window should pop up, asking for their first name, last name,
+       *  display name, email address, SMTP host, TLS port, and her email password
+       * Then the user fills in the fields then clicks "Save"
+       * Then when the user clicks "Start"
+       * And says "Setup Email"
+       * Then the fields are filled out with the information they put in previously.
+       */
+
+       //tests that the window opens
+       @Test
+       public void M2US7S1pt1Test() {
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+          AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+
+          //given the application is open
+          String question1 = "Setup Email";
+          String answer1 = "question 1 answer";
+          MockRecorder mockRec = new MockRecorder(true);
+          MockWhisper mockWhisper = new MockWhisper(true, question1);
+          MockGPT mockGPT = new MockGPT(true, answer1);
+          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+ 
+          //when the user says the setup command
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens
+          assertTrue(app.emailSetUp != null);
+
+          EmailUI emailFrame = (app.emailSetUp);
+          //click cancel button
+          emailFrame.cancelClicked();
+       }      
+
+       //tests that the Email Setup works as expected
+       @Test
+       public void M2US7S1pt2Test() {
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+          AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+
+          //given the setup frame is already open, fill out fields
+
+          String fName = "John";
+          String lName = "Doe";
+          String dName = "JD";
+          String mEmail = "email@email.com";
+          String smtp = "smtp.serveraddress.com";
+          String tls = "aJAKnNlLkjJjJjJSAMPLE33";
+          String pass = "sampleEmailPass";
+
+          EmailUI emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
+          emailFrame.firstNTextField.setText(fName);
+          emailFrame.lastNTextField.setText(lName);
+          emailFrame.displayNTextField.setText(dName);
+          emailFrame.emailTextField.setText(mEmail);
+          emailFrame.SMTPTextField.setText(smtp);
+          emailFrame.TLSTextField.setText(tls);
+          emailFrame.emailPasswordTextField.setText(pass);
+          
+          //click save button
+          emailFrame.saveClicked();
+
+          assertEquals(fName, AccountSystem.currentUser.firstName);
+          assertEquals(lName, AccountSystem.currentUser.lastName);
+          assertEquals(dName, AccountSystem.currentUser.displayName);
+          assertEquals(mEmail, AccountSystem.currentUser.messageEmail);
+          assertEquals(smtp, AccountSystem.currentUser.stmpHost);
+          assertEquals(tls, AccountSystem.currentUser.tlsPort);
+          assertEquals(pass, AccountSystem.currentUser.messageEmailPass);
+
+          //when the setup window opens again
+          emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
+
+          assertEquals(fName, emailFrame.firstNTextField.getText());
+          assertEquals(lName, emailFrame.lastNTextField.getText());
+          assertEquals(dName, emailFrame.displayNTextField.getText());
+          assertEquals(mEmail, emailFrame.emailTextField.getText());
+          assertEquals(smtp, emailFrame.SMTPTextField.getText());
+          assertEquals(tls, emailFrame.TLSTextField.getText());
+          assertEquals(pass, emailFrame.emailPasswordTextField.getText());
+          
+          //click cancel button
+          emailFrame.cancelClicked();
+       }
+
+      /**
+       * Setting up an email and clicking "Cancel"
+       * Given that the application is open
+       * And the user logs into their account
+       * And the user hasn't filled out the setup email section previously and clicked "Save"
+       * When the user hits "Start" and says "Setup Email"
+       * Then a new window should pop up, asking for their first name, last name, display name
+       *  email address, SMTP host, TLS port, and her email password.
+       * Then when the user fills in the fields then clicks "Cancel"
+       * And clicks "Start"
+       * And says "Setup Email"
+       * Then all the fields are blank
+       */
+
+       @Test
+       public void M2US7S2Test() {    
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+          AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+
+          //given the application is open
+          String question1 = "Setup Email";
+          String answer1 = "question 1 answer";
+          MockRecorder mockRec = new MockRecorder(true);
+          MockWhisper mockWhisper = new MockWhisper(true, question1);
+          MockGPT mockGPT = new MockGPT(true, answer1);
+          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+ 
+          //when the user says the setup command
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens
+          assertTrue(app.emailSetUp != null);
+          //fill out fields
+
+          String fName = "NewJohn";
+          String lName = "NewDoe";
+          String dName = "NewJD";
+          String mEmail = "Newemail@email.com";
+          String smtp = "Newsmtp.serveraddress.com";
+          String tls = "NewaJAKnNlLkjJjJjJSAMPLE33";
+          String pass = "NewsampleEmailPass";
+
+          EmailUI emailFrame = ((EmailUI) app.emailSetUp);
+          emailFrame.firstNTextField.setText(fName);
+          emailFrame.lastNTextField.setText(lName);
+          emailFrame.displayNTextField.setText(dName);
+          emailFrame.emailTextField.setText(mEmail);
+          emailFrame.SMTPTextField.setText(smtp);
+          emailFrame.TLSTextField.setText(tls);
+          emailFrame.emailPasswordTextField.setText(tls);
+          
+          //click save button
+          emailFrame.cancelClicked();
+
+          JUser currentJUser = AccountSystem.currentUser;
+          assertNotEquals(fName, currentJUser.firstName);
+          assertNotEquals(lName, currentJUser.lastName);
+          assertNotEquals(dName, currentJUser.displayName);
+          assertNotEquals(mEmail, currentJUser.messageEmail);
+          assertNotEquals(smtp, currentJUser.stmpHost);
+          assertNotEquals(tls, currentJUser.tlsPort);
+          assertNotEquals(pass, currentJUser.messageEmailPass);
+
+          //when the user says the setup command again
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens again
+          assertTrue(app.emailSetUp != null);
+
+          emailFrame = (app.emailSetUp);
+
+          assertNotEquals(fName, emailFrame.firstNTextField.getText());
+          assertNotEquals(lName, emailFrame.lastNTextField.getText());
+          assertNotEquals(dName, emailFrame.displayNTextField.getText());
+          assertNotEquals(mEmail, emailFrame.emailTextField.getText());
+          assertNotEquals(smtp, emailFrame.SMTPTextField.getText());
+          assertNotEquals(tls, emailFrame.TLSTextField.getText());
+          assertNotEquals(pass, emailFrame.emailPasswordTextField.getText());
+
+          emailFrame.cancelClicked();
+       }
+
+       /**
+       * Setting up an email and clicking "Cancel" when fields were filled out
+       * 
+       * Given that the application is open
+       * And the user logs into their account
+       * And the user filled out the setup email section previously and clicked "Save"
+       * When the user hits "Start" and says "Setup Email"
+       * Then a new window should pop up, asking for their first name, last name, display name,
+       *  email address, SMTP host, TLS port, and her email password
+       * Then when the user changes the fields and clicks Cancel
+       * And the user clicks "Start" and says "Setup Email"
+       * Then all the fields are what they previously
+       */
+
+       @Test
+       public void M2US7S3Test() {
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+          AccountSystem.updateEmailInfo("first", "last", "display", "another@gmail.org", "aj fhghiowef", "tlsdfakj hojif", "lkasdskjl56564");
+          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+
+          //given the application is open
+          String question1 = "Setup Email";
+          String answer1 = "question 1 answer";
+          MockRecorder mockRec = new MockRecorder(true);
+          MockWhisper mockWhisper = new MockWhisper(true, question1);
+          MockGPT mockGPT = new MockGPT(true, answer1);
+          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+ 
+          //when the user says the setup command
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens
+          assertTrue(app.emailSetUp != null);
+          //fill out fields
+
+          String fName = "NewJohn";
+          String lName = "NewDoe";
+          String dName = "NewJD";
+          String mEmail = "Newemail@email.com";
+          String smtp = "Newsmtp.serveraddress.com";
+          String tls = "NewaJAKnNlLkjJjJjJSAMPLE33";
+          String pass = "NewsampleEmailPass";
+
+          EmailUI emailFrame = (app.emailSetUp);
+          emailFrame.firstNTextField.setText(fName);
+          emailFrame.lastNTextField.setText(lName);
+          emailFrame.displayNTextField.setText(dName);
+          emailFrame.emailTextField.setText(mEmail);
+          emailFrame.SMTPTextField.setText(smtp);
+          emailFrame.TLSTextField.setText(tls);
+          emailFrame.emailPasswordTextField.setText(tls);
+          
+          //click save button
+          emailFrame.cancelClicked();
+
+          JUser currentJUser = AccountSystem.currentUser;
+          assertNotEquals(fName, currentJUser.firstName);
+          assertNotEquals(lName, currentJUser.lastName);
+          assertNotEquals(dName, currentJUser.displayName);
+          assertNotEquals(mEmail, currentJUser.messageEmail);
+          assertNotEquals(smtp, currentJUser.stmpHost);
+          assertNotEquals(tls, currentJUser.tlsPort);
+          assertNotEquals(pass, currentJUser.messageEmailPass);
+
+          //when the user says the setup command again
+          app.changeRecording();
+          app.changeRecording();
+          //the setup window opens again
+          assertTrue(app.emailSetUp != null);
+
+          emailFrame = (app.emailSetUp);
+
+          assertNotEquals(fName, emailFrame.firstNTextField.getText());
+          assertNotEquals(lName, emailFrame.lastNTextField.getText());
+          assertNotEquals(dName, emailFrame.displayNTextField.getText());
+          assertNotEquals(mEmail, emailFrame.emailTextField.getText());
+          assertNotEquals(smtp, emailFrame.SMTPTextField.getText());
+          assertNotEquals(tls, emailFrame.TLSTextField.getText());
+          assertNotEquals(pass, emailFrame.emailPasswordTextField.getText());
+
+          emailFrame.cancelClicked();
+       }
+
+       /*
+        * Scenario 1: Created an email to Jill with the voice command that has content
+        * Given that the user already setup the email
+        * When the user presses the start button and says “Create email to Jill let's meet at Geisel for our 7pm study session”
+        * Then the command “create email” and the rest of the prompt would be shown on the above of screen
+        * Then the email created would be shown below the prompt area with the display name under the email’s closing.
+        */
+        @Test
+        public void M2US8S1Test() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s1", "password", false));
+
+            String question1 = "Create Email: to Jill let's meet at Geisel for our 7pm study session";
+            String answer1 = "Subject: Study Session at Geisel Library at 7 PM\r\n" + 
+            "Dear Jill,\r\n" +
+            "I hope this email finds you well. My name is Helen, and I wanted to reach out to you to confirm our study session at Geisel Library.\r\n" + 
+            "Let's meet at Geisel Library at 7 PM as planned. Geisel Library provides a conducive environment for studying, and I believe it will be a great location for our session.\r\n" +
+            "I'm looking forward to collaborating with you and making progress on our studies. If you have any specific topics or subjects you'd like to focus on during our study session, please let me know.\r\n" +
+            "If there are any changes or if you have any concerns, please don't hesitate to reach out to me. Otherwise, I'll see you at Geisel Library at 7 PM.\r\n" +
+            "Best regards,\r\n" + 
+            "Helen";
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+
+            int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+            PromptHistory ph = app.getSideBar().getPromptHistory();
+            int numPHItems = ph.getHistory().getComponents().length;
+
+            assertEquals(null, app.getMainPanel().getQaPanel().getQuestionAnswer());
+
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qa = app.getMainPanel().getQaPanel();
+            assertEquals("Create Email: ", qa.getPrefixQ());
+            assertEquals(qa.DEF_PRE_A, qa.getPrefixA());
+            assertEquals(question1, qa.getQuestionText());
+            assertEquals(qa.getPrefixA() + answer1, qa.getAnswerText());
+
+            assertEquals("Helen", qa.getAnswerText().substring(qa.getAnswerText().length()-5));
+    
+            Component[] listItems = ph.getHistory().getComponents();
+    
+            assertEquals(numPHItems + 1, listItems.length);
+
+            assertEquals(numEntries + 1, AccountSystem.currentUser.getPromptHistorySize()); 
+        }
+               /*
+        * Scenario 1: Created an email to Jill with the voice command that has content
+        * Given that the user already setup the email
+        * When the user presses the start button and says “Create email to Jill let's meet at Geisel for our 7pm study session”
+        * Then the command “create email” and the rest of the prompt would be shown on the above of screen
+        * Then the email created would be shown below the prompt area with the display name under the email’s closing.
+        */
+        @Test
+        public void M2US8S2Test() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s2", "password", false));
+
+            String question1 = "Create Email";
+            String answer1 = "null";
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+
+            assertEquals(null, app.getMainPanel().getQaPanel().getQuestionAnswer());
+
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qa = app.getMainPanel().getQaPanel();
+            assertEquals(qa.DEF_PRE_A + "Please enter content for email", qa.getAnswerText());
+        }
+
+        
+       /**
+        * The user correctly setup, creates, and sends email
+        *
+        * Given the application is open
+        * And the user is logged in
+        * And the user has created an email and is on the correct prompt with the command "Create Email"
+        * When the user says "Send email to Jill B at UCSD dot EDU"
+        * Then the email is sent to jillb@ucsd.edu
+        * Then under the "Send email to jillb@ucsd.edu" it says "Email Successfully Sent"
+        */
+        @Test
+        public void MS2US9S1() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.EMAIL_SUCESS, "01234832", "Password");
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+  
+            //given the application is open
+            String command = "Create email";
+            String question1 = "to Jill let's meet at Geisel for our 7pm study session";
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+            app.setisMock(true);
+   
+            //when the user says the setup command
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qaPanel = app.getMainPanel().getQaPanel();
+            assertEquals(qaPanel.getQuestionAnswer().command, Parser.CREATE_EMAIL);
+    
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.CREATE_EMAIL + ": " + question1);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + answer1);
+
+            String sendCommand = "Send email to Jill B at ucsd.edu";
+            String sendAnswer = "jillb@ucsd.edu";
+            mockWhisper.setTranscription(sendCommand);
+
+            app.changeRecording();
+            app.changeRecording();
+
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.SEND_EMAIL + ": " + sendAnswer);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + EmailSystem.EMAIL_SUCESS);
+        }
+
+       /**
+        * The user incorrectly set up their email and created an email and tries to send it
+        * 
+        * Given the application is open
+        * And the user has created an email and is on the correct prompt with the command "Create email"
+        * When the user says "Send email to Jill B at UCSD dot EDU"
+        * Then the screen shows an error message with what was wrong with teh setup
+        * Then the email is not sent
+        */
+        @Test
+        public void MS2US9S2() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.AUTH_ERROR, "01234832", "Password");
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+
+            //given the application is open
+            String command = "Create email";
+            String question1 = "to Jill let's meet at Geisel for our 7pm study session";
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+            app.setisMock(true);
+   
+            //when the user says the setup command
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qaPanel = app.getMainPanel().getQaPanel();
+            assertEquals(qaPanel.getQuestionAnswer().command, Parser.CREATE_EMAIL);
+            assertEquals(qaPanel.getQuestionAnswer().answer, answer1);
+    
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.CREATE_EMAIL + ": " + question1);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + answer1);
+
+            //NEED MOCK OF EMAILSYSTEM
+            String sendCommand = "Send email to Jill B at ucsd.edu";
+            String sendAnswer = "jillb@ucsd.edu";
+            mockWhisper.setTranscription(sendCommand);
+
+            app.changeRecording();
+            app.changeRecording();
+
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.SEND_EMAIL + ": " + sendAnswer);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + EmailSystem.AUTH_ERROR);
+        }
+
+        /**
+         * The user incorrectly set up their email and created an email and tries to send it then fixes it
+         * 
+         * Given the application is open
+         * And the user is logged in
+         * And the user has created an email and is on the correct prompt with the command "Create Email"
+         * When the user says "Send email to Jill B at UCSD dot EDU"
+         * Then the screen shows an error message with what was wrong with the setup
+         * Then the email is not sent
+         * When the user clicks "Start"
+         * Then says "Send Email to Jill B at UCSD dot EDU"
+         * Then the email is sent to jillb@uscd.edu
+         * Then under the "Send email to jillb@ucsd.edu" it says "Email successfully sent"
+         */
+        @Test
+        public void MS2US9S3() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.EMAIL_FAIL, "01234832", "Password");
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+  
+            //given the application is open
+            String command = "Create email";
+            String question1 = "to Jill let's meet at Geisel for our 7pm study session";
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+            app.setisMock(true);
+   
+            //when the user says the setup command
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qaPanel = app.getMainPanel().getQaPanel();
+            RecentQuestion qa = (RecentQuestion) app.getSideBar().getPromptHistory().getHistory().getComponent(0);
+            assertEquals(qaPanel.getQuestionAnswer().command, Parser.CREATE_EMAIL);
+            assertEquals(qaPanel.getQuestionAnswer().question, question1);
+            assertEquals(qaPanel.getQuestionAnswer().answer, answer1);
+    
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.CREATE_EMAIL + ": " + question1);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + answer1);
+
+            String sendCommand = "Send email to Jill B at ucsd.edu";
+            String sendAnswer = "jillb@ucsd.edu";
+            mockWhisper.setTranscription(sendCommand);
+
+            app.changeRecording();
+            app.changeRecording();
+
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.SEND_EMAIL + ": " + sendAnswer);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + EmailSystem.EMAIL_FAIL);
+
+            String fName = "steve";
+            String lName = "jobs";
+            String dName = "tammy";
+            String mEmail = "email@email.com";
+            String smtp = EmailSystem.EMAIL_SUCESS;
+            String tls = "01234832";
+            String pass = "Password";
+  
+            EmailUI emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
+            emailFrame.firstNTextField.setText(fName);
+            emailFrame.lastNTextField.setText(lName);
+            emailFrame.displayNTextField.setText(dName);
+            emailFrame.emailTextField.setText(mEmail);
+            emailFrame.SMTPTextField.setText(smtp);
+            emailFrame.TLSTextField.setText(tls);
+            emailFrame.emailPasswordTextField.setText(pass);
+            
+            //click save button
+            emailFrame.saveClicked();
+            
+            //click back onto email
+            app.showPromptHistQuestionOnQAPrompt(qa);
+
+            app.changeRecording();
+            app.changeRecording();
+
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.SEND_EMAIL + ": " + sendAnswer);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + EmailSystem.EMAIL_SUCESS);
+            mockWhisper.setTranscription(sendCommand);
+        }
 }
 

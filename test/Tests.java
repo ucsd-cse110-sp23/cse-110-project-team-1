@@ -1006,7 +1006,7 @@ public class Tests {
         assertEquals(null, parser.command);
 
         parser.Parse();
-        assertEquals(parser.DELETE_PROMPT, parser.command);
+        assertEquals(Parser.DELETE_PROMPT, parser.command);
         assertEquals(null, parser.getPrompt());
     }
 
@@ -1017,7 +1017,7 @@ public class Tests {
         assertEquals(null, parser.command);
 
         parser.Parse();
-        assertEquals(parser.CLEAR_ALL, parser.command);
+        assertEquals(Parser.CLEAR_ALL, parser.command);
         assertEquals(null, parser.getPrompt());
     }
 
@@ -1029,6 +1029,72 @@ public class Tests {
 
         parser.Parse();
         assertEquals(null, parser.command);
+    }
+
+    @Test
+    public void testSetupEmailWithVoice() {
+        String testPrompt = "Set up email please";
+        Parser parser = new Parser(testPrompt);
+        assertEquals(null, parser.command);
+
+        parser.Parse();
+        assertEquals(Parser.SETUP_EMAIL, parser.command);
+        assertEquals(null, parser.getPrompt());
+
+        String testPrompt2 = "Setup email please";
+        Parser parser2 = new Parser(testPrompt2);
+        assertEquals(null, parser2.command);
+
+        parser2.Parse();
+        assertEquals(Parser.SETUP_EMAIL, parser2.command);
+        assertEquals(null, parser2.getPrompt());
+    }
+
+    @Test
+    public void testCreateEmailWithVoice() {
+        String testPrompt = "Create email to Jill. Let's meet at geisel.";
+        Parser parser = new Parser(testPrompt);
+        assertEquals(null, parser.command);
+
+        parser.Parse();
+        assertEquals(Parser.CREATE_EMAIL, parser.command);
+        assertEquals("to Jill. Let's meet at geisel.", parser.getPrompt());
+    }
+
+    @Test
+    public void testSendEmailWithVoice() {
+        String testPrompt = "Send email to jill b at ucsd.edu";
+        Parser parser = new Parser(testPrompt);
+        assertEquals(null, parser.command);
+
+        parser.Parse();
+        assertEquals(Parser.SEND_EMAIL, parser.command);
+        assertEquals("jillb@ucsd.edu", parser.getEmailAddress());
+    }
+
+    @Test
+    public void testEmailParser() {
+        String email = "Subject: Study Session at Geisel Library at 7 PM\r\n" + 
+        "Dear Jill,\r\n" +
+        "I hope this email finds you well. My name is Helen, and I wanted to reach out to you to confirm our study session at Geisel Library.\r\n" + 
+        "Let's meet at Geisel Library at 7 PM as planned. Geisel Library provides a conducive environment for studying, and I believe it will be a great location for our session.\r\n" +
+        "I'm looking forward to collaborating with you and making progress on our studies. If you have any specific topics or subjects you'd like to focus on during our study session, please let me know.\r\n" +   
+        "If there are any changes or if you have any concerns, please don't hesitate to reach out to me. Otherwise, I'll see you at Geisel Library at 7 PM.\r\n" +
+        "Best regards,\r\n" + 
+        "Helen";
+        Parser parsing = new Parser(email);
+        parsing.Parse();
+
+        String[] emailParts = parsing.emailSeparator(email);
+        assertEquals("Study Session at Geisel Library at 7 PM", emailParts[0]);
+        assertEquals("Dear Jill,\r\n" +
+                    "I hope this email finds you well. My name is Helen, and I wanted to reach out to you to confirm our study session at Geisel Library.\r\n" + 
+                    "Let's meet at Geisel Library at 7 PM as planned. Geisel Library provides a conducive environment for studying, and I believe it will be a great location for our session.\r\n" +
+                    "I'm looking forward to collaborating with you and making progress on our studies. If you have any specific topics or subjects you'd like to focus on during our study session, please let me know.\r\n" +   
+                    "If there are any changes or if you have any concerns, please don't hesitate to reach out to me. Otherwise, I'll see you at Geisel Library at 7 PM.\r\n" +
+                    "Best regards,\r\n" + 
+                    "Helen", 
+                    emailParts[1]);
     }
 }
 
