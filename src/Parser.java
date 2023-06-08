@@ -95,7 +95,8 @@ public class Parser {
     public String getEmailAddress() {
         String emailAddress = "";
         String emailPrompt = removeCommand(2);
-        String[] eSplit = emailPrompt.toLowerCase().split("\\s+");
+        String[] eSplit = emailPrompt.replaceAll("\\p{P}", " ").toLowerCase().split("\\s+");
+        eSplit[eSplit.length-2] = eSplit[eSplit.length-2] + ".";
         if (eSplit[0].equals("to")) {
             for (int i = 1; i < eSplit.length; i++) {
                 if (eSplit[i].equals("at")) {
@@ -107,8 +108,8 @@ public class Parser {
         } else {
             return "Use correct format: Send email to <email address>";
         }
-        System.out.println(emailAddress.substring(0, emailAddress.length()-1));
-        return emailAddress.substring(0, emailAddress.length()-1);
+        // System.out.println(emailAddress);
+        return emailAddress;
     }
     public static void main(String[] args) {
         String email = "Subject: Study Session at Geisel Library at 7 PM\r\n" + 
@@ -119,13 +120,13 @@ public class Parser {
         "If there are any changes or if you have any concerns, please don't hesitate to reach out to me. Otherwise, I'll see you at Geisel Library at 7 PM.\r\n" +
         "Best regards,\r\n" + 
         "Helen";
-        String testPrompt = "send email to jillb@ucsd.edu";
+        String testPrompt = "send email to jill at ucsd.edu.";
         Parser parsing = new Parser(testPrompt);
         parsing.Parse();
 
         System.out.println(parsing.command);
         System.out.println(parsing.getPrompt());
-
+        System.out.println(parsing.getEmailAddress());
         
         // String[] emailParts = parsing.emailSeparator(email);
         // System.out.println(emailParts[0]);

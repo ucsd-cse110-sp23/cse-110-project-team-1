@@ -575,6 +575,7 @@ public class SayIt extends JFrame{
                 @Override
                 public void mousePressed(MouseEvent e) {
                     System.out.println(recentQ.getQuestionAnswer().question);
+                    System.out.println(recentQ.getQuestionAnswer().command);
                     showPromptHistQuestionOnQAPrompt(recentQ);
                 }
             }
@@ -652,15 +653,17 @@ public class SayIt extends JFrame{
                 qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
+                String commandStrip = currQ.getQuestionAnswer().command.replaceAll("\\p{P}", "").toLowerCase().replaceAll("\\s+", "");
+                if (commandStrip.equals("createemail")) {
+                    System.out.println("is not correct place");
+                    System.out.println(currQ.getQuestionAnswer().command);
+                    return currQ;
+                }
                 String response = EmailSystem.sendEmail(parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
                                                         parser.emailSeparator(currQ.getQuestionAnswer().answer)[1], 
-<<<<<<< HEAD
-                                                        parser.getEmailAddress());
-=======
-                                                        "");
+                                                        "ptwu@ucsd.edu");
                 System.out.println(parser.getPrompt());
->>>>>>> 13bac889a165811e0b944360667d2e9eaf65d26d
-                qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getPrompt(),0);
+                qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getEmailAddress(),0);
                 answer = response;
                 qaPanel.setPrefixQ(Parser.SEND_EMAIL);
                 qaPanel.changeAnswer(answer);
