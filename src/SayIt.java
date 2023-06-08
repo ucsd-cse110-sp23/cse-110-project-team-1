@@ -633,6 +633,7 @@ public class SayIt extends JFrame{
                 return currQ;
             } else if (parser.command.equals(Parser.SETUP_EMAIL)) {
                 emailSetUp = new EmailUI(currentJUser);
+                emailSetUp.setVisible(true);
                 // Create the frame here for the email setup
                 return currQ;
             } else if (parser.command.equals(Parser.CREATE_EMAIL)) {
@@ -653,7 +654,12 @@ public class SayIt extends JFrame{
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
                 String response = EmailSystem.sendEmail(parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
                                                         parser.emailSeparator(currQ.getQuestionAnswer().answer)[1], 
+<<<<<<< HEAD
                                                         parser.getEmailAddress());
+=======
+                                                        "");
+                System.out.println(parser.getPrompt());
+>>>>>>> 13bac889a165811e0b944360667d2e9eaf65d26d
                 qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getPrompt(),0);
                 answer = response;
                 qaPanel.setPrefixQ(Parser.SEND_EMAIL);
