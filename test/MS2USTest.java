@@ -37,13 +37,13 @@ class MockAccountSystem extends AccountSystem{
 
 }
 
-/* 
+ 
 class MockCreateScreen extends CreateScreen{
     String account;
     String password;
     
 }
-*/
+
 
 
 
@@ -99,8 +99,9 @@ public class MS2USTest {
         String user = "";
         String password = "";
         String verifyPassword = "";
-        new CreateScreen();
-        //assertEquals(CreateScreen., );
+        CreateScreen cs = new CreateScreen();
+        //since its the UI part that woudle test the filled in things
+        //then we can't test witht the code
         
     }
 
@@ -144,7 +145,8 @@ public class MS2USTest {
         String password = "123456";
         String verify = "1234567";
         CreateScreen cs = new CreateScreen();
-        //cs.email = user;
+        //since its the UI part that woudle test the filled in things
+        //then we can't test witht the code
     }
 
     /**
