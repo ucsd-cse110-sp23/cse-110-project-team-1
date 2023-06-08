@@ -238,7 +238,7 @@ public class MS2USTest {
         assertEquals(qaPanel.getQuestionAnswer().question, question);
         assertEquals(qaPanel.getQuestionAnswer().answer, p.COMMAND_NOT_FOUND);
 
-        assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_Q + question, app.getMainPanel().getQaPanel().getQuestionText());
+        assertEquals(qaPanel.getQuestionAnswer().command + ": " + question, app.getMainPanel().getQaPanel().getQuestionText());
         assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
         app.getMainPanel().getQaPanel().getPrefixA() + p.COMMAND_NOT_FOUND);
     }
@@ -671,7 +671,6 @@ public class MS2USTest {
 
        @Test
        public void M2US7S3Test() {
-          WindowChecker windowChecker = new WindowChecker();    
           assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
           AccountSystem.updateEmailInfo("first", "last", "display", "another@gmail.org", "aj fhghiowef", "tlsdfakj hojif", "lkasdskjl56564");
           assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
@@ -738,6 +737,7 @@ public class MS2USTest {
 
           emailFrame.cancelClicked();
        }
+
        /*
         * Scenario 1: Created an email to Jill with the voice command that has content
         * Given that the user already setup the email
@@ -767,7 +767,7 @@ public class MS2USTest {
             PromptHistory ph = app.getSideBar().getPromptHistory();
             int numPHItems = ph.getHistory().getComponents().length;
 
-            assertEquals(null, app.getCurrQ());
+            assertEquals(null, app.getMainPanel().getQaPanel().getQuestionAnswer());
 
             app.changeRecording();
             app.changeRecording();
@@ -804,13 +804,200 @@ public class MS2USTest {
             MockGPT mockGPT = new MockGPT(true, answer1);
             SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
 
-            assertEquals(null, app.getCurrQ());
+            assertEquals(null, app.getMainPanel().getQaPanel().getQuestionAnswer());
 
             app.changeRecording();
             app.changeRecording();
 
             QAPanel qa = app.getMainPanel().getQaPanel();
             assertEquals(qa.DEF_PRE_A + "Please enter content for email", qa.getAnswerText());
+        }
+
+        
+       /**
+        * The user correctly setup, creates, and sends email
+        *
+        * Given the application is open
+        * And the user is logged in
+        * And the user has created an email and is on the correct prompt with the command "Create Email"
+        * When the user says "Send email to Jill B at UCSD dot EDU"
+        * Then the email is sent to jillb@ucsd.edu
+        * Then under the "Send email to jillb@ucsd.edu" it says "Email Successfully Sent"
+        */
+        @Test
+        public void MS2US9S1() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.EMAIL_SUCESS, "01234832", "Password");
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+  
+            //given the application is open
+            String command = "Create email";
+            String question1 = "to Jill let's meet at Geisel for our 7pm study session";
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+            app.setisMock(true);
+   
+            //when the user says the setup command
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qaPanel = app.getMainPanel().getQaPanel();
+            assertEquals(qaPanel.getQuestionAnswer().command, Parser.CREATE_EMAIL);
+    
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.CREATE_EMAIL + ": " + question1);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + answer1);
+
+            String sendCommand = "Send email to Jill B at ucsd.edu";
+            String sendAnswer = "jillb@ucsd.edu";
+            mockWhisper.setTranscription(sendCommand);
+
+            app.changeRecording();
+            app.changeRecording();
+
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.SEND_EMAIL + ": " + sendAnswer);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + EmailSystem.EMAIL_SUCESS);
+        }
+
+       /**
+        * The user incorrectly set up their email and created an email and tries to send it
+        * 
+        * Given the application is open
+        * And the user has created an email and is on the correct prompt with the command "Create email"
+        * When the user says "Send email to Jill B at UCSD dot EDU"
+        * Then the screen shows an error message with what was wrong with teh setup
+        * Then the email is not sent
+        */
+        @Test
+        public void MS2US9S2() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.AUTH_ERROR, "01234832", "Password");
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+
+            //given the application is open
+            String command = "Create email";
+            String question1 = "to Jill let's meet at Geisel for our 7pm study session";
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+            app.setisMock(true);
+   
+            //when the user says the setup command
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qaPanel = app.getMainPanel().getQaPanel();
+            assertEquals(qaPanel.getQuestionAnswer().command, Parser.CREATE_EMAIL);
+            assertEquals(qaPanel.getQuestionAnswer().answer, answer1);
+    
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.CREATE_EMAIL + ": " + question1);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + answer1);
+
+            //NEED MOCK OF EMAILSYSTEM
+            String sendCommand = "Send email to Jill B at ucsd.edu";
+            String sendAnswer = "jillb@ucsd.edu";
+            mockWhisper.setTranscription(sendCommand);
+
+            app.changeRecording();
+            app.changeRecording();
+
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.SEND_EMAIL + ": " + sendAnswer);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + EmailSystem.AUTH_ERROR);
+        }
+
+        /**
+         * The user incorrectly set up their email and created an email and tries to send it then fixes it
+         * 
+         * Given the application is open
+         * And the user is logged in
+         * And the user has created an email and is on the correct prompt with the command "Create Email"
+         * When the user says "Send email to Jill B at UCSD dot EDU"
+         * Then the screen shows an error message with what was wrong with the setup
+         * Then the email is not sent
+         * When the user clicks "Start"
+         * Then says "Send Email to Jill B at UCSD dot EDU"
+         * Then the email is sent to jillb@uscd.edu
+         * Then under the "Send email to jillb@ucsd.edu" it says "Email successfully sent"
+         */
+        @Test
+        public void MS2US9S3() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.EMAIL_FAIL, "01234832", "Password");
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+  
+            //given the application is open
+            String command = "Create email";
+            String question1 = "to Jill let's meet at Geisel for our 7pm study session";
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+            app.setisMock(true);
+   
+            //when the user says the setup command
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qaPanel = app.getMainPanel().getQaPanel();
+            RecentQuestion qa = (RecentQuestion) app.getSideBar().getPromptHistory().getHistory().getComponent(0);
+            assertEquals(qaPanel.getQuestionAnswer().command, Parser.CREATE_EMAIL);
+            assertEquals(qaPanel.getQuestionAnswer().question, question1);
+            assertEquals(qaPanel.getQuestionAnswer().answer, answer1);
+    
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.CREATE_EMAIL + ": " + question1);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + answer1);
+
+            String sendCommand = "Send email to Jill B at ucsd.edu";
+            String sendAnswer = "jillb@ucsd.edu";
+            mockWhisper.setTranscription(sendCommand);
+
+            app.changeRecording();
+            app.changeRecording();
+
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.SEND_EMAIL + ": " + sendAnswer);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + EmailSystem.EMAIL_FAIL);
+
+            String fName = "steve";
+            String lName = "jobs";
+            String dName = "tammy";
+            String mEmail = "email@email.com";
+            String smtp = EmailSystem.EMAIL_SUCESS;
+            String tls = "01234832";
+            String pass = "Password";
+  
+            EmailUI emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
+            emailFrame.firstNTextField.setText(fName);
+            emailFrame.lastNTextField.setText(lName);
+            emailFrame.displayNTextField.setText(dName);
+            emailFrame.emailTextField.setText(mEmail);
+            emailFrame.SMTPTextField.setText(smtp);
+            emailFrame.TLSTextField.setText(tls);
+            emailFrame.emailPasswordTextField.setText(pass);
+            
+            //click save button
+            emailFrame.saveClicked();
+            
+            //click back onto email
+            app.showPromptHistQuestionOnQAPrompt(qa);
+
+            app.changeRecording();
+            app.changeRecording();
+
+            assertEquals(app.getMainPanel().getQaPanel().getQuestionText(), Parser.SEND_EMAIL + ": " + sendAnswer);
+            assertEquals(app.getMainPanel().getQaPanel().getAnswerText(),
+            app.getMainPanel().getQaPanel().getPrefixA() + EmailSystem.EMAIL_SUCESS);
+            mockWhisper.setTranscription(sendCommand);
         }
 }
 

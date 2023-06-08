@@ -478,6 +478,8 @@ public class SayIt extends JFrame{
 
     EmailUI emailSetUp;
 
+    boolean isMock=false;
+
     /**
      * @return panel housing the record button and 
      * the question/answer panel where the current question/answer are displayed
@@ -698,9 +700,16 @@ public class SayIt extends JFrame{
                     mainPanel.stopRecording();
                     return currQ;
                 }
-                String response = EmailSystem.sendEmail(subject, 
-                                                        body, 
-                                                        parser.getEmailAddress());
+
+                String response;
+                if (!isMock){
+                    response = EmailSystem.sendEmail(subject, 
+                    body, 
+                    parser.getEmailAddress());
+                } else {
+                    response = EmailSystem.sendMockEmail();
+                }
+
                 // System.out.println(subject);
                 // System.out.println(body);
                 qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getEmailAddress(),0);
@@ -746,6 +755,11 @@ public class SayIt extends JFrame{
             System.out.println("Interupt exception chatGPT");
             return null;
         }
+    }
+
+    //TODO: find alternative
+    public void setisMock(boolean b){
+        isMock = b;
     }
     
     /*

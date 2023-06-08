@@ -14,10 +14,10 @@ import javax.mail.internet.MimeMessage;
 
 //Thanks :) https://www.digitalocean.com/community/tutorials/javamail-example-send-mail-in-java-smtp 
 public class EmailSystem {
-    private static final String EMAIL_SUCESS = "Email sent successfully";
-    private static final String AUTH_ERROR = "Authentication Error";
-    private static final String EMAIL_FAIL = "Email failed to send";
-    private static final String NAME_ERROR = "Name Error";
+    public static final String EMAIL_SUCESS = "Email sent successfully";
+    public static final String AUTH_ERROR = "Authentication Error";
+    public static final String EMAIL_FAIL = "Email failed to send";
+    public static final String NAME_ERROR = "Name Error";
 
     public static String sendEmail(String header, String body, String toEmail) {
         Properties props = new Properties();
@@ -70,4 +70,7 @@ public class EmailSystem {
         }
     }
 
+    public static String sendMockEmail() {
+        return AccountSystem.currentUser.stmpHost;
+    }
 }
