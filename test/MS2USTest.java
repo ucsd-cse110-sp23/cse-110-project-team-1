@@ -37,13 +37,6 @@ class MockAccountSystem extends AccountSystem{
 
 }
 
-/* 
-class MockCreateScreen extends CreateScreen{
-    String account;
-    String password;
-    
-}
-*/
 
 
 
@@ -71,8 +64,9 @@ public class MS2USTest {
         String user = "iamauseer";
         String password = "Anp455w05e##";
         String verifyPw = "Anp455w05e##";
+        MockAccountSystem as = new MockAccountSystem(user, password, autoLogin);
         //since after the first time testing this, the account has already been created, we use the email taken response
-        assertEquals(AccountSystem.createAccount(user, password, false), AccountSystem.EMAIL_TAKEN);
+        assertEquals(as.createAccount(user, password, false), AccountSystem.EMAIL_TAKEN);
         //CreateScreen newAcc = new CreateScreen(as);
         //assertEquals(password, verifyPw);
         //assertFalse(as.autoLogin);
@@ -81,7 +75,75 @@ public class MS2USTest {
 
 
     /**
-     * Scenario 1: The application is set to automatically sign in
+     * US1 Scenario 2: new user with unfilled out fields
+     * Given that the application is not set to automatically sign in
+     * When a user presses “Create Account”
+     * Then a new screen opens with fields username, password, and verify password, and a button “Create Account”
+     * Then, given no fields are filled out
+     * when the “Create Account” button is pressed
+     * Then nothing happens(?)
+     * Then when the fields are filled out correctly
+     * correctly
+     * the account is created and the screen is closed.
+     */
+    @Test
+    public void MS2US1S2Test(){
+        boolean autoLogin = false;
+        String user = "";
+        String password = "";
+        String verifyPassword = "";
+        CreateScreen cs = new CreateScreen();
+        //since its the UI part that woudle test the filled in things
+        //then we can't test witht the code
+        
+    }
+
+
+    /**
+     * US1 Scenario 3: user with taken username
+     * Given that the application is not set to automatically sign in
+     * When a user presses “Create Account”
+     * Then a new screen opens with fields username, password, and verify password, and a button “Create Account”
+     * Then, given the username is filled out with IAmTakenUsername which is a username that is taken by someone else, verify password and password with 123456
+     * When the “Create Account” button is pressed
+     * Then it gives the error message “Username is already taken” and the screen stays open
+     * Then when the username is replaced with something that isn’t taken, and the “Create Account” button is clicked, the account is created and the screen is closed
+     */
+    @Test
+    public void MS2US1S3Test(){
+        //The account with user name "IAmTakenUsername" is  being created previously
+        AccountSystem.createAccount("IAmTakenUsername", "123456", false);
+        //when trying to create the account again
+        boolean autoLogin = false;
+        String user = "IAmTakenUsername";
+        String password = "123456";
+        assertEquals(AccountSystem.createAccount(user, password, autoLogin), AccountSystem.EMAIL_TAKEN);
+
+    }
+
+    /*
+     * US1 Scenario 4: conflicting password and verify password
+     * Given that the application is not set to automatically sign in
+     * When a user presses “Create Account”
+     * Then a new screen opens with fields username, password, and verify password, and a button “Create Account”
+     * Then, given the username field is filled out with iamauseer, verify password with 123456 and password is 1234567
+     * When the “Create Account” button is pressed
+     * Then an error message is shown, saying “Passwords don’t match”
+     * When the passwords are fixed to made match
+     * Then the user clicks “Create Account” and the account is created and the screen closes
+     */
+    @Test
+    public void MS2US1S4Test(){
+        String user = "iamauseer";
+        String password = "123456";
+        String verify = "1234567";
+        CreateScreen cs = new CreateScreen();
+        //since its the UI part that woudle test the filled in things
+        //then we can't test witht the code
+    }
+
+    /**
+     * User Story 10 Scenario 1: The application is set to automatically sign in
      * Given the application is set to automatically 
      * sign in for the account ‘autosignaccount’
      * When the application is opened
@@ -96,6 +158,47 @@ public class MS2USTest {
         MockAccountSystem as = new MockAccountSystem(user, password, autoLogin);
         LoginScreen auto = new LoginScreen();
         assertEquals(as.createAccount(user, password, autoLogin), AccountSystem.EMAIL_TAKEN);
+        assertEquals(as.loginAccount(user, password, autoLogin), AccountSystem.LOGIN_SUCCESS);
+    }
+
+    /**
+     * Scenario 2: You are a user with an account but are not set to automatically sign in
+     * Given the application is not set to automatically sign in
+     * And the user has an account
+     * When the user opens the application, they are shown a login screen that prompts for a username and password 
+     * Then the user fills in their username and password and clicks “Login”
+     * Then the screen changes to show the main screen with the prompts in the side bar
+     */
+    @Test
+    public void MS2US10S2Test(){
+        boolean autoLogin = false;
+        String user = "notautosignaccount";
+        String password = "123456";
+        //giveen that accout was created
+        MockAccountSystem as = new MockAccountSystem(user, password, autoLogin);
+        as.createAccount(user, password, autoLogin);
+        //sign in with the account that is not set to auto login
+        assertEquals(as.loginAccount(user, password, autoLogin), AccountSystem.LOGIN_SUCCESS);
+    }
+
+    /**
+     * Scenario 3: Invalid login
+     * Given the application is not set to automatically sign in
+     * And the user has an account
+     * When the user opens the application, they are shown a login screen that prompts for a username and password 
+     * Then the user fills in an incorrect username and password and clicks “Login”
+     * Then an error message is shown, saying “username or password does not match:
+     * When the username and passwords are fixed to match,
+     * Then the screen changes to show the main screen with the prompts in the side bar
+     */
+    @Test
+    public void MS2US10S3Test(){
+        boolean autoLogin = false;
+        String user = "notautosignaccount";
+        String password = "123456";
+        String incorrectPW = "1234567";
+        MockAccountSystem as = new MockAccountSystem(user, password, autoLogin);
+        assertEquals(as.loginAccount(user, incorrectPW, autoLogin), AccountSystem.WRONG_PASSWORD);
         assertEquals(as.loginAccount(user, password, autoLogin), AccountSystem.LOGIN_SUCCESS);
     }
 
@@ -544,7 +647,5 @@ public class MS2USTest {
         assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_Q, app.getMainPanel().getQaPanel().getQuestionText());
         assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_A, app.getMainPanel().getQaPanel().getAnswerText());
     }
-
-    
 }
 
