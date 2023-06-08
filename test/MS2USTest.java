@@ -310,12 +310,12 @@ public class MS2USTest {
     /**
      * US1 Scenario 3: user with taken username
      * Given that the application is not set to automatically sign in
-     * When a user presses “Create Account”
-     * Then a new screen opens with fields username, password, and verify password, and a button “Create Account”
+     * When a user presses "Create Account"
+     * Then a new screen opens with fields username, password, and verify password, and a button "Create Account"
      * Then, given the username is filled out with IAmTakenUsername which is a username that is taken by someone else, verify password and password with 123456
-     * When the “Create Account” button is pressed
-     * Then it gives the error message “Username is already taken” and the screen stays open
-     * Then when the username is replaced with something that isn’t taken, and the “Create Account” button is clicked, the account is created and the screen is closed
+     * When the "Create Account" button is pressed
+     * Then it gives the error message "Username is already taken" and the screen stays open
+     * Then when the username is replaced with something that isn’t taken, and the "Create Account" button is clicked, the account is created and the screen is closed
      */
     @Test
     public void MS2US1S3Test(){
