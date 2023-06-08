@@ -784,9 +784,14 @@ public class MS2USTest {
     //tests that the Email Setup works as expected
     @Test
     public void M2US7S1pt2Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
-        AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
+        Requester mq = new MockRequester();
+        String email = "us4s2noHistory";
+        String password = "password";
+        AccountSystem.updateEmailInfo(email, null, null, null, null, null, null, null);
+
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
 
         //given the setup frame is already open, fill out fields
 
@@ -798,7 +803,7 @@ public class MS2USTest {
         String tls = "aJAKnNlLkjJjJjJSAMPLE33";
         String pass = "sampleEmailPass";
 
-        EmailUI emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
+        EmailUI emailFrame = new NonHTTPEmailUI(user);
         emailFrame.firstNTextField.setText(fName);
         emailFrame.lastNTextField.setText(lName);
         emailFrame.displayNTextField.setText(dName);
@@ -810,16 +815,16 @@ public class MS2USTest {
         //click save button
         emailFrame.saveClicked();
 
-        assertEquals(fName, AccountSystem.currentUser.firstName);
-        assertEquals(lName, AccountSystem.currentUser.lastName);
-        assertEquals(dName, AccountSystem.currentUser.displayName);
-        assertEquals(mEmail, AccountSystem.currentUser.messageEmail);
-        assertEquals(smtp, AccountSystem.currentUser.stmpHost);
-        assertEquals(tls, AccountSystem.currentUser.tlsPort);
-        assertEquals(pass, AccountSystem.currentUser.messageEmailPass);
+        assertEquals(fName, user.firstName);
+        assertEquals(lName, user.lastName);
+        assertEquals(dName, user.displayName);
+        assertEquals(mEmail, user.messageEmail);
+        assertEquals(smtp, user.stmpHost);
+        assertEquals(tls, user.tlsPort);
+        assertEquals(pass, user.messageEmailPass);
 
         //when the setup window opens again
-        emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
+        emailFrame = new NonHTTPEmailUI(user);
 
         assertEquals(fName, emailFrame.firstNTextField.getText());
         assertEquals(lName, emailFrame.lastNTextField.getText());
@@ -849,9 +854,14 @@ public class MS2USTest {
 
     @Test
     public void M2US7S2Test() {    
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
-        AccountSystem.updateEmailInfo(null, null, null, null, null, null, null);
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+        Requester mq = new MockRequester();
+        String email = "us7s1";
+        String password = "password";
+        AccountSystem.updateEmailInfo(email, null, null, null, null, null, null, null);
+
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
 
         //given the application is open
         String question1 = "Setup Email";
@@ -859,7 +869,7 @@ public class MS2USTest {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
         //when the user says the setup command
         app.changeRecording();
@@ -888,7 +898,7 @@ public class MS2USTest {
         //click save button
         emailFrame.cancelClicked();
 
-        JUser currentJUser = AccountSystem.currentUser;
+        JUser currentJUser = user;
         assertNotEquals(fName, currentJUser.firstName);
         assertNotEquals(lName, currentJUser.lastName);
         assertNotEquals(dName, currentJUser.displayName);
@@ -931,11 +941,15 @@ public class MS2USTest {
      */
 
     @Test
-    public void M2US7S3Test() {
-        WindowChecker windowChecker = new WindowChecker();    
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
-        AccountSystem.updateEmailInfo("first", "last", "display", "another@gmail.org", "aj fhghiowef", "tlsdfakj hojif", "lkasdskjl56564");
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+    public void M2US7S3Test() {    
+        Requester mq = new MockRequester();
+        String email = "us7s1";
+        String password = "password";
+        AccountSystem.updateEmailInfo(email, "first", "last", "display", "another@gmail.org", "aj fhghiowef", "tlsdfakj hojif", "lkasdskjl56564");
+
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
 
         //given the application is open
         String question1 = "Setup Email";
@@ -943,7 +957,7 @@ public class MS2USTest {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
         //when the user says the setup command
         app.changeRecording();
@@ -972,7 +986,7 @@ public class MS2USTest {
         //click save button
         emailFrame.cancelClicked();
 
-        JUser currentJUser = AccountSystem.currentUser;
+        JUser currentJUser = user;
         assertNotEquals(fName, currentJUser.firstName);
         assertNotEquals(lName, currentJUser.lastName);
         assertNotEquals(dName, currentJUser.displayName);
