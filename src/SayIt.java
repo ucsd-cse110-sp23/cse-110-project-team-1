@@ -653,8 +653,7 @@ public class SayIt extends JFrame{
                 qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
-                String commandStrip = currQ.getQuestionAnswer().command.replaceAll("\\p{P}", "").toLowerCase().replaceAll("\\s+", "");
-                if (commandStrip.equals("createemail")) {
+                if (!currQ.getQuestionAnswer().command.equals(Parser.CREATE_EMAIL)) {
                     System.out.println("is not correct place");
                     System.out.println(currQ.getQuestionAnswer().command);
                     return currQ;

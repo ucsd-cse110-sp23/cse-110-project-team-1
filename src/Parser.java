@@ -56,7 +56,7 @@ public class Parser {
         } else if (command.equals(QUESTION)) {
             return removeCommand(1);
         } else if (command.equals(CREATE_EMAIL)) {
-            return removeCommand(2);
+            return transcription;
         } else if (command.equals(SEND_EMAIL)) {
             return removeCommand(3); // format is Send email to jillb@ucsd.edu
         }
@@ -86,7 +86,7 @@ public class Parser {
         emailParts[0] = emailSplit[0].substring(CHATGPT_SUBJECT.length());
 
         for(int i = 1; i < emailSplit.length; i++) {
-            emailParts[1] += emailSplit[i] + "\r\n";
+            emailParts[1] += emailSplit[i] + System.lineSeparator();
         }
 
         return emailParts;
