@@ -26,6 +26,7 @@ public class Requests {
     public static final String CREATETYPE = "CREATE";
     public static final String LOGINTYPE = "LOGIN";
     public static final String UPDATETYPE = "UPDATE";
+    public static final String SENDTYPE = "Send";
 
     //Field Strings
     public static final String EMAIL = "Email";
@@ -66,6 +67,7 @@ public class Requests {
      */
     public static ArrayList<Object> performLogin(String email, String password, boolean autoLogIn) {
         ArrayList<Object> response = new ArrayList<>();
+        JUser currentUser = null;
         try {
             // Set request body with arguments
             HashMap<String, Object> requestData = new HashMap<>();
@@ -97,7 +99,6 @@ public class Requests {
             // Extract login status
             String status = jsonResponse.getString("status");
 
-            JUser currentUser = null;
             System.out.println(status);
             if (status.equals(LOGIN_SUCCESS)){
                 // Convert JSONArray to ArrayList<QuestionAnswer>
@@ -134,22 +135,22 @@ public class Requests {
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
             response.add(LOGIN_FAIL);
-            response.add(new ArrayList<QuestionAnswer>());
+            response.add(currentUser);
             JOptionPane.showMessageDialog(null, "Malformed URL: " + ex.getMessage());
         } catch (IOException ex) {
             ex.printStackTrace();
             response.add(LOGIN_FAIL);
-            response.add(new ArrayList<QuestionAnswer>());
+            response.add(currentUser);
             JOptionPane.showMessageDialog(null, "I/O Error: " + ex.getMessage());
         } catch (JSONException ex) {
             ex.printStackTrace();
             response.add(LOGIN_FAIL);
-            response.add(new ArrayList<QuestionAnswer>());
+            response.add(currentUser);
             JOptionPane.showMessageDialog(null, "JSON Error: " + ex.getMessage());
         } catch (Exception ex) {
             ex.printStackTrace();
             response.add(LOGIN_FAIL);
-            response.add(new ArrayList<QuestionAnswer>());
+            response.add(currentUser);
             JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
         }
         return response;
@@ -261,9 +262,10 @@ public class Requests {
         String response = "Email Failed in performSendEmail";
             try {
                 // Set request body with arguments
-                HashMap<String,Object> requestData = new HashMap<String,Object>();            
+                HashMap<String,Object> requestData = new HashMap<String,Object>();
+                requestData.put("postType", SENDTYPE);            
                 requestData.put("username", username);
-                requestData.put("username", password);
+                requestData.put("password", password);
                 requestData.put("header", header);
                 requestData.put("body", body);
                 requestData.put("toEmail", toEmail);

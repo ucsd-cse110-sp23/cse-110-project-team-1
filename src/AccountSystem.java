@@ -74,7 +74,7 @@ public class AccountSystem {
                 return null;
             }
             String pass = (String) account.get(PASS);
-            if (!pass.equals(password)) {
+            if (pass.equals(password)) {
                 return account;
             } else {
                 return null;

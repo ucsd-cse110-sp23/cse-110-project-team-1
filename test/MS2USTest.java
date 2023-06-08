@@ -79,6 +79,15 @@ class NonHTTPEmailUI extends EmailUI{
         currentJUser.setEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, emailPassword);
     }
 }
+
+class NDEmailUI extends EmailUI{
+    NDEmailUI(JUser user){super(user);}
+    
+    @Override
+    protected void performEmailSetup(String firstName, String lastName, String displayName, String email, String SMTP, String TLS, String emailPassword){
+        currentJUser.setEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, emailPassword);
+    }
+}
 /* 
 class MockCreateScreen extends CreateScreen{
     String account;
@@ -88,36 +97,56 @@ class MockCreateScreen extends CreateScreen{
 */
 
 class MockRequester implements Requester {
+
+
     public ArrayList<Object> performLogin(String email, String password, boolean autoLogIn){
         ArrayList<Object> response = new ArrayList<>();
+        JUser currentUser = null;
         try {
-
             // Convert the response string to a JSON object
             JSONObject jsonResponse = AccountSystem.loginAccount(email, password, autoLogIn);
 
             // Extract login status
             String status = jsonResponse.getString("status");
 
-            // Convert JSONArray to ArrayList<QuestionAnswer>
-            JSONArray promptHistoryJson = jsonResponse.getJSONArray("promptHistory");
-            ArrayList<QuestionAnswer> promptHistoryList = new ArrayList<>();
-            for (int i = 0; i < promptHistoryJson.length(); i++) {
-                JSONObject promptJson = promptHistoryJson.getJSONObject(i);
-                int qid = promptJson.getInt(Requests.QID);
-                String comment = promptJson.getString(Requests.COM_STRING);
-                String question = promptJson.getString(Requests.QUE_STRING);
-                String answer = promptJson.getString(Requests.ANS_STRING);
-                QuestionAnswer questionAnswer = new QuestionAnswer(qid, comment, question, answer);
-                promptHistoryList.add(questionAnswer);
-            }
+            System.out.println(status);
+            if (status.equals(Requests.LOGIN_SUCCESS)){
+                // Convert JSONArray to ArrayList<QuestionAnswer>
+                JSONArray promptHistoryJson = jsonResponse.getJSONArray("promptHistory");
+                ArrayList<QuestionAnswer> promptHistoryList = new ArrayList<>();
+                for (int i = 0; i < promptHistoryJson.length(); i++) {
+                    JSONObject promptJson = promptHistoryJson.getJSONObject(i);
+                    int qid = promptJson.getInt(Requests.QID);
+                    String comment = promptJson.getString(Requests.COM_STRING);
+                    String question = promptJson.getString(Requests.QUE_STRING);
+                    String answer = promptJson.getString(Requests.ANS_STRING);
+                    QuestionAnswer questionAnswer = new QuestionAnswer(qid, comment, question, answer);
+                    promptHistoryList.add(questionAnswer);
+                }
 
+                if (jsonResponse.getBoolean(Requests.EMAIL_EXISTS)){
+                    String firstName = jsonResponse.getString(Requests.FIRSTNAME);
+                    String lastName = jsonResponse.getString(Requests.LASTNAME);
+                    String displayName = jsonResponse.getString(Requests.DISPLAYNAME);
+                    String messageEmail = jsonResponse.getString(Requests.MESSAGE_EMAIL);
+                    String smtpHost = jsonResponse.getString(Requests.STMP);
+                    String tlsPort = jsonResponse.getString(Requests.TLS);
+                    String messageEmailPass = jsonResponse.getString(Requests.MESSAGE_PASS);
+                    currentUser = new JUser(email, password, promptHistoryList, firstName, lastName, displayName, messageEmail, smtpHost, tlsPort, messageEmailPass);
+                    
+                } else {
+                    currentUser = new JUser(email, password, promptHistoryList);
+                    
+                }
+            }
             // Store the login status and prompt history in the response list
             response.add(status);
-            response.add(promptHistoryList);
+            response.add(currentUser);
         } catch (Exception ex) {
             ex.printStackTrace();
             response.add(Requests.LOGIN_FAIL);
-            response.add(new ArrayList<QuestionAnswer>());
+            response.add(currentUser);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
         }
         return response;
     }
@@ -156,21 +185,97 @@ class MockRequester implements Requester {
     }
 
     /**
-     * sends a log in request to the server
-     * @param email -the email sends to the server
-     * @param password -the password of that email
-     * @param autoLogIn -sets to auto-login if it is true
-     * @return -the login status
      * 
-    */ 
+     */
     public String performSendEmail(String username, String password, String header, String body, String toEmail) {
         String response = "Email Failed in performSendEmail";
-        response = EmailSystem.sendEmail(username, password, header, body, toEmail);  
+        response = (String) AccountSystem.getAccount(username, password).get(EmailSystem.STMP);
         return response;
     }
 }
 
+class NDMockRequester implements Requester {
 
+    JUser currUser;
+    boolean error;
+
+    NDMockRequester(JUser currUser, boolean error){
+        this.currUser = currUser;
+        this.error = error;
+    }
+
+    public void setError(boolean error){
+        this.error = error;
+    }
+
+    public boolean accountExists(String email, String password){
+        if ((currUser != null) && currUser.email.equals(email) && currUser.password.equals(password)){
+            return true;   
+        }
+        return false;
+    }
+
+    public ArrayList<Object> performLogin(String email, String password, boolean autoLogIn){
+        ArrayList<Object> response = new ArrayList<>();
+        
+        String status;
+        JUser currentUser = null;
+
+        if (error){
+            status = Requests.LOGIN_FAIL;
+        } else if ((currUser != null) && currUser.email.equals(email)){
+            if (currUser.password.equals(password)){
+                status = Requests.LOGIN_SUCCESS;
+                currentUser = currUser;
+            }else{
+                status = AccountSystem.WRONG_PASSWORD;
+            }
+        } else {
+            status = AccountSystem.EMAIL_NOT_FOUND;
+        }
+        
+        response.add(status);
+        response.add(currentUser);
+
+        return response;
+    }
+
+    public String performCreate(String email, String password){
+        String createStatus = "CREATE_FAIL";
+        if (!error){
+            if ((currUser != null) && currUser.email.equals(email)){
+                createStatus = AccountSystem.EMAIL_TAKEN;
+            } else {
+                createStatus = AccountSystem.CREATE_SUCCESS;        
+                currUser = new JUser(email, password);
+            }
+        }
+        return createStatus;
+    }
+
+    public String performUpdate(String email, String password, ArrayList<QuestionAnswer> promptHList){
+        String updateStatus = "UPDATE_FAIL";
+        if (error){
+            return updateStatus;
+        }
+        if (accountExists(email, password)){
+            updateStatus = AccountSystem.UPDATE_SUCCESS;
+        } else {
+            updateStatus = "Update Fail";
+        }
+        
+        return updateStatus;
+    }
+
+    /**
+     * @require currUser != null
+     */
+    public String performSendEmail(String username, String password, String header, String body, String toEmail) {
+        String response = "Email Failed in performSendEmail";
+        response = currUser.stmpHost;
+        return response;
+    }
+}
 
 public class MS2USTest {
     /**
@@ -234,7 +339,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         
         user.clearPromptHistory();
         mq.performUpdate(email, password, user.getPromptHistory());
@@ -273,7 +378,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         
         user.clearPromptHistory();
         mq.performUpdate(email, password, user.getPromptHistory());
@@ -332,7 +437,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(email, password, user.getPromptHistory());
@@ -373,7 +478,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         String q = "question";
@@ -438,7 +543,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         String q = "question";
@@ -513,7 +618,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         String q = "question";
@@ -576,7 +681,7 @@ public class MS2USTest {
           String password = "password";
           ArrayList<Object> loginResult= mq.performLogin(email, password, false);
           assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-          JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+          JUser user = (JUser) loginResult.get(1);
 
           user.clearPromptHistory();
           mq.performUpdate(email, password, user.getPromptHistory());
@@ -631,7 +736,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -696,7 +801,7 @@ public class MS2USTest {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -757,7 +862,7 @@ public class MS2USTest {
 
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -791,7 +896,7 @@ public class MS2USTest {
 
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         //given the setup frame is already open, fill out fields
 
@@ -861,7 +966,7 @@ public class MS2USTest {
 
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         //given the application is open
         String question1 = "Setup Email";
@@ -949,7 +1054,7 @@ public class MS2USTest {
 
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         //given the application is open
         String question1 = "Setup Email";
@@ -1023,7 +1128,13 @@ public class MS2USTest {
         */
         @Test
         public void M2US8S1Test() {
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s1", "password", false));
+            Requester mq = new MockRequester();
+            String email = "us8s1";
+            String password = "password";
+
+            ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+            assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+            JUser user = (JUser) loginResult.get(1);
 
             String question1 = "Create Email: to Jill let's meet at Geisel for our 7pm study session";
             String answer1 = "Subject: Study Session at Geisel Library at 7 PM\r\n" + 
@@ -1037,9 +1148,9 @@ public class MS2USTest {
             MockRecorder mockRec = new MockRecorder(true);
             MockWhisper mockWhisper = new MockWhisper(true, question1);
             MockGPT mockGPT = new MockGPT(true, answer1);
-            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
-            int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+            int numEntries = user.getPromptHistorySize();
             PromptHistory ph = app.getSideBar().getPromptHistory();
             int numPHItems = ph.getHistory().getComponents().length;
 
@@ -1060,7 +1171,7 @@ public class MS2USTest {
     
             assertEquals(numPHItems + 1, listItems.length);
 
-            assertEquals(numEntries + 1, AccountSystem.currentUser.getPromptHistorySize()); 
+            assertEquals(numEntries + 1, user.getPromptHistorySize()); 
         }
                /*
         * Scenario 1: Created an email to Jill with the voice command that has content
@@ -1071,14 +1182,20 @@ public class MS2USTest {
         */
         @Test
         public void M2US8S2Test() {
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s2", "password", false));
+            Requester mq = new MockRequester();
+            String email = "us8s2";
+            String password = "password";
+
+            ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+            assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+            JUser user = (JUser) loginResult.get(1);
 
             String question1 = "Create Email";
             String answer1 = "null";
             MockRecorder mockRec = new MockRecorder(true);
             MockWhisper mockWhisper = new MockWhisper(true, question1);
             MockGPT mockGPT = new MockGPT(true, answer1);
-            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
             assertEquals(null, app.getMainPanel().getQaPanel().getQuestionAnswer());
 
@@ -1101,20 +1218,27 @@ public class MS2USTest {
         * Then under the "Send email to jillb@ucsd.edu" it says "Email Successfully Sent"
         */
         @Test
-        public void MS2US9S1() {
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
-            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.EMAIL_SUCESS, "01234832", "Password");
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+        public void MS2US9S1Test() {
+            String email = "us7s1";
+            String password = "password";
+
+            JUser user = new JUser(email, password);
+            user.setEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.EMAIL_SUCESS, "01234832", "Password");
+            Requester mq = new NDMockRequester(user, false);            
+
+            ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+            assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+            user = (JUser) loginResult.get(1);
   
             //given the application is open
             String command = "Create email";
             String question1 = "to Jill let's meet at Geisel for our 7pm study session";
-            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" 
+            + user.displayName;
             MockRecorder mockRec = new MockRecorder(true);
             MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
             MockGPT mockGPT = new MockGPT(true, answer1);
-            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
-            app.setisMock(true);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
    
             //when the user says the setup command
             app.changeRecording();
@@ -1149,20 +1273,27 @@ public class MS2USTest {
         * Then the email is not sent
         */
         @Test
-        public void MS2US9S2() {
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
-            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.AUTH_ERROR, "01234832", "Password");
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+        public void MS2US9S2Test() {
+            String email = "us7s1";
+            String password = "password";
+
+            JUser user = new JUser(email, password);
+            user.setEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.AUTH_ERROR, "01234832", "Password");
+            Requester mq = new NDMockRequester(user, false);            
+
+            ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+            assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+            user = (JUser) loginResult.get(1);
 
             //given the application is open
             String command = "Create email";
             String question1 = "to Jill let's meet at Geisel for our 7pm study session";
-            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n"
+             + user.displayName;
             MockRecorder mockRec = new MockRecorder(true);
             MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
             MockGPT mockGPT = new MockGPT(true, answer1);
-            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
-            app.setisMock(true);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
    
             //when the user says the setup command
             app.changeRecording();
@@ -1204,20 +1335,27 @@ public class MS2USTest {
          * Then under the "Send email to jillb@ucsd.edu" it says "Email successfully sent"
          */
         @Test
-        public void MS2US9S3() {
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
-            AccountSystem.updateEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.EMAIL_FAIL, "01234832", "Password");
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
+        public void MS2US9S3Test() {
+            String email = "us7s1";
+            String password = "password";
+
+            JUser user = new JUser(email, password);
+            user.setEmailInfo("steve", "jobs", "tammy", "email@email.com", EmailSystem.EMAIL_FAIL, "01234832", "Password");
+            Requester mq = new NDMockRequester(user, false);            
+
+            ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+            assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+            user = (JUser) loginResult.get(1);
   
             //given the application is open
             String command = "Create email";
             String question1 = "to Jill let's meet at Geisel for our 7pm study session";
-            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n" + AccountSystem.currentUser.displayName;
+            String answer1 = "Subject: Study Session at Geisel\n\nDear Jill,\n\nI hope this email finds you well. I wanted to touch base with you regarding our upcoming study session. Let's meet at Geisel Library at 7 PM as planned. Geisel is a great environment for focused studying, and I think it will be the perfect place for us to review our materials.\n\nPlease let me know if this time and location work for you. If there are any changes or if you have any other suggestions, feel free to let me know, and we can adjust accordingly.\nLooking forward to our study session and working together to prepare for our upcoming exams!\n\nBest regards,\n"
+             + user.displayName;
             MockRecorder mockRec = new MockRecorder(true);
             MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
             MockGPT mockGPT = new MockGPT(true, answer1);
-            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
-            app.setisMock(true);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
    
             //when the user says the setup command
             app.changeRecording();
@@ -1252,7 +1390,7 @@ public class MS2USTest {
             String tls = "01234832";
             String pass = "Password";
   
-            EmailUI emailFrame = new NonHTTPEmailUI(AccountSystem.currentUser);
+            EmailUI emailFrame = new NDEmailUI(user);
             emailFrame.firstNTextField.setText(fName);
             emailFrame.lastNTextField.setText(lName);
             emailFrame.displayNTextField.setText(dName);

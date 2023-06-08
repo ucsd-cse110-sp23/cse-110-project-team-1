@@ -165,7 +165,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
         // Given the application is open
@@ -313,7 +313,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -348,14 +348,14 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
 
         loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        user = (JUser) loginResult.get(1);
 
         String command = "Question";
         String question = "What is Java UI?";
@@ -409,7 +409,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -440,7 +440,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -548,7 +548,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -607,7 +607,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
         user.clearPromptHistory();
@@ -641,7 +641,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -702,7 +702,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -765,7 +765,7 @@ public class USTests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());

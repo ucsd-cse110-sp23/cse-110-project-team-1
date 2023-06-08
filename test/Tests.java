@@ -349,7 +349,7 @@ public class Tests {
         String password = "11111";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         SayIt app = new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
@@ -638,7 +638,7 @@ public class Tests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -751,7 +751,7 @@ public class Tests {
         String password = "11111";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
@@ -778,7 +778,7 @@ public class Tests {
         String password = "11111";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
@@ -806,7 +806,7 @@ public class Tests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -841,7 +841,7 @@ public class Tests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -895,7 +895,7 @@ public class Tests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
         String question = "Question ";
@@ -937,7 +937,7 @@ public class Tests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
 
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());
@@ -979,7 +979,7 @@ public class Tests {
         String password = "password";
         ArrayList<Object> loginResult= mq.performLogin(email, password, false);
         assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
-        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        JUser user = (JUser) loginResult.get(1);
         
         user.clearPromptHistory();
         mq.performUpdate(user.email, user.password, user.getPromptHistory());

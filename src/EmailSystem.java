@@ -103,8 +103,4 @@ public class EmailSystem {
             return NAME_ERROR;
         }
     }
-
-    public static String sendMockEmail() {
-        return AccountSystem.currentUser.stmpHost;
-    }
 }

@@ -22,6 +22,7 @@ public class handler implements HttpHandler {
     public static final String LOGINTYPE = "LOGIN";
     public static final String CREATETYPE = "CREATE";
     public static final String UPDATETYPE = "UPDATE";
+    public static final String SENDTYPE = "Send";
 
         //Return messages
         public static final String CREATE_SUCCESS = "Account created successfully";
@@ -46,8 +47,6 @@ public class handler implements HttpHandler {
                 response = handlePost(httpExchange);
             } else if(method.equals("GET")){    //handle "GET"
                 response = handleGet(httpExchange);
-            } else if (method.equals("Send")) {
-                response = handleSend(httpExchange);
             }
             else {
                 throw new Exception("Not Valid Request Method");
@@ -105,7 +104,14 @@ public class handler implements HttpHandler {
             String SMTP = requestData.getString("SMTP");
             String TLS = requestData.getString("TLS");
             return emailSetupHandler(accEmail, firstName, lastName, displayName, email, password, SMTP, TLS);
-        } else {
+        } else if(postType.equals(SENDTYPE)){
+            String header = requestData.getString("header");
+            String body  = requestData.getString("body");
+            String toEmail = requestData.getString("toEmail");
+            String username = requestData.getString("username");
+            String password = requestData.getString("password");
+            return sendHandler(username, password, header, body, toEmail);
+        }else {
             throw new IOException("Unsupported postType: " + postType);
         }
     }
@@ -116,25 +122,6 @@ public class handler implements HttpHandler {
      */
     private String handleGet(HttpExchange httpExchange) throws IOException{
         return "Welcome to SayIt";
-    }
-    /**
-     * handles all email send requests to server
-     * @param httpExchange -the request receieved
-     * @return -the response get from the server
-     */
-    private String handleSend(HttpExchange httpExchange) throws IOException {
-        InputStream inStream = httpExchange.getRequestBody();
-        String postData = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8))
-                .lines()
-                .collect(Collectors.joining());
-
-        JSONObject requestData = new JSONObject(postData);
-        String header = requestData.getString("header");
-        String body  = requestData.getString("body");
-        String toEmail = requestData.getString("toEmail");
-        String username = requestData.getString("username");
-        String password = requestData.getString("password");
-        return sendHandler(username, password, header, body, toEmail);
     }
 
     /**
