@@ -22,7 +22,7 @@ public class JUser {
     }
     
     //Constructor for if there is email info
-    public JUser(String email, String password, String firstName, String lastName, String displayName,
+    public JUser(String email, String password, ArrayList<QuestionAnswer> promptHistory, String firstName, String lastName, String displayName,
     String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
         this.email = email;
         this.password = password;
@@ -33,7 +33,7 @@ public class JUser {
         this.stmpHost = stmpHost;
         this.tlsPort = tlsPort;
         this.messageEmailPass = messageEmailPass;
-        promptHistory = new ArrayList<>();
+        this.promptHistory = promptHistory;
     }
 
     //Setter for email info

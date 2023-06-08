@@ -13,6 +13,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import java.net.MalformedURLException;
+import org.json.JSONException;
+
 import javax.swing.JOptionPane;
 
 public class Requests {
@@ -41,6 +44,17 @@ public class Requests {
     public static final String WRONG_PASSWORD = "Wrong password";
     public static final String LOGIN_FAIL = "Login Fail";
 
+    //email fields
+    public static final String FIRSTNAME = "FIRST_NAME";
+    public static final String LASTNAME = "LAST_NAME";
+    public static final String DISPLAYNAME = "DISPLAY_NAME";
+    public static final String MESSAGE_EMAIL = "Message_Email";
+    public static final String STMP = "STMP";
+    public static final String TLS = "TLS";
+    public static final String MESSAGE_PASS = "Message_Pass";
+    public static final String EMAIL_EXISTS = "email_exists";
+
+    //public static JUser currentUser;
     /**
      * Sends a login request to the server
      * 
@@ -48,7 +62,7 @@ public class Requests {
      * @param password  - the password of that email
      * @param autoLogIn - set to auto-login if it is true
      * @return - an ArrayList where the first element represents the login status,
-     *         and the second element represents the prompt history
+     *         and the second element represents the JUser (null if failed to login)
      */
     public static ArrayList<Object> performLogin(String email, String password, boolean autoLogIn) {
         ArrayList<Object> response = new ArrayList<>();
@@ -83,26 +97,60 @@ public class Requests {
             // Extract login status
             String status = jsonResponse.getString("status");
 
-            // Convert JSONArray to ArrayList<QuestionAnswer>
-            JSONArray promptHistoryJson = jsonResponse.getJSONArray("promptHistory");
-            ArrayList<QuestionAnswer> promptHistoryList = new ArrayList<>();
-            for (int i = 0; i < promptHistoryJson.length(); i++) {
-                JSONObject promptJson = promptHistoryJson.getJSONObject(i);
-                int qid = promptJson.getInt(QID);
-                String comment = promptJson.getString(COM_STRING);
-                String question = promptJson.getString(QUE_STRING);
-                String answer = promptJson.getString(ANS_STRING);
-                QuestionAnswer questionAnswer = new QuestionAnswer(qid, comment, question, answer);
-                promptHistoryList.add(questionAnswer);
-            }
+            JUser currentUser = null;
+            System.out.println(status);
+            if (status.equals(LOGIN_SUCCESS)){
+                // Convert JSONArray to ArrayList<QuestionAnswer>
+                JSONArray promptHistoryJson = jsonResponse.getJSONArray("promptHistory");
+                ArrayList<QuestionAnswer> promptHistoryList = new ArrayList<>();
+                for (int i = 0; i < promptHistoryJson.length(); i++) {
+                    JSONObject promptJson = promptHistoryJson.getJSONObject(i);
+                    int qid = promptJson.getInt(QID);
+                    String comment = promptJson.getString(COM_STRING);
+                    String question = promptJson.getString(QUE_STRING);
+                    String answer = promptJson.getString(ANS_STRING);
+                    QuestionAnswer questionAnswer = new QuestionAnswer(qid, comment, question, answer);
+                    promptHistoryList.add(questionAnswer);
+                }
 
+                if (jsonResponse.getBoolean(EMAIL_EXISTS)){
+                    String firstName = jsonResponse.getString(FIRSTNAME);
+                    String lastName = jsonResponse.getString(LASTNAME);
+                    String displayName = jsonResponse.getString(DISPLAYNAME);
+                    String messageEmail = jsonResponse.getString(MESSAGE_EMAIL);
+                    String smtpHost = jsonResponse.getString(STMP);
+                    String tlsPort = jsonResponse.getString(TLS);
+                    String messageEmailPass = jsonResponse.getString(MESSAGE_PASS);
+                    currentUser = new JUser(email, password, promptHistoryList, firstName, lastName, displayName, messageEmail, smtpHost, tlsPort, messageEmailPass);
+                    
+                } else {
+                    currentUser = new JUser(email, password, promptHistoryList);
+                    
+                }
+            }
             // Store the login status and prompt history in the response list
             response.add(status);
-            response.add(promptHistoryList);
+            response.add(currentUser);
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+            response.add(LOGIN_FAIL);
+            response.add(new ArrayList<QuestionAnswer>());
+            JOptionPane.showMessageDialog(null, "Malformed URL: " + ex.getMessage());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            response.add(LOGIN_FAIL);
+            response.add(new ArrayList<QuestionAnswer>());
+            JOptionPane.showMessageDialog(null, "I/O Error: " + ex.getMessage());
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            response.add(LOGIN_FAIL);
+            response.add(new ArrayList<QuestionAnswer>());
+            JOptionPane.showMessageDialog(null, "JSON Error: " + ex.getMessage());
         } catch (Exception ex) {
             ex.printStackTrace();
             response.add(LOGIN_FAIL);
             response.add(new ArrayList<QuestionAnswer>());
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
         }
         return response;
     }
@@ -200,4 +248,60 @@ public class Requests {
         }
         return updateStatus;
     }
+
+    /**
+     * sends a log in request to the server
+     * @param email -the email sends to the server
+     * @param password -the password of that email
+     * @param autoLogIn -sets to auto-login if it is true
+     * @return -the login status
+     * 
+    */ 
+    public static String performSendEmail(String username, String password, String header, String body, String toEmail) {
+        String response = "Email Failed in performSendEmail";
+            try {
+                // Set request body with arguments
+                HashMap<String,Object> requestData = new HashMap<String,Object>();            
+                requestData.put("username", username);
+                requestData.put("username", password);
+                requestData.put("header", header);
+                requestData.put("body", body);
+                requestData.put("toEmail", toEmail);
+
+                JSONObject requestDataJson = new JSONObject(requestData);
+                // Send the login request to the server
+                URL url = new URL(URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+
+                //send the request
+                try (OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream())) {
+                    out.write(requestDataJson.toString());
+                }
+
+                // Receive the response from the server
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                response = in.readLine();
+            } catch (MalformedURLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Malformed URL: " + ex.getMessage());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "I/O Error: " + ex.getMessage());
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "JSON Error: " + ex.getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+            }
+        System.out.println(response);
+        return response;
+    }
+
+    // public static void clear(){
+    //     currentUser = null;
+    //     return;
+    // }
 }

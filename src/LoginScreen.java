@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class LoginScreen extends JFrame {
     public static String savePath = "saveFiles/AutoLoginIn.json";
 
-    public final String URL = "http://localhost:8100/";
+    public final String URL = "http://localhost:8101/";
 
     private JTextField emailTextField;
     private JPasswordField passwordField;
@@ -130,7 +130,7 @@ public class LoginScreen extends JFrame {
                     }
                     
                     dispose();
-                    JUser user = new JUser(email,password,(ArrayList<QuestionAnswer>)loginResult.get(1));
+                    JUser user = (JUser) loginResult.get(1);
                     new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user, requests);
 
                 }else{

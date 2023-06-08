@@ -6,4 +6,6 @@ public interface Requester{
     public String performCreate(String email, String password);
 
     public String performUpdate(String email, String password, ArrayList<QuestionAnswer> promptHList);
+    
+    public String performSendEmail(String username, String password, String header, String body, String toEmail);
 }

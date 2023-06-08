@@ -12,4 +12,8 @@ public class RequestsNS implements Requester {
     public String performUpdate(String email, String password, ArrayList<QuestionAnswer> promptHList){
         return Requests.performUpdate(email, password, promptHList);
     }
+
+    public String performSendEmail(String username, String password, String header, String body, String toEmail) {
+        return Requests.performSendEmail(username, password, header, body, toEmail);
+    }
 }

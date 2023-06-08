@@ -13,7 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class EmailLogic {
-    public static final String URL = "http://localhost:8100/";
+    public static final String URL = "http://localhost:8101/";
     /**
      * sends a log in request to the server
      * @param email -the email sends to the server
@@ -22,7 +22,7 @@ public class EmailLogic {
      * @return -the login status
      * 
     */ 
-    public static String performSendEmail(String header, String body, String toEmail) {
+    public static String performSendEmail(String header, String body, String toEmail, String username) {
         String response = "Email Failed in performSendEmail";
             try {
                 // Set request body with arguments

@@ -645,6 +645,7 @@ public class SayIt extends JFrame{
                 return currQ;
             } else if (parser.command.equals(Parser.SETUP_EMAIL)) {
                 emailSetUp = new EmailUI(currentJUser);
+                emailSetUp.setVisible(true);
                 // Create the frame here for the email setup
                 return currQ;
             } else if (parser.command.equals(Parser.CREATE_EMAIL)) {
@@ -663,9 +664,10 @@ public class SayIt extends JFrame{
                 qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
-                String response = EmailSystem.sendEmail(parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
+                String response = requests.performSendEmail(currentJUser.email, currentJUser.password, parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
                                                         parser.emailSeparator(currQ.getQuestionAnswer().answer)[1], 
-                                                        "");
+                                                        parser.getEmailAddress());
+                System.out.println(parser.getPrompt());
                 qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getPrompt(),0);
                 answer = response;
                 qaPanel.setPrefixQ(Parser.SEND_EMAIL);

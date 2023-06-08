@@ -80,7 +80,7 @@ public class App {
                 String loginStatus = (String) loginResult.get(0);
                 //login successfully: Create JUser using the PromptHistory sends from the server and open SayIt
                 if(loginStatus.equals(LOGIN_SUCCESS)){
-                    JUser user = new JUser(email,password,(ArrayList<QuestionAnswer>)loginResult.get(1));
+                    JUser user = (JUser) loginResult.get(1);
                     new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user, requests);
                 }
                 return true;

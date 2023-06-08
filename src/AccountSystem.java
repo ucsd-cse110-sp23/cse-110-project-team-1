@@ -47,6 +47,7 @@ public class AccountSystem {
     public static final String STMP = "STMP";
     public static final String TLS = "TLS";
     public static final String MESSAGE_PASS = "Message_Pass";
+    public static final String EMAIL_EXISTS = "email_exists";
 
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
@@ -57,6 +58,33 @@ public class AccountSystem {
     public static final String SETUP_SUCCESS = "Email setup Success";
     public static final String UPDATE_SUCCESS = "Update Success";
 
+    /**
+     * returns null if username and/or password are not valid
+     * @param username
+     * @param password
+     * @return
+     */
+    public static Document getAccount(String username, String password){
+        try (MongoClient mongoClient = MongoClients.create(uri)) {
+            MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
+            MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
+    
+            Document account = accounts.find(eq(EMAIL, username)).first();
+            if (account == null) {
+                return null;
+            }
+            String pass = (String) account.get(PASS);
+            if (!pass.equals(password)) {
+                return account;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to get Account from AccountSystem");
+            return null;
+        }
+    }
     /*
      * Tries to create an account in the mongoDB database
      * @param email of account
@@ -142,19 +170,18 @@ public static JSONObject loginAccount(String email, String password, boolean aut
         }
         //fix here
         boolean emailInfoExists = account.containsKey(FIRSTNAME);
+        response.put(EMAIL_EXISTS, emailInfoExists);
         if (emailInfoExists) {
-            currentUser = new JUser(email, password, (String)account.get(FIRSTNAME), 
-                                    (String)account.get(LASTNAME),
-                                    (String)account.get(DISPLAYNAME), 
-                                    (String)account.get(MESSAGE_EMAIL), 
-                                    (String)account.get(STMP), 
-                                    (String)account.get(TLS), 
-                                    (String)account.get(MESSAGE_PASS));
-        } else {
-            currentUser = new JUser(email, password);
+            response.put(FIRSTNAME, (String)account.get(FIRSTNAME));
+            response.put(LASTNAME, (String)account.get(LASTNAME));
+            response.put(DISPLAYNAME, (String)account.get(DISPLAYNAME));
+            response.put(MESSAGE_EMAIL, (String)account.get(MESSAGE_EMAIL));
+            response.put(STMP, (String)account.get(STMP));
+            response.put(TLS, (String)account.get(TLS));
+            response.put(MESSAGE_PASS, (String)account.get(MESSAGE_PASS));
         }
 
-        System.out.println(currentUser.getPromptHistory());
+        //System.out.println(currentUser.getPromptHistory());
 
         response.put("status", LOGIN_SUCCESS);
         response.put("promptHistory", promptHList);
@@ -204,11 +231,11 @@ public static JSONObject loginAccount(String email, String password, boolean aut
         return updateStatus;
     }
 
-    //TODO: FIX HERE
-    public static void updateEmailInfo (String firstName, String lastName, String displayName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
-        if (currentUser == null) {
-            return;
-        }
+    //TODO: ADD VALIDATION (IE. CHECK PASSWORD AND IS A VALID ACCOUNT)
+    public static void updateEmailInfo (String email, String firstName, String lastName, String displayName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
+        // if (currentUser == null) {
+        //     return;
+        // }
         try (MongoClient mongoClient = MongoClients.create(uri)) {
             MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
             MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
@@ -224,7 +251,7 @@ public static JSONObject loginAccount(String email, String password, boolean aut
 
             BasicDBObject setQuery = new BasicDBObject();
             setQuery.append("$set", account);
-            Bson filter = eq(EMAIL,currentUser.email);
+            Bson filter = eq(EMAIL, email);
 
             UpdateResult updateResult = accounts.updateOne(filter, setQuery);
             System.out.println(updateResult);
@@ -232,7 +259,7 @@ public static JSONObject loginAccount(String email, String password, boolean aut
     }
 
     /**
-     * 
+     * @param accEmail email associated with account (username)
      * @param firstName
      * @param lastName
      * @param displayName
@@ -242,27 +269,26 @@ public static JSONObject loginAccount(String email, String password, boolean aut
      * @param TLS
      * @return SETUP_SUCCESS if the email was setup successfully
      */
-    public static String emailSetup(String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS){
-        updateEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, password);
+    public static String emailSetup(String accEmail, String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS){
+        updateEmailInfo(accEmail, firstName, lastName, displayName, email, SMTP, TLS, password);
         return SETUP_SUCCESS;
     }
 
 
-    /*
-     * To Clear the AccountSystem by reset currentUser to null()
-     */
-    public static void clear(){
-        currentUser = null;
-        return;
-    }
+    // /*
+    //  * To Clear the AccountSystem by reset currentUser to null()
+    //  */
+    // public static void clear(){
+    //     currentUser = null;
+    //     return;
+    // }
 
     public static void main(String[] args) {
-        AccountSystem.clear();
+        //AccountSystem.clear();
         //AccountSystem.createAccount("Test", "TestPassword", false);
         AccountSystem.loginAccount("Test", "TestPassword", false);
         //AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
         //AccountSystem.updateAccount();
         //System.out.println(AccountSystem.currentUser);
     }
-    */
 }
