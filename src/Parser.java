@@ -8,6 +8,7 @@ public class Parser {
     public static final String SEND_EMAIL = "Send Email";
     private final String CHATGPT_SUBJECT = "Subject: ";
     String transcription;
+    String[] parsedString;
     String command;
 
     Parser(String transcription) {
@@ -20,6 +21,7 @@ public class Parser {
      */
     public void Parse() {
         String[] filteredString = transcription.replaceAll("\\p{P}", "").toLowerCase().split("\\s+");
+        parsedString = filteredString;
         if (filteredString.length >= 1) {
             if (filteredString[0].equals("question")) {
                 command = QUESTION;
@@ -56,7 +58,7 @@ public class Parser {
         } else if (command.equals(QUESTION)) {
             return removeCommand(1);
         } else if (command.equals(CREATE_EMAIL)) {
-            return transcription;
+            return removeCommand(2);
         } else if (command.equals(SEND_EMAIL)) {
             return removeCommand(3); // format is Send email to jillb@ucsd.edu
         }
@@ -80,15 +82,28 @@ public class Parser {
      * @return array of size 2 which stores the header and body respectively
      */
     public String[] emailSeparator(String email) {
-        String[] emailParts = new String[]{"",""};
-        String[] emailSplit = email.split(System.lineSeparator());
+        System.out.println("This is the email inside emailSeparator: \n" + email);
+        // extract the header and body of the email
+        int subjectIndex = email.indexOf("Subject:");
+        String header = "";
+        String body = "";
+        if (subjectIndex != -1) {
+            int headerStartIndex = subjectIndex + "Subject:".length();
+            int headerEndIndex = email.indexOf('\n', headerStartIndex);
+            if (headerEndIndex != -1) {
+                header = email.substring(headerStartIndex, headerEndIndex).trim();
+                body = email.substring(headerEndIndex).trim();
 
-        emailParts[0] = emailSplit[0].substring(CHATGPT_SUBJECT.length());
-
-        for(int i = 1; i < emailSplit.length; i++) {
-            emailParts[1] += emailSplit[i] + System.lineSeparator();
+                System.out.println("Header:");
+                System.out.println(header);
+                System.out.println();
+                System.out.println("Body:");
+                System.out.println(body);
+            }
+        } else {
+            System.out.println("Invalid email format. No subject found.");
         }
-
+        String[] emailParts = new String[]{header,body};
         return emailParts;
     }
 
@@ -124,11 +139,11 @@ public class Parser {
         Parser parsing = new Parser(testPrompt);
         parsing.Parse();
 
-        System.out.println(parsing.command);
-        System.out.println(parsing.getPrompt());
-        System.out.println(parsing.getEmailAddress());
+        // System.out.println(parsing.command);
+        // System.out.println(parsing.getPrompt());
+        // System.out.println(parsing.getEmailAddress());
         
-        // String[] emailParts = parsing.emailSeparator(email);
+        String[] emailParts = parsing.emailSeparator(email);
         // System.out.println(emailParts[0]);
         // System.out.println(emailParts[1]);
     }

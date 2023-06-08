@@ -194,6 +194,9 @@ class QAPanel extends JPanel{
             answer.setText(prefixA);
             return;
         }
+        if (getCommand() != null){
+            setPrefixQ(getCommand());
+        }
         if (getQuestion() != null){
             question.setText(prefixQ + getQuestion());
         } else {
@@ -205,6 +208,10 @@ class QAPanel extends JPanel{
         } else {
             answer.setText(prefixA);
         }
+    }
+
+    public String getCommand(){
+        return getQuestionAnswer().command;
     }
 }
 
@@ -638,8 +645,14 @@ public class SayIt extends JFrame{
                 // Create the frame here for the email setup
                 return currQ;
             } else if (parser.command.equals(Parser.CREATE_EMAIL)) {
+                if (parser.transcription.length() == 2) {
+                    JOptionPane.showMessageDialog(null, "Please enter content for email");
+                    mainPanel.stopRecording();
+                }
+                String trancribing = "Create email to Jill lets meet at Geisel at 7 p.m.";
                 qaPanel.createQuestion(Parser.CREATE_EMAIL,parser.getPrompt(),0);
-                answer = chatGPT.run(parser.getPrompt() + "display name: " + currentJUser.displayName);
+                answer = chatGPT.run(parser.transcription + "display name: " + currentJUser.displayName);
+                System.out.println("\r\n" + answer);
                 qaPanel.setPrefixQ(Parser.CREATE_EMAIL);
                 qaPanel.changeAnswer(answer);
 
@@ -653,15 +666,24 @@ public class SayIt extends JFrame{
                 qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
-                if (!currQ.getQuestionAnswer().command.equals(Parser.CREATE_EMAIL)) {
+                if(currQ == null) {
+                    JOptionPane.showMessageDialog(null, "Please create email first");
+                    mainPanel.stopRecording();
+                }
+                else if (!currQ.getQuestionAnswer().command.equals(Parser.CREATE_EMAIL)) {
                     System.out.println("is not correct place");
                     System.out.println(currQ.getQuestionAnswer().command);
                     return currQ;
                 }
-                String response = EmailSystem.sendEmail(parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
-                                                        parser.emailSeparator(currQ.getQuestionAnswer().answer)[1], 
+                String[] emailParts = parser.emailSeparator(currQ.getQuestionAnswer().answer);
+                String subject = emailParts[0];
+                String body = emailParts[1];
+                String response = EmailSystem.sendEmail(subject, 
+                                                        body, 
                                                         "ptwu@ucsd.edu");
-                System.out.println(parser.getPrompt());
+                // System.out.println(parser.getPrompt() + "\r\n");
+                // System.out.println(subject);
+                // System.out.println(body);
                 qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getEmailAddress(),0);
                 answer = response;
                 qaPanel.setPrefixQ(Parser.SEND_EMAIL);
