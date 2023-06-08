@@ -194,6 +194,9 @@ class QAPanel extends JPanel{
             answer.setText(prefixA);
             return;
         }
+        if (getCommand() != null){
+            setPrefixQ(getCommand());
+        }
         if (getQuestion() != null){
             question.setText(prefixQ + getQuestion());
         } else {
@@ -205,6 +208,10 @@ class QAPanel extends JPanel{
         } else {
             answer.setText(prefixA);
         }
+    }
+    
+    public String getCommand(){
+        return getQuestionAnswer().command;
     }
 }
 
@@ -508,16 +515,27 @@ public class SayIt extends JFrame{
         // setDefaultCloseOperation(EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {            
-                Thread t = new Thread(() -> {
-                    String updateStatus = requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
-                    if(updateStatus.equals(UPDATE_SUCCESS)){
-                        System.exit(0);
-                    }else{
-                        SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(SayIt.this, updateStatus);
-                        });
-                    }
-                });    
+                
+                String updateStatus = requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
+                if(updateStatus.equals(UPDATE_SUCCESS)){
+                    System.exit(0);
+                }else{
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(SayIt.this, updateStatus);
+                    });
+                }
+
+                // Thread t = new Thread(() -> {
+                //     System.out.println("hi");
+                //     String updateStatus = requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
+                //     if(updateStatus.equals(UPDATE_SUCCESS)){
+                //         System.exit(0);
+                //     }else{
+                //         SwingUtilities.invokeLater(() -> {
+                //             JOptionPane.showMessageDialog(SayIt.this, updateStatus);
+                //         });
+                //     }
+                // });    
             }
         });
         // setVisible(true);
@@ -587,6 +605,7 @@ public class SayIt extends JFrame{
                 @Override
                 public void mousePressed(MouseEvent e) {
                     System.out.println(recentQ.getQuestionAnswer().question);
+                    System.out.println(recentQ.getQuestionAnswer().command);
                     showPromptHistQuestionOnQAPrompt(recentQ);
                 }
             }
@@ -664,11 +683,17 @@ public class SayIt extends JFrame{
                 qaPanel.setQuestionID(currentJUser.addPrompt(qaPanel.getQuestionAnswer()));
                 return recentQ;
             } else if (parser.command.equals(Parser.SEND_EMAIL)) {
+                String commandStrip = currQ.getQuestionAnswer().command.replaceAll("\\p{P}", "").toLowerCase().replaceAll("\\s+", "");
+                if (commandStrip.equals("createemail")) {
+                    System.out.println("is not correct place");
+                    System.out.println(currQ.getQuestionAnswer().command);
+                    return currQ;
+                }
                 String response = requests.performSendEmail(currentJUser.email, currentJUser.password, parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
                                                         parser.emailSeparator(currQ.getQuestionAnswer().answer)[1], 
                                                         parser.getEmailAddress());
                 System.out.println(parser.getPrompt());
-                qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getPrompt(),0);
+                qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getEmailAddress(),0);
                 answer = response;
                 qaPanel.setPrefixQ(Parser.SEND_EMAIL);
                 qaPanel.changeAnswer(answer);

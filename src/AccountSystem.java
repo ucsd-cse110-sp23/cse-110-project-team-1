@@ -225,7 +225,7 @@ public static JSONObject loginAccount(String email, String password, boolean aut
             Bson updateOperation = set(PROMPT_STRING, prompts);
             Bson filter = eq(EMAIL, email);
             UpdateResult updateResult = accounts.updateOne(filter, updateOperation);
-            System.out.println(updateResult);
+            System.out.println("updated: "+ updateResult);
             updateStatus = UPDATE_SUCCESS;
         }
         return updateStatus;

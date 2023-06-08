@@ -59,6 +59,8 @@ public class EmailSystem {
 		props.put("mail.smtp.port", (String) tls); //TLS Port
 		props.put("mail.smtp.auth", "true"); //enable authentication
 		props.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
+        props.put("mail.smtp.connectiontimeout", "10000");
+        props.put("mail.smtp.timeout", "10000");
 
         //create Authenticator object to pass in Session.getInstance argument
 		Authenticator auth = new Authenticator() {
@@ -95,6 +97,7 @@ public class EmailSystem {
         } catch (SendFailedException sendEx) {
             return EMAIL_FAIL;
         } catch (MessagingException msgEx) {
+            msgEx.printStackTrace();
             return AUTH_ERROR;
         } catch (UnsupportedEncodingException e) {
             return NAME_ERROR;
