@@ -344,9 +344,14 @@ public class Tests {
     //TODO: Should we access currentUser from Account System like this?
     @Test
     public void testPromptHistoryLoad(){
-        AccountSystem.loginAccount("testPHLoad", "11111", false);
-        
-        SayIt app = new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
+        Requester mq = new MockRequester();
+        String email = "testPHLoad";
+        String password = "11111";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        SayIt app = new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
         assertEquals(3+1, ph.getHistory().getComponentCount());
         String question1 = "Hey Alexa, what happened to Meta?";
@@ -593,13 +598,13 @@ public class Tests {
         // QuestionAnswer qa2 = new QuestionAnswer(-1, "Question", "quesiton 2", "answer 2");
         // QuestionAnswer qa1 = new QuestionAnswer(-1, "Question", "quesiton 1", "answer 1");
         
-        // int id = AccountSystem.currentUser.addPrompt(qa1);
+        // int id = user.addPrompt(qa1);
         // qa1.qID = id;
-        // id = AccountSystem.currentUser.addPrompt(qa2);
+        // id = user.addPrompt(qa2);
         // qa2.qID = id;
-        // id = AccountSystem.currentUser.addPrompt(qa3);
+        // id = user.addPrompt(qa3);
         // qa3.qID = id;
-        // AccountSystem.updateAccount();
+        // mq.performUpdate(user.email, user.password, user.getPromptHistory());
     }
 
     @Test
@@ -609,42 +614,52 @@ public class Tests {
 
     @Test
     public void testLoginAccEmailFail(){
-            assertEquals(AccountSystem.EMAIL_NOT_FOUND, AccountSystem.loginAccount("notanemail", "11111", false));
+            assertEquals(AccountSystem.EMAIL_NOT_FOUND, AccountSystem.loginAccount("notanemail", "11111", false).get("status"));
     }
 
     @Test
     public void testLoginAccPassFail(){
-            assertEquals(AccountSystem.WRONG_PASSWORD, AccountSystem.loginAccount("testPHLoad", "incorrectpass", false));
+            assertEquals(AccountSystem.WRONG_PASSWORD, AccountSystem.loginAccount("testPHLoad", "incorrectpass", false).get("status"));
     }
 
     @Test
     public void testLoginAccSuccess(){
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testPHLoad", "11111", false));
+        Requester mq = new MockRequester();
+        String email = "testPHLoad";
+        String password = "11111";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
     }
 
     @Test
     public void testUpdateAcc(){
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("AccSysUpdateEmail", "password", false));
-            AccountSystem.currentUser.clearPromptHistory();
-            AccountSystem.updateAccount();
-            String q = "question";
-            String a = "answer";
-            String command = "Question";
-            for (int i = 1; i <= 3; i++){
-                QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
-                qa.qID = AccountSystem.currentUser.addPrompt(qa);
-            }            
-            AccountSystem.updateAccount();
-            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("AccSysUpdateEmail", "password", false));
-            int j = 1;
-            for (QuestionAnswer qa : AccountSystem.currentUser.getPromptHistory()){
-                assertEquals(command, qa.command);
-                assertEquals(q+j, qa.question);
-                assertEquals(a+j, qa.answer);
-                j++;
-            }
-            AccountSystem.currentUser.clearPromptHistory();
-            AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "AccSysUpdateEmail";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
+        String q = "question";
+        String a = "answer";
+        String command = "Question";
+        for (int i = 1; i <= 3; i++){
+            QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
+            qa.qID = user.addPrompt(qa);
+        }            
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("AccSysUpdateEmail", "password", false).get("status"));
+        int j = 1;
+        for (QuestionAnswer qa : user.getPromptHistory()){
+            assertEquals(command, qa.command);
+            assertEquals(q+j, qa.question);
+            assertEquals(a+j, qa.answer);
+            j++;
+        }
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
     }
 
     /**
@@ -731,8 +746,14 @@ public class Tests {
 
     @Test
     public void testClickedQuestionFromDatabase(){
-        AccountSystem.loginAccount("testPHLoad", "11111", false);
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
+        Requester mq = new MockRequester();
+        String email = "testPHLoad";
+        String password = "11111";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
         int i = 0;
         Component qa = ph.getHistory().getComponent(i++);
@@ -752,8 +773,14 @@ public class Tests {
 
     @Test
     public void testClickedAnswerFromDatabase(){
-        AccountSystem.loginAccount("testPHLoad", "11111", false);
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
+        Requester mq = new MockRequester();
+        String email = "testPHLoad";
+        String password = "11111";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
         int i = 0;
         Component qa = ph.getHistory().getComponent(i++);
@@ -774,20 +801,26 @@ public class Tests {
     //TODO: adapt to mongodb from here down.
     @Test 
     public void testDeleteQAFromMainUI() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testDelQAFromMainUI", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "testDelQAFromMainUI";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         String question = "Question ";
         String answer = "Answer ";
         String command = "Question";
         int end = 10;
         for (int i = 0; i < end; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }            
-        AccountSystem.updateAccount();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         Component qa = ph.getHistory().getComponent(0);
@@ -803,21 +836,27 @@ public class Tests {
     @Test 
     public void testDeleteQAFromSideBar() {
         //intialize file
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testDeleteQAFromSideBar", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "testDeleteQAFromSideBar";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         String question = "Question ";
         String answer = "Answer ";
         String command = "Question";
         int end = 10;
         for (int i = 0; i < end; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }            
-        AccountSystem.updateAccount();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
 
         //start the app
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //get number of items in prompt history
@@ -851,22 +890,27 @@ public class Tests {
     @Test 
     public void testDeleteQAwHist() {
         //intialize file
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testDeleteQAwHist", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "testDeleteQAwHist";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         String question = "Question ";
         String answer = "Answer ";
         String command = "Question";
         int end = 10;
         for (int i = 0; i < end; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }            
-        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+        int numEntries = user.getPromptHistorySize();
 
-        AccountSystem.updateAccount();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         //start the app
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //click on the question
@@ -882,27 +926,33 @@ public class Tests {
         assertTrue(app.getCurrQ() != null);
         app.deleteClicked();
 
-        assertEquals(numEntries - 1, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(numEntries - 1, user.getPromptHistorySize());
     }
 
     @Test 
     public void testClearQAwHist() {
         //intialize file
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testClearQAwHist", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "testClearQAwHist";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         String question = "Question ";
         String answer = "Answer ";
         String command = "Question";
         int end = 10;
         for (int i = 0; i < end; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }            
 
-        AccountSystem.updateAccount();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         //start the app
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //click on the question
@@ -918,27 +968,33 @@ public class Tests {
         assertTrue(app.getCurrQ() != null);
         app.clearClicked();
 
-        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(0, user.getPromptHistorySize());
     }
 
     @Test 
     public void testClearQAFromSideBar() {
         //intialize file
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("testClearQAFromSideBar", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "testClearQAFromSideBar";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         String question = "Question ";
         String answer = "Answer ";
         String command = "Question";
         int end = 10;
         for (int i = 0; i < end; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, question+i, answer+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }            
 
-        AccountSystem.updateAccount();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         //start the app
-        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, ""), new MockWhisper(true, ""), new MockRecorder(true), null, user, mq);
         QAPanel panel = app.getMainPanel().getQaPanel();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //get number of items in prompt history

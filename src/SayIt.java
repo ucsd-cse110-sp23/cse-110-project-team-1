@@ -7,6 +7,8 @@ import java.io.*;
 import javax.swing.*;
 // import javax.swing.event.ChangeEvent;
 
+import org.junit.runner.Request;
+
 
 
 class QAPanel extends JPanel{
@@ -468,6 +470,8 @@ public class SayIt extends JFrame{
     // AccountMediator histClass;
     JUser currentJUser;
 
+    Requester requests;
+
     /**
      * @return panel housing the record button and 
      * the question/answer panel where the current question/answer are displayed
@@ -495,15 +499,15 @@ public class SayIt extends JFrame{
      * @param whisper 
      * @param recorder
      */
-    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile,JUser currUser) {
+    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile,JUser currUser, Requester requests) {
         //i = 0;
-
+        this.requests = requests;
         setTitle("SayIt Assistant");
         // setDefaultCloseOperation(EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {            
                 Thread t = new Thread(() -> {
-                    String updateStatus = Requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
+                    String updateStatus = requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
                     if(updateStatus.equals(UPDATE_SUCCESS)){
                         System.exit(0);
                     }else{

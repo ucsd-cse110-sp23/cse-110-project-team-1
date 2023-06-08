@@ -30,7 +30,7 @@ public class App {
             public void run() {
                 if(isServerRunning()){
                     // Check if auto-login is enabled
-                    checkAutoLogIN(null);
+                    checkAutoLogIN(new RequestsNS(), null);
                 }else{
                     JOptionPane.showMessageDialog(null, 
                     //"The server is not running. Please start the server and try again.", 
@@ -59,7 +59,7 @@ public class App {
      * this method checks the auto login status in thie machine by checking the local file path
      * @param filepath
      */
-    public static void checkAutoLogIN(String filepath) {
+    public static boolean checkAutoLogIN(Requester requests, String filepath) {
         if (filepath != null) {
             savePath = filepath;
         }
@@ -75,25 +75,28 @@ public class App {
                 String password = (String)saveBody.get(PASS);
                
                 //tries to login
-                ArrayList<Object> loginResult = Requests.performLogin(email, password, false); 
+                ArrayList<Object> loginResult = requests.performLogin(email, password, false); 
                 String loginStatus = (String) loginResult.get(0);
                 //login successfully: Create JUser using the PromptHistory sends from the server and open SayIt
                 if(loginStatus.equals(LOGIN_SUCCESS)){
                     JUser user = new JUser(email,password,(ArrayList<QuestionAnswer>)loginResult.get(1));
-                    new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user);
+                    new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user, requests);
                 }
+                return true;
             } catch(Exception e) {
                 e.printStackTrace();
+                return false;
             }
         }else{
-            openLoginScreen();
+            openLoginScreen(requests);
+            return false;
         }
     }
 
-    private static void openLoginScreen() {
+    private static void openLoginScreen(Requester requests) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new LoginScreen();
+                new LoginScreen(requests);
             }
         });
     }

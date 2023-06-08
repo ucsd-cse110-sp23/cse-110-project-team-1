@@ -15,7 +15,6 @@ import java.util.HashMap;
 
 import javax.swing.JOptionPane;
 
-
 public class Requests {
     public final static String URL = "http://localhost:8101/";
     public static String savePath = "saveFiles/AutoLoginIn.json";

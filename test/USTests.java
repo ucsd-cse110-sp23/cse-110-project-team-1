@@ -131,7 +131,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null, null, new MockRequester());
         //when the user has clicked new question
         app.changeRecording();
         //when the user says "What is the smallest city?"
@@ -160,9 +160,14 @@ public class USTests {
      */
     @Test
     public void US1S2Test(){
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us1s2", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us1s2";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         // Given the application is open
         String question = "What is the smallest city?";
         String answer = "The smallest city is the Vatican";
@@ -170,7 +175,7 @@ public class USTests {
         MockWhisper mockWhisper = new MockWhisper(false, question);
         
         MockGPT mockGPT = new MockGPT(false, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null, user, mq);
         // and the user has recorded their prompt
         app.changeRecording();
         app.changeRecording();
@@ -230,7 +235,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null, null, new MockRequester());
         //and user has recorded a question successfully
         app.changeRecording();
         app.changeRecording();
@@ -275,7 +280,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, null, null);
         app.changeRecording();
         app.changeRecording();
         JSONObject saveBody = null;
@@ -303,9 +308,15 @@ public class USTests {
      */
     @Test 
     public void US3S2Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us3s2", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us3s2";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
 
         String command = "Question";
         String question = "What is Java Ui?";
@@ -313,13 +324,13 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(false, command + " " + question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec,null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
         app.changeRecording();
         app.changeRecording();
         
         assertEquals(null, app.getMainPanel().getQaPanel().getQuestionAnswer());
         assertEquals(app.getMainPanel().getQaPanel().DEF_PRE_A + "Sorry, we didn't quite catch that", app.getMainPanel().getQaPanel().getAnswerText());
-        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(0, user.getPromptHistorySize());
     }
 
     /**
@@ -332,15 +343,23 @@ public class USTests {
      */
     @Test
     public void US4S1Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s1noHistory", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us4s1noHistory";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
 
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s1noHistory", "password", false));
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
+
+        loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
 
         String command = "Question";
         String question = "What is Java UI?";
-        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, command + " " + question), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, command + " " + question), new MockRecorder(true), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
         app.changeRecording();
         app.changeRecording();
@@ -359,8 +378,8 @@ public class USTests {
     //@Test
     public void US4S2Test() {
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
 
         SayIt app = new SayIt(new MockGPT(true, null), new MockWhisper(true, null), new MockRecorder(true), null);
         PromptHistory ph = app.getSideBar().getPromptHistory();
@@ -385,13 +404,19 @@ public class USTests {
      */
     @Test
     public void US4S3Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s3noHistory", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us4s3noHistory";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         
         String command = "Question";
         String question = "This is a long long long long long long long long long long long long question?";
-        SayIt app = new SayIt(new MockGPT(true, "yup"), new MockWhisper(true, command + " " + question), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, "yup"), new MockWhisper(true, command + " " + question), new MockRecorder(true), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
         app.changeRecording();
         app.changeRecording();
@@ -410,19 +435,25 @@ public class USTests {
      */
     @Test
     public void US4S4Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s4noHistory", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us4s4noHistory";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
 
         String command = "Question";
         String question1 = "What is Java UI?";
-        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, command + " " + question1), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, command + " " + question1), new MockRecorder(true), null, user, mq);
         app.changeRecording();
         app.changeRecording();
         app.dispose();
 
         String question2 = "What's up?";
-        SayIt app2 = new SayIt(new MockGPT(true, "Second Question Answer"), new MockWhisper(true, command + " " + question2), new MockRecorder(true), null);
+        SayIt app2 = new SayIt(new MockGPT(true, "Second Question Answer"), new MockWhisper(true, command + " " + question2), new MockRecorder(true), null, user, mq);
         PromptHistory ph = app2.getSideBar().getPromptHistory();
         app2.changeRecording();
         app2.changeRecording();
@@ -461,7 +492,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question);
         MockGPT mockGPT = new MockGPT(true, answer);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, filePath, null, null);
 
         int beforeQ = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
         System.out.println(beforeQ);
@@ -512,9 +543,15 @@ public class USTests {
     */
     //@Test
     public void US7S1Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us7s1";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
 
         //given the application is open
         String question1 = "question 1";
@@ -522,13 +559,13 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
         app.changeRecording();
 
         RecentQuestion rq = app.changeRecording();
 
-        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+        int numEntries = user.getPromptHistorySize();
         //when the user clicks the delete button
         app.deleteClicked();
 
@@ -551,7 +588,7 @@ public class USTests {
         assertFalse(itemExists);
 
         //question and answer disappear from history
-        assertEquals(numEntries - 1, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(numEntries - 1, user.getPromptHistorySize());
     }
 
 
@@ -565,9 +602,16 @@ public class USTests {
      */
     //@Test
     public void US7S2Test(){
+        Requester mq = new MockRequester();
+        String email = "us4s2noHistory";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
         assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
 
         String command = "Question";
         String question1 = "question 1";
@@ -575,7 +619,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
         //There is no deleteButton enabled
         assertEquals(null, app.getCurrQ());
     }
@@ -592,9 +636,15 @@ public class USTests {
      */
     //@Test
     public void US7S3Test(){
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s3", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us7s3";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
 
         String command = "Question";
         String question1 = "question 1";
@@ -602,7 +652,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
         //asked 1st question
         app.changeRecording();
@@ -646,9 +696,15 @@ public class USTests {
      */
     @Test
     public void US8S1Test(){
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us4s2noHistory";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         
         String command = "Question";
         String question1 = "What is Java UI";
@@ -656,7 +712,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);       
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);       
         
         // Given the answers of Java UI question and other prompts are recorded in the left sidebar history.
 
@@ -685,7 +741,7 @@ public class USTests {
         int afterDelete = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
         assertEquals(beforeQ, afterDelete);
         //check filePath  
-        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(0, user.getPromptHistorySize());
 
         //all the prompts and answers on the current page are cleared
         //check QAPanel
@@ -702,9 +758,15 @@ public class USTests {
      */
     @Test
     public void US8S2Test(){
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s1", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us8s1";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        
+        user.clearPromptHistory();
+        mq.performUpdate(user.email, user.password, user.getPromptHistory());
         
         String command = "Question";
         String question1 = "What is Java UI";
@@ -712,7 +774,7 @@ public class USTests {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, command + " " + question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);       
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);       
         
         // the prompt history is empty.
 
@@ -726,7 +788,7 @@ public class USTests {
         int afterDelete = app.getSideBar().getPromptHistory().getHistory().getComponentCount();
         assertEquals(beforeQ, afterDelete);
         //check filePath  
-        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(0, user.getPromptHistorySize());
 
         //all the prompts and answers on the current page are cleared
         //check QAPanel

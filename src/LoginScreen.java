@@ -36,13 +36,16 @@ public class LoginScreen extends JFrame {
     public static final String WRONG_PASSWORD = "Wrong password";
     public static final String LOGINTYPE = "LOGIN";
     public static final String LOGIN_FAIL = "Login Fail";
-    
+
+    private Requester requests;
    
-    public LoginScreen() {
+    public LoginScreen(Requester requests) {
         setTitle("Login Screen");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Terminates the program when the frame is closed
         setSize(400, 300); // Window size
         setLocationRelativeTo(null); // Center the window
+
+        this.requests = requests;
 
         // Main Panel to hold components by GridLayout
         JPanel mainPanel = new JPanel();
@@ -80,55 +83,16 @@ public class LoginScreen extends JFrame {
         JButton loginButton = new JButton("Log In");
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String email = emailTextField.getText();
-                String password = new String(passwordField.getPassword());
-
-                // Check Email field & Passwordfield
-                if (email.isEmpty()) {
-                    JOptionPane.showMessageDialog(LoginScreen.this, "Please input an email number");
-                } else if (password.isEmpty()) {
-                    JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
-                } else {
-                    // Email and password are inputted, perform login functionality here
-                    Thread t = new Thread(() -> { 
-
-                        //tries to login
-                        ArrayList<Object> loginResult= Requests.performLogin(email, password, false); 
-                        String loginStatus = (String) loginResult.get(0);
-                        
-                        //login successfully: Create JUser using the PromptHistory sends from the server and open SayIt
-                        if(loginStatus.equals(LOGIN_SUCCESS)){
-    
-                            if(autoLoginCheckbox.isSelected()){
-                                createAutoLogIn(email, password, null);
-                            }
-                            
-                            dispose();
-                            JUser user = new JUser(email,password,(ArrayList<QuestionAnswer>)loginResult.get(1));
-                            new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user);
-
-                        }else{
-
-                            SwingUtilities.invokeLater(() -> {
-                                JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
-                            });
-
-                        }
-
-                    });
-
-                    t.start();
-                }
+                loginClicked();
             }
         });
         mainPanel.add(loginButton);
-
 
         // Create Email button
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                    new CreateScreen();
+                    new CreateScreen(requests);
             }
         });
         mainPanel.add(createAccountButton);
@@ -139,11 +103,55 @@ public class LoginScreen extends JFrame {
         add(mainPanel);
     }
 
+    public void loginClicked(){
+        String email = emailTextField.getText();
+        String password = new String(passwordField.getPassword());
+
+        // Check Email field & Passwordfield
+        if (email.isEmpty()) {
+            JOptionPane.showMessageDialog(LoginScreen.this, "Please input an email number");
+        } else if (password.isEmpty()) {
+            JOptionPane.showMessageDialog(LoginScreen.this, "Please input password");
+        } else {
+            // Email and password are inputted, perform login functionality here
+            Thread t = new Thread(() -> { 
+
+                //tries to login
+                ArrayList<Object> loginResult= requests.performLogin(email, password, false); 
+                String loginStatus = (String) loginResult.get(0);
+                
+                //login successfully: Create JUser using the PromptHistory sends from the server and open SayIt
+                if(loginStatus.equals(LOGIN_SUCCESS)){
+
+                    if(autoLoginCheckbox.isSelected()){
+                        createAutoLogIn(email, password, null);
+                    }
+                    
+                    dispose();
+                    JUser user = new JUser(email,password,(ArrayList<QuestionAnswer>)loginResult.get(1));
+                    new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null, user, requests);
+
+                }else{
+
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(LoginScreen.this, loginStatus);
+                    });
+
+                }
+
+            });
+
+            t.start();
+    
+            
+        }
+    }
+
      /* 
      * Helper method to create the autologin file 
      * Sets email and password in the file as a json
      */
-    private static void createAutoLogIn(String email, String password, String filepath) {
+    public static void createAutoLogIn(String email, String password, String filepath) {
         if (filepath != null) {
             savePath = filepath;
         }
@@ -177,7 +185,7 @@ public class LoginScreen extends JFrame {
     public static void main(String[] args) {
         //SwingUtilities.invokeLater(new Runnable() {
             //public void run() {
-                new LoginScreen();
+                new LoginScreen(new RequestsNS());
             //}
         //});
     }

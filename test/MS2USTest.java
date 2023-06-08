@@ -1,6 +1,8 @@
 import org.junit.jupiter.api.Test;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
+import org.json.JSONArray;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,16 +14,14 @@ import java.io.FileReader;
 
 import java.io.IOException;
 import java.lang.InterruptedException;
-
+import java.lang.reflect.Array;
 import java.io.File;
 import java.awt.*;
 
 import org.javatuples.Triplet;
 import java.util.ArrayList;
 
-
-
-
+import javax.swing.JOptionPane;
 
 class MockAccountSystem extends AccountSystem{
     //boolean isSuccessful;
@@ -45,7 +45,74 @@ class MockCreateScreen extends CreateScreen{
 }
 */
 
+class MockRequester implements Requester {
+    public ArrayList<Object> performLogin(String email, String password, boolean autoLogIn){
+        ArrayList<Object> response = new ArrayList<>();
+        try {
 
+            // Convert the response string to a JSON object
+            JSONObject jsonResponse = AccountSystem.loginAccount(email, password, autoLogIn);
+
+            // Extract login status
+            String status = jsonResponse.getString("status");
+
+            // Convert JSONArray to ArrayList<QuestionAnswer>
+            JSONArray promptHistoryJson = jsonResponse.getJSONArray("promptHistory");
+            ArrayList<QuestionAnswer> promptHistoryList = new ArrayList<>();
+            for (int i = 0; i < promptHistoryJson.length(); i++) {
+                JSONObject promptJson = promptHistoryJson.getJSONObject(i);
+                int qid = promptJson.getInt(Requests.QID);
+                String comment = promptJson.getString(Requests.COM_STRING);
+                String question = promptJson.getString(Requests.QUE_STRING);
+                String answer = promptJson.getString(Requests.ANS_STRING);
+                QuestionAnswer questionAnswer = new QuestionAnswer(qid, comment, question, answer);
+                promptHistoryList.add(questionAnswer);
+            }
+
+            // Store the login status and prompt history in the response list
+            response.add(status);
+            response.add(promptHistoryList);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.add(Requests.LOGIN_FAIL);
+            response.add(new ArrayList<QuestionAnswer>());
+        }
+        return response;
+    }
+
+    public String performCreate(String email, String password){
+        String createStatus = "CREATE_FAIL";
+        try {
+            createStatus = AccountSystem.createAccount(email, password, false);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        return createStatus;
+    }
+
+    public String performUpdate(String email, String password, ArrayList<QuestionAnswer> promptHList){
+        String updateStatus = "UPDATE_FAIL";
+        try {
+            //Convert promptHList to JSONArray 
+            JSONArray promptHListJSON = new JSONArray();
+            for (QuestionAnswer questionAnswer : promptHList) {
+                JSONObject promptJson = new JSONObject();
+                promptJson.put(Requests.QID, questionAnswer.qID);
+                promptJson.put(Requests.COM_STRING, questionAnswer.command);
+                promptJson.put(Requests.QUE_STRING, questionAnswer.question);
+                promptJson.put(Requests.ANS_STRING, questionAnswer.answer);
+                promptHListJSON.put(promptJson);
+            }
+            // Receive the response from the "server"
+            updateStatus = AccountSystem.updateAccount(email, password, promptHListJSON);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        return updateStatus;
+    }
+}
 
 
 
@@ -89,56 +156,73 @@ public class MS2USTest {
      */
     @Test
     public void MS2US10S1Test(){
+        MockRequester mq = new MockRequester();
+        String filePath = "saveFiles/testingFiles/AutoLoginIn.json";
+        File tempHistory = new File(filePath);
+        if (tempHistory.exists()) {
+            assertTrue(tempHistory.delete());
+        }
         //Given that the application is set to automatically sign in
         boolean autoLogin = true;
         String user = "autosignaccount";
         String password = "Anp455w05e##";
-        MockAccountSystem as = new MockAccountSystem(user, password, autoLogin);
-        LoginScreen auto = new LoginScreen();
-        assertEquals(as.createAccount(user, password, autoLogin), AccountSystem.EMAIL_TAKEN);
-        assertEquals(as.loginAccount(user, password, autoLogin), AccountSystem.LOGIN_SUCCESS);
+        
+        LoginScreen.createAutoLogIn(user, password, filePath);
+        assertEquals(App.checkAutoLogIN(mq, "saveFiles/testingFiles/AutoLoginIn.json"), true);
     }
 
     @Test
     public void MS2US2S1Test(){
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("ms2us2s1", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        MockRequester mq = new MockRequester();
+        String email = "ms2us2s1";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        
+        user.clearPromptHistory();
+        mq.performUpdate(email, password, user.getPromptHistory());
         String q = "question";
         String a = "answer";
         String command = "Question";
         int size = 3;
         for (int i = 1; i <= size; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }            
-        AccountSystem.updateAccount();
+        mq.performUpdate(email, password, user.getPromptHistory());
 
         String question = "What is Java UI?";
-        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, command + " " + question), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, "Java UI is Java UI"), new MockWhisper(true, command + " " + question), new MockRecorder(true), null, user, mq);
         
         PromptHistory ph = app.getSideBar().getPromptHistory();
         assertEquals(size + 1, ph.getHistory().getComponents().length);
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("AccSysUpdateEmail", "password", false));
+        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("AccSysUpdateEmail", "password", false).get("status"));
         int j = 1;
-        for (QuestionAnswer qa : AccountSystem.currentUser.getPromptHistory()){
+        for (QuestionAnswer qa : user.getPromptHistory()){
             assertEquals(command, qa.command);
             assertEquals(q+j, qa.question);
             assertEquals(a+j, qa.answer);
             j++;
         }
         
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        user.clearPromptHistory();
+        mq.performUpdate(email, password, user.getPromptHistory());
     }
 
     @Test
     public void MS2US2S2Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "us4s2noHistory";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+        
+        user.clearPromptHistory();
+        mq.performUpdate(email, password, user.getPromptHistory());
 
-        SayIt app = new SayIt(new MockGPT(true, null), new MockWhisper(true, null), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, null), new MockWhisper(true, null), new MockRecorder(true), null, user, mq);
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //assertEquals(3, ph.getComponentCount());
         Component[] listItems = ph.getHistory().getComponents();
@@ -153,16 +237,22 @@ public class MS2USTest {
     
     @Test
     public void M2US3S1Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("tempHistoryForVoice", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "tempHistoryForVoice";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>) loginResult.get(1));
 
-        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+        user.clearPromptHistory();
+        mq.performUpdate(email, password, user.getPromptHistory());
+
+        assertEquals(0, user.getPromptHistorySize());
 
         String question = "Question. What is Java UI?";
         String questionraw = "What is Java UI?";
         String answer = "Java UI is Java UI";
-        SayIt app = new SayIt(new MockGPT(true, answer), new MockWhisper(true, question), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, answer), new MockWhisper(true, question), new MockRecorder(true), null, user, mq);
         QAPanel qaPanel = app.getMainPanel().getQaPanel();
 
         app.changeRecording();
@@ -181,15 +271,21 @@ public class MS2USTest {
 
     @Test
     public void M2US3S2Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("ms2us3s2", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
-        AccountSystem.updateAccount();
+        Requester mq = new MockRequester();
+        String email = "ms2us3s2";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
 
-        assertEquals(0, AccountSystem.currentUser.getPromptHistorySize());
+        user.clearPromptHistory();
+        mq.performUpdate(email, password, user.getPromptHistory());
+
+        assertEquals(0, user.getPromptHistorySize());
 
         String question = "Ask a Question. What is Java UI?";
         String answer = "Java UI is Java UI";
-        SayIt app = new SayIt(new MockGPT(true, answer), new MockWhisper(true, question), new MockRecorder(true), null);
+        SayIt app = new SayIt(new MockGPT(true, answer), new MockWhisper(true, question), new MockRecorder(true), null, user, mq);
         QAPanel qaPanel = app.getMainPanel().getQaPanel();
 
         app.changeRecording();
@@ -216,16 +312,22 @@ public class MS2USTest {
      */
     @Test
     public void M2US4S1Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("ms2us4s1", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
+        Requester mq = new MockRequester();
+        String email = "ms2us4s1";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
         String q = "question";
         String a = "answer";
         String command = "Question";
         for (int i = 1; i <= 3; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }
-        AccountSystem.updateAccount();
+        mq.performUpdate(email, password, user.getPromptHistory());
 
         //given the application is open
         String question1 = "Question question 1";
@@ -233,13 +335,13 @@ public class MS2USTest {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
         //says a question
         app.changeRecording();
 
         RecentQuestion rq = app.changeRecording();
 
-        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+        int numEntries = user.getPromptHistorySize();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         int numPHItems = ph.getHistory().getComponents().length;
         //when the user says the delete command
@@ -267,7 +369,7 @@ public class MS2USTest {
         assertEquals(numPHItems -1, listItems.length);
 
         //question and answer disappear from history
-        assertEquals(numEntries - 1, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(numEntries - 1, user.getPromptHistorySize());
     }
 
     /**
@@ -275,16 +377,22 @@ public class MS2USTest {
      */
     @Test
     public void M2US4S1V2Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us7s1", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
+        Requester mq = new MockRequester();
+        String email = "us7s1";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
         String q = "question";
         String a = "answer";
         String command = "Question";
         for (int i = 1; i <= 3; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }
-        AccountSystem.updateAccount();
+        mq.performUpdate(email, password, user.getPromptHistory());
 
         //given the application is open
         String question1 = "question 1";
@@ -292,11 +400,11 @@ public class MS2USTest {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
         app.changeRecording();
 
-        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+        int numEntries = user.getPromptHistorySize();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         //click on the most recent question in prompt history
         RecentQuestion rq = (RecentQuestion) ph.getHistory().getComponent(0);
@@ -332,7 +440,7 @@ public class MS2USTest {
         assertEquals(numPHItems -1, listItems.length);
 
         //question and answer disappear from history
-        assertEquals(numEntries - 1, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(numEntries - 1, user.getPromptHistorySize());
     }
     /**
      * There is a question in prompt history but no Q&A showed in screen
@@ -344,16 +452,22 @@ public class MS2USTest {
      */
     @Test
     public void M2US4S2Test() {
-        assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
-        AccountSystem.currentUser.clearPromptHistory();
+        Requester mq = new MockRequester();
+        String email = "us4s2noHistory";
+        String password = "password";
+        ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+        assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+        JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+        user.clearPromptHistory();
         String q = "question";
         String a = "answer";
         String command = "Question";
         for (int i = 1; i <= 3; i++){
             QuestionAnswer qa = new QuestionAnswer(-1, command, q+i, a+i);
-            qa.qID = AccountSystem.currentUser.addPrompt(qa);
+            qa.qID = user.addPrompt(qa);
         }
-        AccountSystem.updateAccount();
+        mq.performUpdate(email, password, user.getPromptHistory());
 
         //given the application is open
         String question1 = "question 1";
@@ -361,9 +475,9 @@ public class MS2USTest {
         MockRecorder mockRec = new MockRecorder(true);
         MockWhisper mockWhisper = new MockWhisper(true, question1);
         MockGPT mockGPT = new MockGPT(true, answer1);
-        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+        SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
-        int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+        int numEntries = user.getPromptHistorySize();
         PromptHistory ph = app.getSideBar().getPromptHistory();
         int numPHItems = ph.getHistory().getComponents().length;
         //no question answer displayed on screen
@@ -388,7 +502,7 @@ public class MS2USTest {
         assertEquals(numPHItems, listItems.length);
 
         //number of prompts in user do not change
-        assertEquals(numEntries, AccountSystem.currentUser.getPromptHistorySize());
+        assertEquals(numEntries, user.getPromptHistorySize());
     }
 
      /**
@@ -401,9 +515,15 @@ public class MS2USTest {
 
       @Test
       public void M2US4S3Test() {
-          assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us4s2noHistory", "password", false));
-          AccountSystem.currentUser.clearPromptHistory();
-          AccountSystem.updateAccount();
+          Requester mq = new MockRequester();
+          String email = "us4s2noHistory";
+          String password = "password";
+          ArrayList<Object> loginResult= mq.performLogin(email, password, false);
+          assertEquals(LoginScreen.LOGIN_SUCCESS, (String) loginResult.get(0));
+          JUser user = new JUser(email, password, (ArrayList<QuestionAnswer>)loginResult.get(1));
+
+          user.clearPromptHistory();
+          mq.performUpdate(email, password, user.getPromptHistory());
 
           //given the application is open
           String question1 = "question 1";
@@ -411,9 +531,9 @@ public class MS2USTest {
           MockRecorder mockRec = new MockRecorder(true);
           MockWhisper mockWhisper = new MockWhisper(true, question1);
           MockGPT mockGPT = new MockGPT(true, answer1);
-          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+          SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null, user, mq);
 
-          int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+          int numEntries = user.getPromptHistorySize();
           PromptHistory ph = app.getSideBar().getPromptHistory();
           int numPHItems = ph.getHistory().getComponents().length;
           //no question answer displayed on screen
@@ -439,7 +559,7 @@ public class MS2USTest {
           assertEquals(numPHItems, listItems.length);
 
           //the number of prompts in the user stays the same
-          assertEquals(numEntries, AccountSystem.currentUser.getPromptHistorySize());
+          assertEquals(numEntries, user.getPromptHistorySize());
       }
 }
 

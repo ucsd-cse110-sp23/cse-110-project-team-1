@@ -19,14 +19,16 @@ public class CreateScreen extends JFrame {
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
 
+    private Requester requests;
 
-    public CreateScreen() {
+    public CreateScreen(Requester requests) {
         setTitle("Create Account");
         setSize(400, 300);
         setLocationRelativeTo(null);
         Point centerPoint = getLocation();
         setLocation(centerPoint.x + 10, centerPoint.y+10);
 
+        this.requests = requests;
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
@@ -54,34 +56,7 @@ public class CreateScreen extends JFrame {
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String email = emailTextField.getText();
-                String password = new String(passwordField.getPassword());
-                String confirmPassword = new String(confirmField.getPassword());
-        
-                if (email.isEmpty()) {
-                    JOptionPane.showMessageDialog(CreateScreen.this, "Please enter an email");
-                } else if (password.isEmpty()) {
-                    JOptionPane.showMessageDialog(CreateScreen.this, "Please enter a password");
-                } else if (!password.equals(confirmPassword)) {
-                    JOptionPane.showMessageDialog(CreateScreen.this, "Password and confirm password do not match");
-                } else {
-                    Thread t = new Thread(() -> {
-                        // Create an email in another thread by call helpler method
-                        String createStatus = Requests.performCreate(email, password);
-                        // Check if create was successful
-                        if (createStatus.equals(CREATE_SUCCESS)) {
-                            // Perform further actions upon successful login
-                            SwingUtilities.invokeLater(() -> {
-                                closeCreateScreen();
-                            });
-                        } else {
-                            SwingUtilities.invokeLater(() -> {
-                                JOptionPane.showMessageDialog(CreateScreen.this, createStatus);
-                            });
-                        }
-                    });
-                    t.start();
-                }
+                createClicked();
             }
         });
 
@@ -94,11 +69,42 @@ public class CreateScreen extends JFrame {
         setVisible(true);
     }
 
+    public void createClicked(){
+        String email = emailTextField.getText();
+        String password = new String(passwordField.getPassword());
+        String confirmPassword = new String(confirmField.getPassword());
+
+        if (email.isEmpty()) {
+            JOptionPane.showMessageDialog(CreateScreen.this, "Please enter an email");
+        } else if (password.isEmpty()) {
+            JOptionPane.showMessageDialog(CreateScreen.this, "Please enter a password");
+        } else if (!password.equals(confirmPassword)) {
+            JOptionPane.showMessageDialog(CreateScreen.this, "Password and confirm password do not match");
+        } else {
+            Thread t = new Thread(() -> {
+                // Create an email in another thread by call helpler method
+                String createStatus = requests.performCreate(email, password);
+                // Check if create was successful
+                if (createStatus.equals(CREATE_SUCCESS)) {
+                    // Perform further actions upon successful login
+                    SwingUtilities.invokeLater(() -> {
+                        closeCreateScreen();
+                    });
+                } else {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(CreateScreen.this, createStatus);
+                    });
+                }
+            });
+            t.start();
+        }
+    }
+
     private void closeCreateScreen() {
         dispose(); // Close the LoginScreen frame
     }
 
     public static void main(String[] args) {
-        new CreateScreen();
+        new CreateScreen(new RequestsNS());
     }
 }
