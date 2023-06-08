@@ -48,6 +48,12 @@ public class Parser {
                 command = SETUP_EMAIL;
             }
         }
+
+        if (filteredString.length >= 3) {
+            if (filteredString[0].equals("set") && filteredString[1].equals("up") && filteredString[2].equals("email")) {
+                command = SETUP_EMAIL;
+            }
+        }
         
     }
 

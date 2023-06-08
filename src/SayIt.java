@@ -1,14 +1,14 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.*;
 
 // import javax.management.Query;
 // import javax.sound.sampled.*;
 import javax.swing.*;
 // import javax.swing.event.ChangeEvent;
 
-import org.javatuples.Triplet;
+import org.junit.runner.Request;
+
 
 
 class QAPanel extends JPanel{
@@ -454,7 +454,8 @@ class SideBar extends JPanel{
 
 // the main app
 public class SayIt extends JFrame{
-    public final String URL = "http://localhost:8100/sayit";
+    public static final String UPDATE_SUCCESS = "Update Success";
+
 
     private MainPanel mainPanel;
     private JButton recButton;
@@ -476,6 +477,8 @@ public class SayIt extends JFrame{
     // AccountMediator histClass;
     JUser currentJUser;
 
+    Requester requests;
+
     EmailUI emailSetUp;
 
     boolean isMock=false;
@@ -496,9 +499,9 @@ public class SayIt extends JFrame{
      * starts app
      * @param args
      */
-    public static void main(String[] args){
-        new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null);
-    }
+    //public static void main(String[] args){
+        //new SayIt(new JChatGPT(), new JWhisper(), new JRecorder(), null,new JUser("123","123"));
+    //}
 
     // MainPanel mainPanel
     /**
@@ -507,19 +510,38 @@ public class SayIt extends JFrame{
      * @param whisper 
      * @param recorder
      */
-    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile) {
+    public SayIt(JChatGPT chatGPT, JWhisper whisper, JRecorder recorder, String saveFile,JUser currUser, Requester requests) {
         //i = 0;
-
+        this.requests = requests;
         setTitle("SayIt Assistant");
         // setDefaultCloseOperation(EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosing(java.awt.event.WindowEvent e) {
-                AccountSystem.updateAccount();
-                System.exit(0);
+            public void windowClosing(java.awt.event.WindowEvent e) {            
+                
+                String updateStatus = requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
+                if(updateStatus.equals(UPDATE_SUCCESS)){
+                    System.exit(0);
+                }else{
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(SayIt.this, updateStatus);
+                    });
+                }
+
+                // Thread t = new Thread(() -> {
+                //     System.out.println("hi");
+                //     String updateStatus = requests.performUpdate(currUser.email,currUser.password,currUser.getPromptHistory());
+                //     if(updateStatus.equals(UPDATE_SUCCESS)){
+                //         System.exit(0);
+                //     }else{
+                //         SwingUtilities.invokeLater(() -> {
+                //             JOptionPane.showMessageDialog(SayIt.this, updateStatus);
+                //         });
+                //     }
+                // });    
             }
         });
         // setVisible(true);
-        setSize(600, 600); //400, 600
+        setSize(1000, 800); //400, 600
         //setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setUndecorated(false);
         setLayout(new GridBagLayout());
@@ -535,8 +557,9 @@ public class SayIt extends JFrame{
         this.whisper = whisper;
         this.recorder = recorder;
         // histClass = new AccountMediator();
-        this.currentJUser = AccountSystem.currentUser;
-        System.out.println(currentJUser);
+
+        this.currentJUser = currUser;
+
         sideBar = new SideBar();
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = 1;
@@ -701,17 +724,20 @@ public class SayIt extends JFrame{
                     return currQ;
                 }
 
-                String response;
-                if (!isMock){
-                    response = EmailSystem.sendEmail(subject, 
-                    body, 
-                    parser.getEmailAddress());
-                } else {
-                    response = EmailSystem.sendMockEmail();
-                }
+                // String response;
+                // if (!isMock){
+                //     response = EmailSystem.sendEmail(subject, 
+                //     body, 
+                //     parser.getEmailAddress());
+                // } else {
+                //     response = EmailSystem.sendMockEmail();
+                // }
 
-                // System.out.println(subject);
-                // System.out.println(body);
+                String response = requests.performSendEmail(currentJUser.email, currentJUser.password, parser.emailSeparator(currQ.getQuestionAnswer().answer)[0], 
+                                                        parser.emailSeparator(currQ.getQuestionAnswer().answer)[1], 
+                                                        parser.getEmailAddress());
+                System.out.println(parser.getPrompt());
+
                 qaPanel.createQuestion(Parser.SEND_EMAIL,parser.getEmailAddress(),0);
                 answer = response;
                 qaPanel.setPrefixQ(Parser.SEND_EMAIL);
@@ -842,11 +868,14 @@ public class SayIt extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 // int numEntriesJson = History.initial(null).size();
                 // get the added prompt button
-                RecentQuestion recentQ =  changeRecording();
-                // update the QApanel when clicking the question button
-                if(recentQ != null) {
-                    addListenerToRecentQ(recentQ);
-                }
+                Thread t = new Thread(() -> { 
+                    RecentQuestion recentQ =  changeRecording();
+                    // update the QApanel when clicking the question button
+                    if(recentQ != null) {
+                        addListenerToRecentQ(recentQ);
+                    }
+                });
+                t.start();
             }
         }
         );

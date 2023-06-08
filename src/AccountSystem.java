@@ -14,7 +14,8 @@ import static com.mongodb.client.model.Updates.*;
 
 import static java.util.Arrays.asList;
 
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,6 @@ import java.io.PrintWriter;
 
 public class AccountSystem {
 
-    public static JUser currentUser;
     private final static String uri = "mongodb+srv://sjgoh:adObuNGxznemoldt@cluster0.0yck06r.mongodb.net/?retryWrites=true&w=majority";
     public static String savePath = "saveFiles/AutoLoginIn.json";
     public final String QUESTION_FIELD = "Question";
@@ -47,6 +47,7 @@ public class AccountSystem {
     public static final String STMP = "STMP";
     public static final String TLS = "TLS";
     public static final String MESSAGE_PASS = "Message_Pass";
+    public static final String EMAIL_EXISTS = "email_exists";
 
     //Return messages
     public static final String CREATE_SUCCESS = "Account created successfully";
@@ -55,7 +56,35 @@ public class AccountSystem {
     public static final String EMAIL_NOT_FOUND = "This email was not found";
     public static final String WRONG_PASSWORD = "Wrong password";
     public static final String SETUP_SUCCESS = "Email setup Success";
+    public static final String UPDATE_SUCCESS = "Update Success";
 
+    /**
+     * returns null if username and/or password are not valid
+     * @param username
+     * @param password
+     * @return
+     */
+    public static Document getAccount(String username, String password){
+        try (MongoClient mongoClient = MongoClients.create(uri)) {
+            MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
+            MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
+    
+            Document account = accounts.find(eq(EMAIL, username)).first();
+            if (account == null) {
+                return null;
+            }
+            String pass = (String) account.get(PASS);
+            if (!pass.equals(password)) {
+                return account;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to get Account from AccountSystem");
+            return null;
+        }
+    }
     /*
      * Tries to create an account in the mongoDB database
      * @param email of account
@@ -65,10 +94,7 @@ public class AccountSystem {
      * @returns CREATE_SUCCESS if account was created successfully
      */
     static String createAccount(String email, String password, boolean autoLogIn) {
-        currentUser = new JUser(email, password);
-        if (autoLogIn) {
-            createAutoLogIn(email, password, "null");
-        }
+
         try (MongoClient mongoClient = MongoClients.create(uri)) {
 
 
@@ -93,7 +119,7 @@ public class AccountSystem {
     }
 
     /*
-     * Tries to login into an existing account in the mongoDB database
+     * Tries to verify the email and password matched in MangoDB
      * @param email of account
      * @param password of account
      * @param autoLogIN: if the user wishes to be auto logined for this device 
@@ -101,85 +127,115 @@ public class AccountSystem {
      * @returns WRONG_PASSWORD when there is an email; however, password does not match
      * @returns LOGIN_SUCCESS when login went sucessful
      */
-    @SuppressWarnings("unchecked")
-    public static String loginAccount(String email, String password, boolean autoLogIn) {
-        try (MongoClient mongoClient = MongoClients.create(uri)) {
+@SuppressWarnings("unchecked")
+public static JSONObject loginAccount(String email, String password, boolean autoLogIn) {
 
+    JSONObject response = new JSONObject();
+    JSONArray promptHList = new JSONArray();
 
-            MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
-            MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
+    try (MongoClient mongoClient = MongoClients.create(uri)) {
+        MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
+        MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
 
-            Document account = accounts.find(eq(EMAIL, email)).first();
-            if (account == null) {
-                return EMAIL_NOT_FOUND;
-            }
-            String pass = (String)account.get(PASS);
-            if (!pass.equals(password)) {
-                return WRONG_PASSWORD;
-            }
-
-            if (autoLogIn) {
-                createAutoLogIn(email, password, null);
-                System.out.println("AutoLogin created: email = " + email);
-            }
-            boolean emailInfoExists = account.containsKey(FIRSTNAME);
-            if (emailInfoExists) {
-                currentUser = new JUser(email, password, (String)account.get(FIRSTNAME), 
-                                        (String)account.get(LASTNAME),
-                                        (String)account.get(DISPLAYNAME), 
-                                        (String)account.get(MESSAGE_EMAIL), 
-                                        (String)account.get(STMP), 
-                                        (String)account.get(TLS), 
-                                        (String)account.get(MESSAGE_PASS));
-            } else {
-                currentUser = new JUser(email, password);
-            }
-            List<Document> prompts = (List<Document>)account.get(PROMPT_STRING);
-            for (Document d: prompts) {
-                System.out.println(d.toJson());
-                QuestionAnswer qa = new QuestionAnswer((int)d.get(QID), (String)d.get(COM_STRING), (String)d.get(QUE_STRING), (String)d.get(ANS_STRING));
-                currentUser.addPrompt(qa);
-            }
-
-            System.out.println(LOGIN_SUCCESS + ": email = " + email);
-            System.out.println(currentUser.getPromptHistory());
-            return LOGIN_SUCCESS;
+        Document account = accounts.find(eq(EMAIL, email)).first();
+        if (account == null) {
+            response.put("status", EMAIL_NOT_FOUND);
+            response.put("promptHistory", promptHList);
+            return response;
         }
+        String pass = (String) account.get(PASS);
+        if (!pass.equals(password)) {
+            response.put("status", WRONG_PASSWORD);
+            response.put("promptHistory", promptHList);
+            return response;
+        }
+
+        // if (autoLogIn) {
+        //     createAutoLogIn(email, password, null);
+        //     System.out.println("AotoLogin created: email = " + email);
+        // }
+        
+        // Login Successfully!!  
+        System.out.println(LOGIN_SUCCESS + ": email = " + email);
+        List<Document> prompts = (List<Document>) account.get(PROMPT_STRING);
+
+        for (Document d : prompts) {
+            System.out.println(d.toJson());
+            JSONObject prompt = new JSONObject();
+            prompt.put(QID, d.get(QID));
+            prompt.put(COM_STRING, d.get(COM_STRING));
+            prompt.put(QUE_STRING, d.get(QUE_STRING));
+            prompt.put(ANS_STRING, d.get(ANS_STRING));
+            promptHList.put(prompt);
+        }
+        //fix here
+        boolean emailInfoExists = account.containsKey(FIRSTNAME);
+        response.put(EMAIL_EXISTS, emailInfoExists);
+        if (emailInfoExists) {
+            response.put(FIRSTNAME, (String)account.get(FIRSTNAME));
+            response.put(LASTNAME, (String)account.get(LASTNAME));
+            response.put(DISPLAYNAME, (String)account.get(DISPLAYNAME));
+            response.put(MESSAGE_EMAIL, (String)account.get(MESSAGE_EMAIL));
+            response.put(STMP, (String)account.get(STMP));
+            response.put(TLS, (String)account.get(TLS));
+            response.put(MESSAGE_PASS, (String)account.get(MESSAGE_PASS));
+        }
+
+        //System.out.println(currentUser.getPromptHistory());
+
+        response.put("status", LOGIN_SUCCESS);
+        response.put("promptHistory", promptHList);
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.put("status", "Error: " + e.getMessage());
+        response.put("promptHistory", promptHList);
     }
+
+    return response;
+}
+
 
     /* 
      * updatAccount takes prompts in currentUser and updates the MongoDB database with them 
      * This means please call either createAccount or loginAccount before this method
      * @ensures currentUser prompts are updated in the database
     */
-    public static void updateAccount() {
-        if (currentUser == null) {
-            return;
-        }
+    public static String updateAccount(String email, String password, JSONArray promptHistoryJson) {
+        String updateStatus = "Update Fail";
         try (MongoClient mongoClient = MongoClients.create(uri)) {
-
-
             MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
             MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
-
-            ArrayList<Document> prompts = new ArrayList<Document>();
-            for (QuestionAnswer qa: currentUser.getPromptHistory()) {
-                Document newEntry = new Document(QID, qa.qID);
-                newEntry.append(COM_STRING, qa.command);
-                newEntry.append(QUE_STRING, qa.question);
-                newEntry.append(ANS_STRING, qa.answer);
+    
+            ArrayList<Document> prompts = new ArrayList<>();
+    
+            for (int i = 0; i < promptHistoryJson.length(); i++) {
+                JSONObject promptJson = promptHistoryJson.getJSONObject(i);
+                int qid = promptJson.getInt(QID);
+                String comment = promptJson.getString(COM_STRING);
+                String question = promptJson.getString(QUE_STRING);
+                String answer = promptJson.getString(ANS_STRING);
+    
+                Document newEntry = new Document(QID, qid);
+                newEntry.append(COM_STRING, comment);
+                newEntry.append(QUE_STRING, question);
+                newEntry.append(ANS_STRING, answer);
                 prompts.add(newEntry);
             }
+    
             Bson updateOperation = set(PROMPT_STRING, prompts);
-            Bson filter = eq(EMAIL,currentUser.email);
+            Bson filter = eq(EMAIL, email);
             UpdateResult updateResult = accounts.updateOne(filter, updateOperation);
-            System.out.println(updateResult);
+            System.out.println("updated: "+ updateResult);
+            updateStatus = UPDATE_SUCCESS;
         }
+        return updateStatus;
     }
-    public static void updateEmailInfo (String firstName, String lastName, String displayName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
-        if (currentUser == null) {
-            return;
-        }
+
+    //TODO: ADD VALIDATION (IE. CHECK PASSWORD AND IS A VALID ACCOUNT)
+    public static void updateEmailInfo (String email, String firstName, String lastName, String displayName, String messageEmail, String stmpHost, String tlsPort, String messageEmailPass) {
+        // if (currentUser == null) {
+        //     return;
+        // }
         try (MongoClient mongoClient = MongoClients.create(uri)) {
             MongoDatabase accountDatabase = mongoClient.getDatabase("Account_Database");
             MongoCollection<Document> accounts = accountDatabase.getCollection("Accounts");
@@ -195,50 +251,15 @@ public class AccountSystem {
 
             BasicDBObject setQuery = new BasicDBObject();
             setQuery.append("$set", account);
-            Bson filter = eq(EMAIL,currentUser.email);
+            Bson filter = eq(EMAIL, email);
 
             UpdateResult updateResult = accounts.updateOne(filter, setQuery);
             System.out.println(updateResult);
         }
     }
-    /*
-     * Helper method to create the autologin file 
-     * Sets email and password in the file as a json
-     */
-    @SuppressWarnings("unchecked")
-    private static void createAutoLogIn(String email, String password, String filepath) {
-        if (filepath != null) {
-            savePath = filepath;
-        }
-        File save = new File(savePath);
-        File parentDir = save.getParentFile();
-        if (parentDir != null) {
-            parentDir.mkdirs();
-        }
-        try {
-            save.createNewFile();
-        } catch (IOException io) {
-            io.printStackTrace();
-        }
-
-        JSONObject saveBody = new JSONObject();
-        saveBody.put(EMAIL, email);
-        saveBody.put(PASS, password);
-
-
-        try {
-            PrintWriter pw = new PrintWriter(savePath);
-            pw.write(saveBody.toJSONString());
-            pw.flush();
-            pw.close();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-            System.out.println("Wrong file path");
-        } 
-    }
 
     /**
-     * 
+     * @param accEmail email associated with account (username)
      * @param firstName
      * @param lastName
      * @param displayName
@@ -248,27 +269,26 @@ public class AccountSystem {
      * @param TLS
      * @return SETUP_SUCCESS if the email was setup successfully
      */
-    public static String emailSetup(String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS){
-        updateEmailInfo(firstName, lastName, displayName, email, SMTP, TLS, password);
+    public static String emailSetup(String accEmail, String firstName, String lastName, String displayName, String email, String password, String SMTP, String TLS){
+        updateEmailInfo(accEmail, firstName, lastName, displayName, email, SMTP, TLS, password);
         return SETUP_SUCCESS;
     }
 
-    /*
-     * To Clear the AccountSystem by reset currentUser to null()
-     */
-    public static void clear(){
-        currentUser = null;
-        return;
-    }
-/* 
+
+    // /*
+    //  * To Clear the AccountSystem by reset currentUser to null()
+    //  */
+    // public static void clear(){
+    //     currentUser = null;
+    //     return;
+    // }
+
     public static void main(String[] args) {
-        AccountSystem.clear();
+        //AccountSystem.clear();
         //AccountSystem.createAccount("Test", "TestPassword", false);
         AccountSystem.loginAccount("Test", "TestPassword", false);
-        AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
-        AccountSystem.updateAccount();
-        AccountSystem.updateEmailInfo("Skyler", "Goh", "something@gmail.com", "stmp@gmail.com", "69", "password");
-        System.out.println(AccountSystem.currentUser.firstName);
+        //AccountSystem.currentUser.addPrompt(new QuestionAnswer(-1, "Question", "What is Java UI?", "IDK"));
+        //AccountSystem.updateAccount();
+        //System.out.println(AccountSystem.currentUser);
     }
-    */
 }

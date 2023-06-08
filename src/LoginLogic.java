@@ -13,7 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class LoginLogic {
-    public static final String URL = "http://localhost:8100/";
+    public static final String URL = "http://localhost:8101/";
 
     //Return messages
     public static final String CREATE_SUCCESS = "Email created successfully";
