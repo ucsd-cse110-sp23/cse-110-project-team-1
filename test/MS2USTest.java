@@ -545,7 +545,6 @@ public class MS2USTest {
           assertEquals(numEntries, AccountSystem.currentUser.getPromptHistorySize());
       }
 
-
       /**
        * User starts with valid command "Clear all"
        * 
