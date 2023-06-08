@@ -738,5 +738,79 @@ public class MS2USTest {
 
           emailFrame.cancelClicked();
        }
+       /*
+        * Scenario 1: Created an email to Jill with the voice command that has content
+        * Given that the user already setup the email
+        * When the user presses the start button and says “Create email to Jill let's meet at Geisel for our 7pm study session”
+        * Then the command “create email” and the rest of the prompt would be shown on the above of screen
+        * Then the email created would be shown below the prompt area with the display name under the email’s closing.
+        */
+        @Test
+        public void M2US8S1Test() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s1", "password", false));
+
+            String question1 = "Create Email: to Jill let's meet at Geisel for our 7pm study session";
+            String answer1 = "Subject: Study Session at Geisel Library at 7 PM\r\n" + 
+            "Dear Jill,\r\n" +
+            "I hope this email finds you well. My name is Helen, and I wanted to reach out to you to confirm our study session at Geisel Library.\r\n" + 
+            "Let's meet at Geisel Library at 7 PM as planned. Geisel Library provides a conducive environment for studying, and I believe it will be a great location for our session.\r\n" +
+            "I'm looking forward to collaborating with you and making progress on our studies. If you have any specific topics or subjects you'd like to focus on during our study session, please let me know.\r\n" +
+            "If there are any changes or if you have any concerns, please don't hesitate to reach out to me. Otherwise, I'll see you at Geisel Library at 7 PM.\r\n" +
+            "Best regards,\r\n" + 
+            "Helen";
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+
+            int numEntries = AccountSystem.currentUser.getPromptHistorySize();
+            PromptHistory ph = app.getSideBar().getPromptHistory();
+            int numPHItems = ph.getHistory().getComponents().length;
+
+            assertEquals(null, app.getCurrQ());
+
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qa = app.getMainPanel().getQaPanel();
+            assertEquals("Create Email: ", qa.getPrefixQ());
+            assertEquals(qa.DEF_PRE_A, qa.getPrefixA());
+            assertEquals(question1, qa.getQuestionText());
+            assertEquals(qa.getPrefixA() + answer1, qa.getAnswerText());
+
+            assertEquals("Helen", qa.getAnswerText().substring(qa.getAnswerText().length()-5));
+    
+            Component[] listItems = ph.getHistory().getComponents();
+    
+            assertEquals(numPHItems + 1, listItems.length);
+
+            assertEquals(numEntries + 1, AccountSystem.currentUser.getPromptHistorySize()); 
+        }
+               /*
+        * Scenario 1: Created an email to Jill with the voice command that has content
+        * Given that the user already setup the email
+        * When the user presses the start button and says “Create email to Jill let's meet at Geisel for our 7pm study session”
+        * Then the command “create email” and the rest of the prompt would be shown on the above of screen
+        * Then the email created would be shown below the prompt area with the display name under the email’s closing.
+        */
+        @Test
+        public void M2US8S2Test() {
+            assertEquals(AccountSystem.LOGIN_SUCCESS, AccountSystem.loginAccount("us8s2", "password", false));
+
+            String question1 = "Create Email";
+            String answer1 = "null";
+            MockRecorder mockRec = new MockRecorder(true);
+            MockWhisper mockWhisper = new MockWhisper(true, question1);
+            MockGPT mockGPT = new MockGPT(true, answer1);
+            SayIt app = new SayIt(mockGPT, mockWhisper, mockRec, null);
+
+            assertEquals(null, app.getCurrQ());
+
+            app.changeRecording();
+            app.changeRecording();
+
+            QAPanel qa = app.getMainPanel().getQaPanel();
+            assertEquals(qa.DEF_PRE_A + "Please enter content for email", qa.getAnswerText());
+        }
 }
 
