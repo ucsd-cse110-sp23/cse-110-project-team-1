@@ -37,13 +37,6 @@ class MockAccountSystem extends AccountSystem{
 
 }
 
- 
-class MockCreateScreen extends CreateScreen{
-    String account;
-    String password;
-    
-}
-
 
 
 
