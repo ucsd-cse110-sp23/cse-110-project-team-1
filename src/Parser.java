@@ -6,6 +6,7 @@ public class Parser {
     public static final String SETUP_EMAIL = "Setup Email";
     public static final String CREATE_EMAIL = "Create Email";
     public static final String SEND_EMAIL = "Send Email";
+    public static final String EMAIL_ADDRESS_ERROR = "Use correct format: Send email to <email address>";
     private final String CHATGPT_SUBJECT = "Subject: ";
     String transcription;
     String[] parsedString;
@@ -121,9 +122,9 @@ public class Parser {
                 }
             }
         } else {
-            return "Use correct format: Send email to <email address>";
+            return EMAIL_ADDRESS_ERROR; // needs Send email to <email address>
         }
-        // System.out.println(emailAddress);
+        System.out.println(emailAddress);
         return emailAddress;
     }
     public static void main(String[] args) {
@@ -141,9 +142,9 @@ public class Parser {
 
         // System.out.println(parsing.command);
         // System.out.println(parsing.getPrompt());
-        // System.out.println(parsing.getEmailAddress());
+        System.out.println(parsing.getEmailAddress());
         
-        String[] emailParts = parsing.emailSeparator(email);
+        // String[] emailParts = parsing.emailSeparator(email);
         // System.out.println(emailParts[0]);
         // System.out.println(emailParts[1]);
     }
