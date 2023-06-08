@@ -146,12 +146,17 @@ public class EmailUI extends JFrame {
         EmailUI.this.dispose();
     }
 
+    protected JUser getUser(){
+        return currentJUser;
+    }
+
     protected void performEmailSetup(String firstName, String lastName, String displayName, String email, String SMTP, String TLS, String emailPassword) {
         String setupStatus = SETUP_FAIL;
             try {
                 // Set request body with arguments
                 HashMap<String,Object> requestData = new HashMap<String,Object>();            
                 requestData.put("postType", SETUPTYPE);
+                requestData.put("accountEmail", currentJUser.email);
                 requestData.put("firstName", firstName);
                 requestData.put("lastName", lastName);
                 requestData.put("displayName", displayName);
